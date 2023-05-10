@@ -10,11 +10,11 @@ If you haven't insatlled Maven on your machine then use below command:
  ```
  Note: Go to root directory of the project and execute above command.
  ## 2. Create a Database
- Before running Spring boot blog application, you need to create the MySQL database.
+ Before running Spring boot  application, you need to create the PostgreSQL database.
  
  Use the below SQL database to create the MySQL database:
  ```sql
- create database myblog
+ create database mpay_test
  ```
  Database name - myblog
  ## 3. Run Spring Boot Project
@@ -23,11 +23,9 @@ If you haven't insatlled Maven on your machine then use below command:
  mvn spring-boot:run
  ```
  Once you run Spring boot application, Hibernate will create the database tables autimatically.
- However, you can refer to DDL scritp for all tables here:
- https://github.com/RameshMF/springboot-blog-rest-api/blob/main/myblog-ddl-script.sql
  ## 4. Insert Data
 User below Insert SQL statements to insert records into roles table:
 ```sql
-INSERT INTO `myblog.roles` VALUES (1,'ROLE_ADMIN'),(2,'ROLE_USER');
+INSERT INTO `mpay_test.roles` VALUES (1,'ROLE_ADMIN'),(2,'ROLE_USER');
 ```
-Now, Spring boot blog application is ready to use.
+Now, Spring boot application is ready to use.
