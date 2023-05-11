@@ -33,8 +33,8 @@ public class DeviceHistory {
     private String sessionState;
     private Float latitude;
     private Float longitude;
-    @OneToOne
-    @JoinColumn(referencedColumnName = "id")
+    @ManyToOne
+    @JoinColumn(name = "wilaya_id")
     private Wilaya wilaya;
     private String commune;
 }

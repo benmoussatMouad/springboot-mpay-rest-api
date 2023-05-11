@@ -21,8 +21,8 @@ public class Wilaya {
     @Id
     private java.lang.Long wilayaId;
     @Column(unique = true)
-    private Integer numWilaya;
-    private String nameWilaya;
+    private Integer number;
+    private String name;
 
     @OneToMany(mappedBy = "wilaya")
     private Set<Client> clients;
@@ -32,4 +32,7 @@ public class Wilaya {
 
     @OneToMany(mappedBy = "wilaya")
     private Set<Agency> agencies;
+
+    @OneToMany(mappedBy = "wilaya")
+    private Set<DeviceHistory> deviceHistories;
 }

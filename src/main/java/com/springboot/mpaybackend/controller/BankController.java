@@ -43,7 +43,6 @@ public class BankController {
         return ResponseEntity.ok(bankService.updateBank(bankDto, bankId));
     }
 
-    // Build Delete Category REST API
 //    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("{id}")
     public ResponseEntity<String> deleteBank(@PathVariable("id") Long bankId){
