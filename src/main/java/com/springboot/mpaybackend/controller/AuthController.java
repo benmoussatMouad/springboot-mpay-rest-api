@@ -1,8 +1,11 @@
 package com.springboot.mpaybackend.controller;
 
+import com.springboot.mpaybackend.entity.User;
+import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.JWTAuthResponse;
 import com.springboot.mpaybackend.payload.LoginDto;
 import com.springboot.mpaybackend.payload.RegisterDto;
+import com.springboot.mpaybackend.repository.UserRepository;
 import com.springboot.mpaybackend.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private AuthService authService;
+    private UserRepository userRepository;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserRepository userRepository) {
         this.authService = authService;
+        this.userRepository = userRepository;
     }
 
     // Build Login REST API
@@ -28,6 +33,10 @@ public class AuthController {
 
         JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
         jwtAuthResponse.setAccessToken(token);
+
+        User user = userRepository.findByUsername( loginDto.getUsernameOrEmail() )
+                .orElseThrow( () -> new ResourceNotFoundException( "User", "username", 0 ) );
+        jwtAuthResponse.setUser( user );
 
         return ResponseEntity.ok(jwtAuthResponse);
     }

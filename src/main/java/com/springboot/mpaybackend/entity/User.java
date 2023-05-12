@@ -45,16 +45,6 @@ public class User {
     private Date maxAttemptDateReached;
     private Integer codeRequestAttempt;
     private String userStatus;
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
-//    private String name;
-//    @Column(nullable = false, unique = true)
-//    private String username;
-//    @Column(nullable = false, unique = true)
-//    private String email;
-//    @Column(nullable = false)
-//    private String password;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "users_roles",
