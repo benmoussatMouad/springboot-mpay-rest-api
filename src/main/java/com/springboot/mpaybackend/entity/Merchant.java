@@ -6,16 +6,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter
+@Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-public class Client {
+public class Merchant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    @Column(name = "merchant_id")
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "username",referencedColumnName = "username")
@@ -33,6 +34,6 @@ public class Client {
     private String postalCode;
     private String phone;
 
-    //TODO: add account for client
-
+    // TODO: add bm field
+    // TODO: add account for merchant
 }
