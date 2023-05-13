@@ -19,7 +19,6 @@ public class BankDto {
     private Integer totalLicence;
     private Integer totalConsumedLicence;
     private Date deleteDate;
-    private Integer flag;
     private Integer bmtmCentralized;
     private Integer validationCentralized;
     private String bankBin;

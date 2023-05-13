@@ -23,15 +23,15 @@ public class UserGie {
     private String user_type;
 
     @OneToOne
-    @JoinColumn(referencedColumnName = "username")
+    @JoinColumn(name = "username",referencedColumnName = "username")
     private User username;
 
     @ManyToOne
-    @JoinColumn(referencedColumnName = "username")
+    @JoinColumn(name = "created_by_user_id")
     private User createdBy;
 
     @ManyToOne
-    @JoinColumn(referencedColumnName = "username")
+    @JoinColumn(name = "updated_by_user_id")
     private User updatedBy;
 
     private Date createdAt;

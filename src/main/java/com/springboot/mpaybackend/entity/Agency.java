@@ -17,7 +17,8 @@ public class Agency {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private java.lang.Long agencyId;
+    @Column(name = "agency_id")
+    private java.lang.Long id;
     private String agencyName;
     private String agencyCode;
     private String address;

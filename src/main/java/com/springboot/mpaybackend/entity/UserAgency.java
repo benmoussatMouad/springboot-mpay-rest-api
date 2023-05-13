@@ -9,28 +9,31 @@ import lombok.Setter;
 import java.util.Date;
 import java.util.Set;
 
-@Setter
+@Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-public class UserBank {
+public class UserAgency {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private java.lang.Long userBankId;
+    @Column(name = "user_agency_id")
+    private Long id;
+
     private String firstName;
     private String lastName;
     private String email;
     private String phone;
-    private String userType;
+    @Enumerated(EnumType.STRING)
+    private UserType userType;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "username",referencedColumnName = "username")
     private User username;
 
-    @OneToOne
-    private Bank bank;
+    @OneToMany
+    private Set<Agency> agency;
 
     private Integer flag;
     private Date createdAt;
