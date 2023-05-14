@@ -64,9 +64,9 @@ public class UserAgencyController {
         }
     }
 
-    @PutMapping
+    @PutMapping("{id}")
     public ResponseEntity<UserAgencyDto> updateUserAgency(@RequestBody UserAgencyDto dto,
-                                                          Long id,
+                                                          @PathVariable Long id,
                                                           Authentication authentication) {
 
         return ResponseEntity.ok( userAgencyService.updateUserAgency( dto, id, authentication.getName() ) );

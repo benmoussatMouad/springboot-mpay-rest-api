@@ -116,6 +116,7 @@ public class UserAgencyServiceImpl implements UserAgencyService {
         UserAgency userAgency = userAgencyRepository.findById( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "UserAgency", "id", id ) );
 
+
         User updatingUser = userRepository.findByUsername( updatingUsername )
                 .orElseThrow( () -> new ResourceNotFoundException( "User", "username", updatingUsername ) );
 
@@ -126,6 +127,11 @@ public class UserAgencyServiceImpl implements UserAgencyService {
         if( dto.getFirstName() != null ) userAgency.setFirstName( dto.getFirstName() );
         if( dto.getLastName() != null ) userAgency.setLastName( dto.getLastName() );
         if( dto.getPhone() != null ) userAgency.setPhone( dto.getPhone() );
+        if( dto.getAgencyId() != null ) {
+            Agency agency = agencyRepository.findById( dto.getAgencyId() )
+                    .orElseThrow( () -> new ResourceNotFoundException( "Agency", "id", dto.getAgencyId() ) );
+            userAgency.setAgency( agency );
+        }
 
         UserAgency savedUserAgency = userAgencyRepository.save( userAgency );
         return modelMapper.map( savedUserAgency, UserAgencyDto.class );
