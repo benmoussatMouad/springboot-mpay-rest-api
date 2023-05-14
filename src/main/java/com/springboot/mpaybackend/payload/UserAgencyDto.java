@@ -18,6 +18,7 @@ public class UserAgencyDto {
     private String userType;
     private String username;
     private String password;
+    private Long agencyId;
 
     // TODO: add UserAgency special admin response DTO
 

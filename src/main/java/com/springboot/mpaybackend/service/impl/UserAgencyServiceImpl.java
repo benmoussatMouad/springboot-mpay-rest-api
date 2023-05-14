@@ -1,16 +1,19 @@
 package com.springboot.mpaybackend.service.impl;
 
+import com.springboot.mpaybackend.entity.Agency;
 import com.springboot.mpaybackend.entity.User;
 import com.springboot.mpaybackend.entity.UserAgency;
 import com.springboot.mpaybackend.entity.UserType;
 import com.springboot.mpaybackend.exception.BlogAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.UserAgencyDto;
+import com.springboot.mpaybackend.repository.AgencyRepository;
 import com.springboot.mpaybackend.repository.UserAgencyRepository;
 import com.springboot.mpaybackend.repository.UserRepository;
 import com.springboot.mpaybackend.service.UserAgencyService;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,14 +27,18 @@ public class UserAgencyServiceImpl implements UserAgencyService {
 
     UserAgencyRepository userAgencyRepository;
     UserRepository userRepository;
+    AgencyRepository agencyRepository;
     ModelMapper modelMapper;
     PasswordEncoder passwordEncoder;
 
-    public UserAgencyServiceImpl(UserAgencyRepository userAgencyRepository, UserRepository userRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder) {
+    public UserAgencyServiceImpl(UserAgencyRepository userAgencyRepository, UserRepository userRepository, AgencyRepository agencyRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder) {
         this.userAgencyRepository = userAgencyRepository;
         this.userRepository = userRepository;
+        this.agencyRepository = agencyRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
+
+
     }
 
     @Override
@@ -54,12 +61,14 @@ public class UserAgencyServiceImpl implements UserAgencyService {
     public List<UserAgencyDto> getUsersAgencyByAgency(Long agencyId) {
         List<UserAgency> usersAgency = userAgencyRepository.findAllByAgencyId( agencyId );
 
-        return usersAgency.stream().map( (userAgency -> modelMapper.map( userAgency, UserAgencyDto.class )) ).collect( Collectors.toList());
+        return usersAgency.stream().map( (userAgency -> modelMapper.map( userAgency, UserAgencyDto.class )) ).collect( Collectors.toList() );
     }
 
     @Override
     @Transactional(rollbackOn = Exception.class)
     public UserAgencyDto addUserAgency(UserAgencyDto dto, String username) {
+
+        modelMapper.getConfiguration().setMatchingStrategy( MatchingStrategies.STRICT );
 
         // check if username is taken by other users
         if(userRepository.existsByUsername(dto.getUsername())){
@@ -77,6 +86,11 @@ public class UserAgencyServiceImpl implements UserAgencyService {
         userRepository.save( user );
 
         UserAgency userAgency = modelMapper.map( dto, UserAgency.class );
+
+        Agency agency = agencyRepository.findById( dto.getAgencyId() )
+                .orElseThrow( () -> new ResourceNotFoundException( "Agency", "id", dto.getAgencyId() ) );
+        userAgency.setAgency( agency );
+
         User creatingUser = userRepository.findByUsername( username )
                 .orElseThrow( () -> new ResourceNotFoundException( "User", "username", username ) );
         userAgency.setCreatedBy( creatingUser );

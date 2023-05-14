@@ -1,19 +1,17 @@
 package com.springboot.mpaybackend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 import java.util.Set;
 
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
+@Entity
 public class UserAgency {
 
     @Id
@@ -32,8 +30,9 @@ public class UserAgency {
     @JoinColumn(name = "username",referencedColumnName = "username")
     private User username;
 
-    @OneToMany
-    private Set<Agency> agency;
+    @ManyToOne
+    @JoinColumn(name = "agency_id")
+    private Agency agency;
 
     private Integer flag;
     private Date createdAt;

@@ -42,12 +42,10 @@ public class UserAgencyController {
             @RequestParam(name = "by", required = false) @Parameter(description = "specify condition to filter Agency Users", example = "agency") String filter,
             @RequestParam(name = "id", required = false) @Parameter(description = "If 'by' is specified as associated entity, id should be included and should be the id of the associated entity", example = "id of an agency associated to agency user") String id
     ) {
-        switch (filter) {
-            case "agency":
-                return ResponseEntity.ok( userAgencyService.getUsersAgencyByAgency( Long.valueOf( id ) ) );
-            default:
-                return ResponseEntity.ok( userAgencyService.getUsersAgency() );
+        if( "agency".equals( filter ) ) {
+            return ResponseEntity.ok( userAgencyService.getUsersAgencyByAgency( Long.valueOf( id ) ) );
         }
+        return ResponseEntity.ok( userAgencyService.getUsersAgency() );
     }
 
     @GetMapping("{key}")
