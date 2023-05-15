@@ -105,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword( passwordEncoder.encode( registerDto.getPassword() ) );
         user.setPhone( registerDto.getPhone() );
         user.setFirstConnexion( true );
-        user.setUserType( "CLIENT" );
+        user.setUserType( UserType.CLIENT );
         userRepository.save( user );
 
         // 1.2- Create OTP and send it

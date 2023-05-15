@@ -56,7 +56,7 @@ public class AgencyServiceImpl implements AgencyService {
     @Override
     public List<AgencyDto> getAgenciesByBank(Long bankId) {
 
-        List<Agency> agencies = agencyRepository.findByBankBankId(bankId);
+        List<Agency> agencies = agencyRepository.findByBankId(bankId);
 
         return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyDto.class )) )
                 .collect( Collectors.toList());

@@ -11,7 +11,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-@Entity
+@Entity(name = "user_agency")
 public class UserAgency {
 
     @Id
@@ -23,6 +23,7 @@ public class UserAgency {
     private String lastName;
     private String email;
     private String phone;
+
     @Enumerated(EnumType.STRING)
     private UserType userType;
 

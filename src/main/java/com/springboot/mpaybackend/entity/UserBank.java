@@ -18,18 +18,22 @@ public class UserBank {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private java.lang.Long userBankId;
+    @Column(name = "user_bank_id")
+    private java.lang.Long id;
     private String firstName;
     private String lastName;
     private String email;
     private String phone;
-    private String userType;
+
+    @Enumerated(EnumType.STRING)
+    private UserType userType;
 
     @OneToOne
     @JoinColumn(name = "username",referencedColumnName = "username")
     private User username;
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "bank_id")
     private Bank bank;
 
     private Integer flag;

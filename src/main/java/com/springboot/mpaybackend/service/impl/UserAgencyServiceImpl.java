@@ -81,7 +81,7 @@ public class UserAgencyServiceImpl implements UserAgencyService {
         user.setPassword( passwordEncoder.encode( dto.getPassword() ) );
         user.setPhone( dto.getPhone() );
         user.setFirstConnexion( true );
-        user.setUserType( "AGENCY_USER" );
+        user.setUserType( UserType.AGENCY_USER );
         System.out.println(dto.getUsername());
         userRepository.save( user );
 
@@ -134,7 +134,9 @@ public class UserAgencyServiceImpl implements UserAgencyService {
         }
 
         UserAgency savedUserAgency = userAgencyRepository.save( userAgency );
-        return modelMapper.map( savedUserAgency, UserAgencyDto.class );
+        UserAgencyDto userAgencyDto = modelMapper.map( savedUserAgency, UserAgencyDto.class );
+        userAgencyDto.setUsername( userAgency.getUsername().getUsername() );
+        return userAgencyDto;
     }
 
 

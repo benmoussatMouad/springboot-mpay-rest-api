@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface AgencyRepository extends JpaRepository<Agency, java.lang.Long> {
 
-    List<Agency> findByBankBankId(Long bankid);
+    List<Agency> findByBankId(Long bankid);
 }

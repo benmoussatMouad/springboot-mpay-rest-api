@@ -18,7 +18,8 @@ public class Bank {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private java.lang.Long bankId;
+    @Column(name = "bank_id")
+    private java.lang.Long id;
 
     private String name;
     private String acronymName;

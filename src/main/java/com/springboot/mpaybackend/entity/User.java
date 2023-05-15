@@ -37,7 +37,10 @@ public class User {
     private String phone;
     private Integer suffersAttempts;
     private boolean firstConnexion;
-    private String userType;
+
+    @Enumerated(EnumType.STRING)
+    private UserType userType;
+
     private Date deletedDate;
     private Integer flag;
     private Integer connexion;
