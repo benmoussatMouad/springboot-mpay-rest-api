@@ -135,6 +135,7 @@ public class UserAgencyServiceImpl implements UserAgencyService {
 
         UserAgency savedUserAgency = userAgencyRepository.save( userAgency );
         UserAgencyDto userAgencyDto = modelMapper.map( savedUserAgency, UserAgencyDto.class );
+        // Not to change the username, but to set a String instead when sending DTO
         userAgencyDto.setUsername( userAgency.getUsername().getUsername() );
         return userAgencyDto;
     }

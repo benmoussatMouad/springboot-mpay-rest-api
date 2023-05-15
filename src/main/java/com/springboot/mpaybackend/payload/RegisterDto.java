@@ -25,7 +25,11 @@ public class RegisterDto {
     @NotEmpty(message = "Name should not be null or empty")
     @Size(min = 8, message = "Size should be 8 characters or more")
     private String password;
+    @NotEmpty(message = "WilayaId should not be null or empty")
     private Long wilayaId;
+
+    @NotEmpty(message = "Address should not be null or empty")
     private String address;
+    @NotEmpty(message = "Commune should not be null or empty")
     private String commune;
 }
