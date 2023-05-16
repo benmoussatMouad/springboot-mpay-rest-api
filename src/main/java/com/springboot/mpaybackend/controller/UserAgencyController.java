@@ -1,16 +1,11 @@
 package com.springboot.mpaybackend.controller;
 
-import com.springboot.mpaybackend.entity.User;
-import com.springboot.mpaybackend.entity.UserAgency;
-import com.springboot.mpaybackend.payload.BankDto;
 import com.springboot.mpaybackend.payload.UserAgencyDto;
+import com.springboot.mpaybackend.payload.UserAgencyPageDto;
 import com.springboot.mpaybackend.service.UserAgencyService;
-import com.springboot.mpaybackend.service.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
-import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +41,16 @@ public class UserAgencyController {
             return ResponseEntity.ok( userAgencyService.getUsersAgencyByAgency( Long.valueOf( id ) ) );
         }
         return ResponseEntity.ok( userAgencyService.getUsersAgency() );
+    }
+
+    @GetMapping("page")
+    public ResponseEntity<UserAgencyPageDto> getUserAgencyByPage(
+            @RequestParam(name = "page")
+            @Parameter(description = "The number of the desired page, start from 0") Integer page,
+            @RequestParam(name= "size")
+            @Parameter(description = "The size of the page") Integer size
+    ) {
+        return ResponseEntity.ok( userAgencyService.getAllUserAgency( page, size ) );
     }
 
     @GetMapping("{key}")

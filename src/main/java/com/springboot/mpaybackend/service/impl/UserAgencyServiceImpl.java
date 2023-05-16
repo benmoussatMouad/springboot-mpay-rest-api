@@ -1,12 +1,12 @@
 package com.springboot.mpaybackend.service.impl;
 
-import com.springboot.mpaybackend.entity.Agency;
-import com.springboot.mpaybackend.entity.User;
-import com.springboot.mpaybackend.entity.UserAgency;
-import com.springboot.mpaybackend.entity.UserType;
+import com.springboot.mpaybackend.entity.*;
 import com.springboot.mpaybackend.exception.BlogAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.UserAgencyDto;
+import com.springboot.mpaybackend.payload.UserAgencyPageDto;
+import com.springboot.mpaybackend.payload.UserBankDto;
+import com.springboot.mpaybackend.payload.UserBankPageDto;
 import com.springboot.mpaybackend.repository.AgencyRepository;
 import com.springboot.mpaybackend.repository.UserAgencyRepository;
 import com.springboot.mpaybackend.repository.UserRepository;
@@ -14,6 +14,8 @@ import com.springboot.mpaybackend.service.UserAgencyService;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -147,6 +149,20 @@ public class UserAgencyServiceImpl implements UserAgencyService {
                 .orElseThrow( () -> new ResourceNotFoundException( "UserAgency", "id", id ) );
 
         userAgencyRepository.delete( userAgency );
+    }
+
+    @Override
+    public UserAgencyPageDto getAllUserAgency(Integer page, Integer size) {
+        Page<UserAgency> users = userAgencyRepository.findAll( PageRequest.of( page, size ) );
+
+        List<UserAgencyDto> userDtos = users.stream().map( (user -> modelMapper.map( user, UserAgencyDto.class )) ).toList();
+
+        UserAgencyPageDto userAgencyPageDto = new UserAgencyPageDto();
+
+        userAgencyPageDto.setCount( users.getTotalElements() );
+        userAgencyPageDto.setUserPage( userDtos );
+
+        return userAgencyPageDto;
     }
 
     // TODO: add putting agency to user, or removing agencies
