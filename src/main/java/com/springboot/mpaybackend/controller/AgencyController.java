@@ -33,7 +33,6 @@ public class AgencyController {
             @RequestParam(name = "bank_id",required = false) @Parameter(description = "If filter is set to 'bank', bank_id must be included", example = "1") Long bankId
     ) {
 
-        // TODO: change to if else
         if( "bank".equals( filter ) ) {
             return ResponseEntity.ok( agencyService.getAgenciesByBank( bankId ) );
         }

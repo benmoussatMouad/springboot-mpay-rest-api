@@ -4,6 +4,7 @@ import com.springboot.mpaybackend.entity.Bank;
 import com.springboot.mpaybackend.entity.Wilaya;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.BankDto;
+import com.springboot.mpaybackend.payload.BankLightDto;
 import com.springboot.mpaybackend.repository.BankRepository;
 import com.springboot.mpaybackend.repository.WilayaRepository;
 import com.springboot.mpaybackend.service.BankService;
@@ -79,5 +80,13 @@ public class BankServiceImpl implements BankService {
                 .orElseThrow( () -> new ResourceNotFoundException( "Bank", "id", bankId ) );
 
         bankRepository.delete( bank );
+    }
+
+    @Override
+    public List<BankLightDto> getBanksLightFormat() {
+        List<Bank> banks = bankRepository.findAll();
+
+        return banks.stream().map( (bank -> modelMapper.map( bank, BankLightDto.class )) )
+                .collect( Collectors.toList() );
     }
 }

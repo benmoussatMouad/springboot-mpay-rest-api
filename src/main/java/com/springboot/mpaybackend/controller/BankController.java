@@ -1,6 +1,7 @@
 package com.springboot.mpaybackend.controller;
 
 import com.springboot.mpaybackend.payload.BankDto;
+import com.springboot.mpaybackend.payload.BankLightDto;
 import com.springboot.mpaybackend.service.BankService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,11 @@ public class BankController {
     @GetMapping()
     public ResponseEntity<List<BankDto>> getBanks(){
         return ResponseEntity.ok(bankService.getBanks());
+    }
+
+    @GetMapping("light")
+    public ResponseEntity<List<BankLightDto>> getBanksLightFormat() {
+        return ResponseEntity.ok( bankService.getBanksLightFormat() );
     }
 
     @GetMapping("{id}")

@@ -1,6 +1,7 @@
 package com.springboot.mpaybackend.service;
 
 import com.springboot.mpaybackend.payload.BankDto;
+import com.springboot.mpaybackend.payload.BankLightDto;
 
 import java.util.List;
 
@@ -15,4 +16,7 @@ public interface BankService {
     BankDto updateBank(BankDto bankDto, Long bankId);
 
     void deleteBank(Long bankId);
+
+    List<BankLightDto> getBanksLightFormat();
+
 }
