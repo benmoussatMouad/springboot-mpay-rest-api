@@ -5,10 +5,13 @@ import com.springboot.mpaybackend.entity.Wilaya;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.BankDto;
 import com.springboot.mpaybackend.payload.BankLightDto;
+import com.springboot.mpaybackend.payload.BankPageDto;
 import com.springboot.mpaybackend.repository.BankRepository;
 import com.springboot.mpaybackend.repository.WilayaRepository;
 import com.springboot.mpaybackend.service.BankService;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -89,4 +92,20 @@ public class BankServiceImpl implements BankService {
         return banks.stream().map( (bank -> modelMapper.map( bank, BankLightDto.class )) )
                 .collect( Collectors.toList() );
     }
+
+    @Override
+    public BankPageDto getBanks(int page, int size) {
+        Page<Bank> banks = bankRepository.findAll( PageRequest.of( page, size ) );
+
+        List<BankDto> bankDtoList = banks.stream().map( (bank -> modelMapper.map( bank, BankDto.class )) ).toList();
+
+        BankPageDto bankPage = new BankPageDto();
+
+        bankPage.setCount( banks.getTotalElements() );
+        bankPage.setBanks( bankDtoList );
+
+        return bankPage;
+    }
+
+    //TODO: add pagination
 }

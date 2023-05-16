@@ -2,7 +2,9 @@ package com.springboot.mpaybackend.controller;
 
 import com.springboot.mpaybackend.payload.BankDto;
 import com.springboot.mpaybackend.payload.BankLightDto;
+import com.springboot.mpaybackend.payload.BankPageDto;
 import com.springboot.mpaybackend.service.BankService;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +21,6 @@ public class BankController {
         this.bankService = bankService;
     }
 
-    //TODO: Get all banks in light form
-
     @PostMapping
 //    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BankDto> addBank(@RequestBody BankDto bankDto){
@@ -29,8 +29,18 @@ public class BankController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<BankDto>> getBanks(){
-        return ResponseEntity.ok(bankService.getBanks());
+    public ResponseEntity<List<BankDto>> getBanks() {
+            return ResponseEntity.ok( bankService.getBanks() );
+    }
+
+    @GetMapping("page")
+    public ResponseEntity<BankPageDto> getBanksByPage(
+            @RequestParam(name = "page")
+            @Parameter(description = "The number of the desired page, start from 0") Integer page,
+            @RequestParam(name= "size")
+            @Parameter(description = "The size of the page") Integer size
+    ) {
+        return ResponseEntity.ok( bankService.getBanks( page, size ) );
     }
 
     @GetMapping("light")

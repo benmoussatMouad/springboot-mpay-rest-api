@@ -2,6 +2,7 @@ package com.springboot.mpaybackend.service;
 
 import com.springboot.mpaybackend.payload.BankDto;
 import com.springboot.mpaybackend.payload.BankLightDto;
+import com.springboot.mpaybackend.payload.BankPageDto;
 
 import java.util.List;
 
@@ -19,4 +20,5 @@ public interface BankService {
 
     List<BankLightDto> getBanksLightFormat();
 
+    BankPageDto getBanks(int page, int size);
 }
