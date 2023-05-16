@@ -7,7 +7,7 @@ import java.util.Date;
 @Data
 public class AgencyDto {
 
-    private Long agencyId;
+    private Long id;
     private String agencyName;
     private String agencyCode;
     private String address;

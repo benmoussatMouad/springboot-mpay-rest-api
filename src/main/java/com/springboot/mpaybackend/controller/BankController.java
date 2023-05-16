@@ -18,6 +18,8 @@ public class BankController {
         this.bankService = bankService;
     }
 
+    //TODO: Get all banks in light form
+
     @PostMapping
 //    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BankDto> addBank(@RequestBody BankDto bankDto){

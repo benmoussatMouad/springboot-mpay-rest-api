@@ -18,6 +18,8 @@ public class AgencyController {
         this.agencyService = agencyService;
     }
 
+    //TODO: Get all agencies in light form
+
     @PostMapping
     public ResponseEntity<AgencyDto> addAgency(@RequestBody AgencyDto agencyDto) {
 
@@ -31,6 +33,7 @@ public class AgencyController {
             @RequestParam(name = "bank_id",required = false) @Parameter(description = "If filter is set to 'bank', bank_id must be included", example = "1") Long bankId
     ) {
 
+        // TODO: change to if else
         switch (filter) {
             case "bank":
                 return ResponseEntity.ok( agencyService.getAgenciesByBank( bankId ) );

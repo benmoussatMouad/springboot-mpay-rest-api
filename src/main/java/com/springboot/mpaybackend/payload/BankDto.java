@@ -7,7 +7,7 @@ import java.util.Date;
 @Data
 public class BankDto {
 
-    private Long bankId;
+    private Long id;
     private String name;
     private String acronymName;
     private String bankCode;
