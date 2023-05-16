@@ -1,6 +1,7 @@
 package com.springboot.mpaybackend.controller;
 
 import com.springboot.mpaybackend.payload.AgencyDto;
+import com.springboot.mpaybackend.payload.AgencyLightDto;
 import com.springboot.mpaybackend.service.AgencyService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,11 @@ public class AgencyController {
             return ResponseEntity.ok( agencyService.getAgenciesByBank( bankId ) );
         }
         return ResponseEntity.ok( agencyService.getAgencies() );
+    }
+
+    @GetMapping("light")
+    public ResponseEntity<List<AgencyLightDto>> getAgenciesLightFormat() {
+        return ResponseEntity.ok( agencyService.getAgenciesLightFormat() );
     }
 
     @GetMapping("{id}")

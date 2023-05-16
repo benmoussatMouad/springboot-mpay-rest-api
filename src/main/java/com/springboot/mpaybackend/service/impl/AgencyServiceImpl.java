@@ -5,6 +5,7 @@ import com.springboot.mpaybackend.entity.Bank;
 import com.springboot.mpaybackend.entity.Wilaya;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.AgencyDto;
+import com.springboot.mpaybackend.payload.AgencyLightDto;
 import com.springboot.mpaybackend.repository.AgencyRepository;
 import com.springboot.mpaybackend.repository.BankRepository;
 import com.springboot.mpaybackend.repository.WilayaRepository;
@@ -97,5 +98,13 @@ public class AgencyServiceImpl implements AgencyService {
     @Override
     public void deleteAgency(java.lang.Long agencyId) {
         agencyRepository.deleteById( agencyId );
+    }
+
+    @Override
+    public List<AgencyLightDto> getAgenciesLightFormat() {
+        List<Agency> agencies = agencyRepository.findAll();
+
+        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyLightDto.class )) )
+                .collect( Collectors.toList() );
     }
 }

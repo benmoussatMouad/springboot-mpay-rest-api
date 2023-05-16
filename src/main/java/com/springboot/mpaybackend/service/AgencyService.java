@@ -1,6 +1,7 @@
 package com.springboot.mpaybackend.service;
 
 import com.springboot.mpaybackend.payload.AgencyDto;
+import com.springboot.mpaybackend.payload.AgencyLightDto;
 
 import java.util.List;
 
@@ -18,4 +19,6 @@ public interface AgencyService {
     AgencyDto updateAgency(AgencyDto agencyDto, java.lang.Long agencyId);
 
     void deleteAgency(java.lang.Long agencyId);
+
+    List<AgencyLightDto> getAgenciesLightFormat();
 }
