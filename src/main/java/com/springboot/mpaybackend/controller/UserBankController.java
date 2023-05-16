@@ -1,7 +1,9 @@
 package com.springboot.mpaybackend.controller;
 
+import com.springboot.mpaybackend.payload.BankPageDto;
 import com.springboot.mpaybackend.payload.UserAgencyDto;
 import com.springboot.mpaybackend.payload.UserBankDto;
+import com.springboot.mpaybackend.payload.UserBankPageDto;
 import com.springboot.mpaybackend.service.UserBankService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.HttpStatus;
@@ -41,6 +43,16 @@ public class UserBankController {
             return ResponseEntity.ok( userBankService.getUsersBankByBankId( Long.valueOf( id ) ) );
         }
         return ResponseEntity.ok( userBankService.getAllUserBanks() );
+    }
+
+    @GetMapping("page")
+    public ResponseEntity<UserBankPageDto> getBanksByPage(
+            @RequestParam(name = "page")
+            @Parameter(description = "The number of the desired page, start from 0") Integer page,
+            @RequestParam(name= "size")
+            @Parameter(description = "The size of the page") Integer size
+    ) {
+        return ResponseEntity.ok( userBankService.getAllUserBank( page, size ) );
     }
 
 

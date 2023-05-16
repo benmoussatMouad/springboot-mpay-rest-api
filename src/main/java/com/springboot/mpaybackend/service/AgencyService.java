@@ -12,6 +12,7 @@ public interface AgencyService {
 
     List<AgencyDto> getAgencies();
 
+
     List<AgencyDto> getAgenciesByBank(Long bankId);
 
     AgencyDto updateAgency(AgencyDto agencyDto, java.lang.Long agencyId);

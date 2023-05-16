@@ -3,8 +3,7 @@ package com.springboot.mpaybackend.service.impl;
 import com.springboot.mpaybackend.entity.*;
 import com.springboot.mpaybackend.exception.BlogAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
-import com.springboot.mpaybackend.payload.UserAgencyDto;
-import com.springboot.mpaybackend.payload.UserBankDto;
+import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.repository.BankRepository;
 import com.springboot.mpaybackend.repository.UserBankRepository;
 import com.springboot.mpaybackend.repository.UserRepository;
@@ -13,6 +12,8 @@ import com.springboot.mpaybackend.service.UserBankService;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -109,6 +110,20 @@ public class UserBankServiceImpl implements UserBankService {
         List<UserBank> usersBank = userBankRepository.findAll();
 
         return usersBank.stream().map( (user -> modelMapper.map( user, UserBankDto.class )) ).collect( Collectors.toList());
+    }
+
+    @Override
+    public UserBankPageDto getAllUserBank(int page, int size) {
+        Page<UserBank> users = userBankRepository.findAll( PageRequest.of( page, size ) );
+
+        List<UserBankDto> userDtos = users.stream().map( (bank -> modelMapper.map( bank, UserBankDto.class )) ).toList();
+
+        UserBankPageDto userBankPageDto = new UserBankPageDto();
+
+        userBankPageDto.setCount( users.getTotalElements() );
+        userBankPageDto.setUserPage( userDtos );
+
+        return userBankPageDto;
     }
 
     @Override
