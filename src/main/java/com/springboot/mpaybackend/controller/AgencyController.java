@@ -34,13 +34,10 @@ public class AgencyController {
     ) {
 
         // TODO: change to if else
-        switch (filter) {
-            case "bank":
-                return ResponseEntity.ok( agencyService.getAgenciesByBank( bankId ) );
-            default:
-                return ResponseEntity.ok( agencyService.getAgencies() );
-
+        if( "bank".equals( filter ) ) {
+            return ResponseEntity.ok( agencyService.getAgenciesByBank( bankId ) );
         }
+        return ResponseEntity.ok( agencyService.getAgencies() );
     }
 
     @GetMapping("{id}")
