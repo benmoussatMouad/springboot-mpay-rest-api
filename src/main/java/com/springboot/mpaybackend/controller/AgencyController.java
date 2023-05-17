@@ -19,8 +19,6 @@ public class AgencyController {
         this.agencyService = agencyService;
     }
 
-    //TODO: Get all agencies in light form
-
     @PostMapping
     public ResponseEntity<AgencyDto> addAgency(@RequestBody AgencyDto agencyDto) {
 
