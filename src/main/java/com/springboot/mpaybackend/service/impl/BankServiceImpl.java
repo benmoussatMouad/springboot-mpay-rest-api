@@ -34,6 +34,11 @@ public class BankServiceImpl implements BankService {
     @Override
     public BankDto addBank(BankDto bankDto) {
         Bank bank = modelMapper.map( bankDto, Bank.class );
+
+        bank.setBmtmCentralized( 0 );
+        bank.setTotalLicence( 0 );
+        bank.setTotalConsumedLicence( 0 );
+
         Bank savedBank = bankRepository.save( bank );
         return modelMapper.map( savedBank, BankDto.class );
     }
