@@ -15,7 +15,8 @@ public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    @Column(name = "user_id")
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "username",referencedColumnName = "username")

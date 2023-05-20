@@ -64,19 +64,24 @@ public class BankServiceImpl implements BankService {
     public BankDto updateBank(BankDto bankDto, java.lang.Long bankId) {
         Bank bank = bankRepository.findById( bankId )
                 .orElseThrow( () -> new ResourceNotFoundException( "Bank", "id", bankId ) );
-        Wilaya wilaya = wilayaRepository.findById( bankDto.getWilayaId() )
-                .orElseThrow(() -> new ResourceNotFoundException("Wilaya", "id", bankDto.getWilayaId()));
 
-        bank.setBankBin( bankDto.getBankBin() );
-        bank.setBankCode( bankDto.getBankCode() );
-        bank.setAddress( bankDto.getAddress() );
-        bank.setAcronymName( bank.getAcronymName() );
-        bank.setWilaya( wilaya );
-        bank.setCommune( bankDto.getCommune() );
-        bank.setBmtmCentralized( bankDto.getBmtmCentralized() );
-        bank.setFax( bankDto.getFax() );
-        bank.setName( bankDto.getName() );
-        bank.setDeleteDate( bankDto.getDeleteDate() );
+
+        if(bankDto.getBankBin() != null) bank.setBankBin( bankDto.getBankBin() );
+        if(bankDto.getBankCode() != null)  bank.setBankCode( bankDto.getBankCode() );
+        if(bankDto.getAddress() != null) bank.setAddress( bankDto.getAddress() );
+        if(bankDto.getAcronymName() != null) bank.setAcronymName( bankDto.getAcronymName() );
+        if(bankDto.getWilayaId() != null) {
+
+            Wilaya wilaya = wilayaRepository.findById( bankDto.getWilayaId() )
+                    .orElseThrow(() -> new ResourceNotFoundException("Wilaya", "id", bankDto.getWilayaId()));
+            bank.setWilaya( wilaya );
+        }
+
+        if(bankDto.getCommune() != null) bank.setCommune( bankDto.getCommune() );
+        if(bankDto.getBmtmCentralized() != null) bank.setBmtmCentralized( bankDto.getBmtmCentralized() );
+        if(bankDto.getFax() != null) bank.setFax( bankDto.getFax() );
+        if(bankDto.getName() != null) bank.setName( bankDto.getName() );
+        if(bankDto.getDeleteDate() != null) bank.setDeleteDate( bankDto.getDeleteDate() );
 
         Bank savedBank = bankRepository.save( bank );
         return modelMapper.map( savedBank, BankDto.class );
