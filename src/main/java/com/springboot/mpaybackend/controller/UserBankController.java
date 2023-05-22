@@ -1,9 +1,6 @@
 package com.springboot.mpaybackend.controller;
 
-import com.springboot.mpaybackend.payload.BankPageDto;
-import com.springboot.mpaybackend.payload.UserAgencyDto;
-import com.springboot.mpaybackend.payload.UserBankDto;
-import com.springboot.mpaybackend.payload.UserBankPageDto;
+import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.service.UserBankService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.HttpStatus;
@@ -57,7 +54,7 @@ public class UserBankController {
 
 
     @GetMapping("{key}")
-    public ResponseEntity<UserBankDto> getUserAgencyBy(
+    public ResponseEntity<UserBankResponseDto> getUserAgencyBy(
             @PathVariable("key") String key,
             @RequestParam(name = "by") @Parameter(description = "Specify by which key to get the User", example = "by=id OR by=username") String filter) {
 

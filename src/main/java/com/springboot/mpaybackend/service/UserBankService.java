@@ -1,16 +1,16 @@
 package com.springboot.mpaybackend.service;
 
-import com.springboot.mpaybackend.payload.UserAgencyDto;
 import com.springboot.mpaybackend.payload.UserBankDto;
 import com.springboot.mpaybackend.payload.UserBankPageDto;
+import com.springboot.mpaybackend.payload.UserBankResponseDto;
 
 import java.util.List;
 
 public interface UserBankService {
 
-    UserBankDto getUserBank(Long id);
+    UserBankResponseDto getUserBank(Long id);
 
-    UserBankDto getUserBankByUsername(String username);
+    UserBankResponseDto getUserBankByUsername(String username);
 
     List<UserBankDto> getUsersBankByBankId(Long bank);
 

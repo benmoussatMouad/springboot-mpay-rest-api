@@ -7,7 +7,6 @@ import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.repository.BankRepository;
 import com.springboot.mpaybackend.repository.UserBankRepository;
 import com.springboot.mpaybackend.repository.UserRepository;
-import com.springboot.mpaybackend.service.UserAgencyService;
 import com.springboot.mpaybackend.service.UserBankService;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,19 +41,27 @@ public class UserBankServiceImpl implements UserBankService {
     }
 
     @Override
-    public UserBankDto getUserBank(Long id) {
+    public UserBankResponseDto getUserBank(Long id) {
         UserBank userBank = userBankRepository.findById( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "UserBank", "id", id ) );
 
-        return modelMapper.map( userBank, UserBankDto.class );
+        UserBankResponseDto responseDto = modelMapper.map( userBank, UserBankResponseDto.class );
+        responseDto.setBank( modelMapper.map(userBank.getBank(), BankLightDto.class) );
+        responseDto.setUsername( userBank.getUsername().getUsername() );
+
+        return responseDto;
     }
 
     @Override
-    public UserBankDto getUserBankByUsername(String username) {
+    public UserBankResponseDto getUserBankByUsername(String username) {
         UserBank userBank = userBankRepository.findByUsernameUsername( username )
                 .orElseThrow( () -> new ResourceNotFoundException( "UserBank", "username", username ) );
 
-        return modelMapper.map( userBank, UserBankDto.class );
+        UserBankResponseDto responseDto = modelMapper.map( userBank, UserBankResponseDto.class );
+        responseDto.setBank( modelMapper.map(userBank.getBank(), BankLightDto.class) );
+        responseDto.setUsername( userBank.getUsername().getUsername() );
+
+        return responseDto;
     }
 
     @Override
@@ -98,11 +106,20 @@ public class UserBankServiceImpl implements UserBankService {
         userBank.setCreatedAt( new Date() );
         userBank.setUpdatedBy( creatingUser );
         userBank.setUpdatedAt( new Date() );
-        userBank.setUserType( UserType.BANK_USER );
+
+        if( Objects.equals( dto.getUserType(), "BANK_ADMIN" ) || Objects.equals( dto.getUserType(), "BANK_USER" ) ) {
+            userBank.setUserType( UserType.valueOf( dto.getUserType() ) );
+        } else
+            throw new BlogAPIException( HttpStatus.BAD_REQUEST, "Wrong user type, should be BANK_USER or BANK_ADMIN" );
+
         userBank.setUsername( user );
 
-        UserBank savedBankUer = userBankRepository.save( userBank );
-        return modelMapper.map( savedBankUer, UserBankDto.class );
+        UserBank savedBankUser = userBankRepository.save( userBank );
+        UserBankDto responseDto = modelMapper.map( savedBankUser, UserBankDto.class );
+        responseDto.setUsername( user.getUsername() );
+        responseDto.setBankId( savedBankUser.getBank().getId() );
+
+        return responseDto;
     }
 
     @Override
@@ -116,7 +133,12 @@ public class UserBankServiceImpl implements UserBankService {
     public UserBankPageDto getAllUserBank(int page, int size) {
         Page<UserBank> users = userBankRepository.findAll( PageRequest.of( page, size ) );
 
-        List<UserBankDto> userDtos = users.stream().map( (bank -> modelMapper.map( bank, UserBankDto.class )) ).toList();
+        List<UserBankResponseDto> userDtos = users.stream().map( (userBank -> {
+
+            UserBankResponseDto dto = modelMapper.map( userBank, UserBankResponseDto.class );
+            dto.setBank( modelMapper.map( userBank.getBank(), BankLightDto.class ) );
+            return dto;
+        }) ).toList();
 
         UserBankPageDto userBankPageDto = new UserBankPageDto();
 
