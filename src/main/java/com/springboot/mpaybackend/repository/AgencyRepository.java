@@ -8,4 +8,18 @@ import java.util.List;
 public interface AgencyRepository extends JpaRepository<Agency, java.lang.Long> {
 
     List<Agency> findByBankId(Long bankid);
+
+    List<Agency> findByWilayaId(Long id);
+
+    List<Agency> findByAgencyNameContaining(String name);
+
+    List<Agency> findByAgencyCodeContaining(String code);
+
+    List<Agency> findByPhoneContaining(String phone);
+
+    List<Agency> findAllByCommune(String commune);
+
+    List<Agency> findAllByAgencyCode(String agencyCode);
+
+    List<Agency> findAllByPhone(String phone);
 }

@@ -1,9 +1,6 @@
 package com.springboot.mpaybackend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +16,10 @@ import java.util.Set;
 public class Wilaya {
 
     @Id
-    private java.lang.Long wilayaId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "wilaya_id")
+    private java.lang.Long id;
+
     @Column(unique = true)
     private Integer number;
     private String name;

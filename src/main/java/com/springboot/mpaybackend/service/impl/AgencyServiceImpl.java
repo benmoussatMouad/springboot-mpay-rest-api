@@ -55,6 +55,15 @@ public class AgencyServiceImpl implements AgencyService {
     }
 
     @Override
+    public List<AgencyDto> getAgenciesByWilaya(Long wilayaId) {
+        List<Agency> agencies = agencyRepository.findByWilayaId(wilayaId);
+
+        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyDto.class )) )
+                .collect( Collectors.toList());
+
+    }
+
+    @Override
     public List<AgencyDto> getAgenciesByBank(Long bankId) {
 
         List<Agency> agencies = agencyRepository.findByBankId(bankId);
@@ -105,6 +114,30 @@ public class AgencyServiceImpl implements AgencyService {
         List<Agency> agencies = agencyRepository.findAll();
 
         return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyLightDto.class )) )
+                .collect( Collectors.toList() );
+    }
+
+    @Override
+    public List<AgencyDto> getAgenciesByNameContaining(String agencyName) {
+        List<Agency> agencies = agencyRepository.findByAgencyNameContaining( agencyName );
+
+        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyDto.class )) )
+                .collect( Collectors.toList() );
+    }
+
+    @Override
+    public List<AgencyDto> getAgenciesByCodeContaining(String agencyCode) {
+        List<Agency> agencies = agencyRepository.findAllByAgencyCode( agencyCode );
+
+        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyDto.class )) )
+                .collect( Collectors.toList() );
+    }
+
+    @Override
+    public List<AgencyDto> getAgenciesByPhoneContaining(String phone) {
+        List<Agency> agencies = agencyRepository.findByPhoneContaining( phone );
+
+        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyDto.class )) )
                 .collect( Collectors.toList() );
     }
 }

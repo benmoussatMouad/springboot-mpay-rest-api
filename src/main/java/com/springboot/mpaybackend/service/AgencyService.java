@@ -13,6 +13,7 @@ public interface AgencyService {
 
     List<AgencyDto> getAgencies();
 
+    List<AgencyDto> getAgenciesByWilaya(Long wilayaId);
 
     List<AgencyDto> getAgenciesByBank(Long bankId);
 
@@ -21,4 +22,10 @@ public interface AgencyService {
     void deleteAgency(java.lang.Long agencyId);
 
     List<AgencyLightDto> getAgenciesLightFormat();
+
+    List<AgencyDto> getAgenciesByNameContaining(String agencyName);
+
+    List<AgencyDto> getAgenciesByCodeContaining(String agencyCode);
+
+    List<AgencyDto> getAgenciesByPhoneContaining(String phone);
 }

@@ -1,5 +1,6 @@
 package com.springboot.mpaybackend.controller;
 
+import com.springboot.mpaybackend.entity.Agency;
 import com.springboot.mpaybackend.payload.AgencyDto;
 import com.springboot.mpaybackend.payload.AgencyLightDto;
 import com.springboot.mpaybackend.service.AgencyService;
@@ -8,7 +9,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/agency")
@@ -28,14 +33,36 @@ public class AgencyController {
 
     @GetMapping
     public ResponseEntity<List<AgencyDto>> getAgencies(
-            @RequestParam(name = "by", required = false) @Parameter(description = "Describe how to filter agencies", example = "bank") String filter,
-            @RequestParam(name = "bank_id",required = false) @Parameter(description = "If filter is set to 'bank', bank_id must be included", example = "1") Long bankId
+            @RequestParam(name = "bank_id",required = false) @Parameter(description = "if this is not null, this will filter the result by bank id", example = "1") Long bankId,
+            @RequestParam(name = "wilaya_id",required = false) @Parameter(description = "if this is not null, this will filter the result by wilaya id", example = "1") Long wilayaId,
+            @RequestParam(name = "agency_code",required = false) @Parameter(description = "if this is not null, this will filter the result to agencies containing this code in their codename", example = "BE, returns BEA and others") String agencyCode,
+            @RequestParam(name = "phone",required = false) @Parameter(description = "if this is not null, this will filter the result to agencies containing this phone in their phone number", example = "558 might return qn agency with phone number 0558394565") String phone,
+            @RequestParam(name = "agency_name",required = false) @Parameter(description = "if this is not null, this will filter the result by agencies containing the name", example = "Nationale return Banque Nationale and others") String agencyName
     ) {
+        List<AgencyDto> response = agencyService.getAgencies();
+        List<AgencyDto> finalAgencyDto = response;
 
-        if( "bank".equals( filter ) ) {
-            return ResponseEntity.ok( agencyService.getAgenciesByBank( bankId ) );
+        if( bankId != null ) {
+            List<AgencyDto>  midResponse = agencyService.getAgenciesByBank( bankId );
+            finalAgencyDto = finalAgencyDto.stream().distinct().filter( midResponse::contains ).collect( Collectors.toList() );
         }
-        return ResponseEntity.ok( agencyService.getAgencies() );
+        if( wilayaId != null ) {
+            List<AgencyDto> midResponse = agencyService.getAgenciesByWilaya( wilayaId );
+            finalAgencyDto = finalAgencyDto.stream().distinct().filter( midResponse::contains ).collect( Collectors.toList() );
+        }
+        if( agencyName != null ) {
+            List<AgencyDto> midResponse = agencyService.getAgenciesByNameContaining( agencyName );
+            finalAgencyDto = finalAgencyDto.stream().distinct().filter( midResponse::contains ).collect( Collectors.toList() );
+        }
+        if( agencyCode != null ) {
+            List<AgencyDto> midResponse = agencyService.getAgenciesByCodeContaining( agencyCode );
+            finalAgencyDto = finalAgencyDto.stream().distinct().filter( midResponse::contains ).collect( Collectors.toList() );
+        }
+        if( phone != null ) {
+            List<AgencyDto> midResponse = agencyService.getAgenciesByPhoneContaining( phone );
+            finalAgencyDto = finalAgencyDto.stream().distinct().filter( midResponse::contains ).collect( Collectors.toList() );
+        }
+        return ResponseEntity.ok( finalAgencyDto );
     }
 
     @GetMapping("light")
