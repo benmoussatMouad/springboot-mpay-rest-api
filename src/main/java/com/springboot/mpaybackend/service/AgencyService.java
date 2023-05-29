@@ -2,6 +2,7 @@ package com.springboot.mpaybackend.service;
 
 import com.springboot.mpaybackend.payload.AgencyDto;
 import com.springboot.mpaybackend.payload.AgencyLightDto;
+import com.springboot.mpaybackend.payload.AgencyResponseDto;
 
 import java.util.List;
 
@@ -11,11 +12,11 @@ public interface AgencyService {
 
     AgencyDto getAgency(java.lang.Long agencyId);
 
-    List<AgencyDto> getAgencies();
+    List<AgencyResponseDto> getAgencies();
 
-    List<AgencyDto> getAgenciesByWilaya(Long wilayaId);
+    List<AgencyResponseDto> getAgenciesByWilaya(Long wilayaId);
 
-    List<AgencyDto> getAgenciesByBank(Long bankId);
+    List<AgencyResponseDto> getAgenciesByBank(Long bankId);
 
     AgencyDto updateAgency(AgencyDto agencyDto, java.lang.Long agencyId);
 
@@ -23,9 +24,9 @@ public interface AgencyService {
 
     List<AgencyLightDto> getAgenciesLightFormat();
 
-    List<AgencyDto> getAgenciesByNameContaining(String agencyName);
+    List<AgencyResponseDto> getAgenciesByNameContaining(String agencyName);
 
-    List<AgencyDto> getAgenciesByCodeContaining(String agencyCode);
+    List<AgencyResponseDto> getAgenciesByCodeContaining(String agencyCode);
 
-    List<AgencyDto> getAgenciesByPhoneContaining(String phone);
+    List<AgencyResponseDto> getAgenciesByPhoneContaining(String phone);
 }

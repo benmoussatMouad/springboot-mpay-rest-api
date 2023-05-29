@@ -6,6 +6,7 @@ import com.springboot.mpaybackend.entity.Wilaya;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.AgencyDto;
 import com.springboot.mpaybackend.payload.AgencyLightDto;
+import com.springboot.mpaybackend.payload.AgencyResponseDto;
 import com.springboot.mpaybackend.repository.AgencyRepository;
 import com.springboot.mpaybackend.repository.BankRepository;
 import com.springboot.mpaybackend.repository.WilayaRepository;
@@ -47,28 +48,28 @@ public class AgencyServiceImpl implements AgencyService {
     }
 
     @Override
-    public List<AgencyDto> getAgencies() {
+    public List<AgencyResponseDto> getAgencies() {
         List<Agency> agencies = agencyRepository.findAll();
 
-        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyDto.class )) )
+        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyResponseDto.class )) )
                 .collect( Collectors.toList());
     }
 
     @Override
-    public List<AgencyDto> getAgenciesByWilaya(Long wilayaId) {
+    public List<AgencyResponseDto> getAgenciesByWilaya(Long wilayaId) {
         List<Agency> agencies = agencyRepository.findByWilayaId(wilayaId);
 
-        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyDto.class )) )
+        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyResponseDto.class )) )
                 .collect( Collectors.toList());
 
     }
 
     @Override
-    public List<AgencyDto> getAgenciesByBank(Long bankId) {
+    public List<AgencyResponseDto> getAgenciesByBank(Long bankId) {
 
         List<Agency> agencies = agencyRepository.findByBankId(bankId);
 
-        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyDto.class )) )
+        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyResponseDto.class )) )
                 .collect( Collectors.toList());
     }
 
@@ -118,26 +119,26 @@ public class AgencyServiceImpl implements AgencyService {
     }
 
     @Override
-    public List<AgencyDto> getAgenciesByNameContaining(String agencyName) {
+    public List<AgencyResponseDto> getAgenciesByNameContaining(String agencyName) {
         List<Agency> agencies = agencyRepository.findByAgencyNameContaining( agencyName );
 
-        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyDto.class )) )
+        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyResponseDto.class )) )
                 .collect( Collectors.toList() );
     }
 
     @Override
-    public List<AgencyDto> getAgenciesByCodeContaining(String agencyCode) {
+    public List<AgencyResponseDto> getAgenciesByCodeContaining(String agencyCode) {
         List<Agency> agencies = agencyRepository.findAllByAgencyCode( agencyCode );
 
-        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyDto.class )) )
+        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyResponseDto.class )) )
                 .collect( Collectors.toList() );
     }
 
     @Override
-    public List<AgencyDto> getAgenciesByPhoneContaining(String phone) {
+    public List<AgencyResponseDto> getAgenciesByPhoneContaining(String phone) {
         List<Agency> agencies = agencyRepository.findByPhoneContaining( phone );
 
-        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyDto.class )) )
+        return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyResponseDto.class )) )
                 .collect( Collectors.toList() );
     }
 }

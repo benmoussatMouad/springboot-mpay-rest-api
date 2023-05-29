@@ -3,6 +3,7 @@ package com.springboot.mpaybackend.controller;
 import com.springboot.mpaybackend.entity.Agency;
 import com.springboot.mpaybackend.payload.AgencyDto;
 import com.springboot.mpaybackend.payload.AgencyLightDto;
+import com.springboot.mpaybackend.payload.AgencyResponseDto;
 import com.springboot.mpaybackend.service.AgencyService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.HttpStatus;
@@ -32,36 +33,36 @@ public class AgencyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AgencyDto>> getAgencies(
+    public ResponseEntity<List<AgencyResponseDto>> getAgencies(
             @RequestParam(name = "bank_id",required = false) @Parameter(description = "if this is not null, this will filter the result by bank id", example = "1") Long bankId,
             @RequestParam(name = "wilaya_id",required = false) @Parameter(description = "if this is not null, this will filter the result by wilaya id", example = "1") Long wilayaId,
             @RequestParam(name = "agency_code",required = false) @Parameter(description = "if this is not null, this will filter the result to agencies containing this code in their codename", example = "BE, returns BEA and others") String agencyCode,
             @RequestParam(name = "phone",required = false) @Parameter(description = "if this is not null, this will filter the result to agencies containing this phone in their phone number", example = "558 might return qn agency with phone number 0558394565") String phone,
             @RequestParam(name = "agency_name",required = false) @Parameter(description = "if this is not null, this will filter the result by agencies containing the name", example = "Nationale return Banque Nationale and others") String agencyName
     ) {
-        List<AgencyDto> response = agencyService.getAgencies();
-        List<AgencyDto> finalAgencyDto = response;
+        List<AgencyResponseDto> response = agencyService.getAgencies();
+        List<AgencyResponseDto> finalAgencyDto = response;
 
         if( bankId != null ) {
-            List<AgencyDto>  midResponse = agencyService.getAgenciesByBank( bankId );
+            List<AgencyResponseDto>  midResponse = agencyService.getAgenciesByBank( bankId );
             finalAgencyDto = finalAgencyDto.stream().distinct().filter( midResponse::contains ).collect( Collectors.toList() );
         }
         if( wilayaId != null ) {
-            List<AgencyDto> midResponse = agencyService.getAgenciesByWilaya( wilayaId );
+            List<AgencyResponseDto> midResponse = agencyService.getAgenciesByWilaya( wilayaId );
             finalAgencyDto = finalAgencyDto.stream().distinct().filter( midResponse::contains ).collect( Collectors.toList() );
         }
         if( agencyName != null ) {
-            List<AgencyDto> midResponse = agencyService.getAgenciesByNameContaining( agencyName );
+            List<AgencyResponseDto> midResponse = agencyService.getAgenciesByNameContaining( agencyName );
             finalAgencyDto = finalAgencyDto.stream().distinct().filter( midResponse::contains ).collect( Collectors.toList() );
         }
         if( agencyCode != null ) {
-            List<AgencyDto> midResponse = agencyService.getAgenciesByCodeContaining( agencyCode );
+            List<AgencyResponseDto> midResponse = agencyService.getAgenciesByCodeContaining( agencyCode );
             finalAgencyDto = finalAgencyDto.stream().distinct().filter( midResponse::contains ).collect( Collectors.toList() );
         }
         if( phone != null ) {
-            List<AgencyDto> midResponse = agencyService.getAgenciesByPhoneContaining( phone );
+            List<AgencyResponseDto> midResponse = agencyService.getAgenciesByPhoneContaining( phone );
             finalAgencyDto = finalAgencyDto.stream().distinct().filter( midResponse::contains ).collect( Collectors.toList() );
-        }
+          }
         return ResponseEntity.ok( finalAgencyDto );
     }
 
