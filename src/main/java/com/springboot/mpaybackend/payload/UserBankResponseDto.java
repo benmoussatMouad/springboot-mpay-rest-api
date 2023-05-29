@@ -15,5 +15,7 @@ public class UserBankResponseDto {
     private String userType;
     private String username;
     private String password;
-    private BankLightDto bank;
+    private Long bankId;
+    private String bankName;
+    private String bankAcronymName;
 }

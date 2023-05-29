@@ -163,4 +163,14 @@ public class AuthServiceImpl implements AuthService {
     public String registerMerchant(RegisterDto registerDto) {
         return null;
     }
+
+    @Override
+    public Boolean checkUsername(String username) {
+        return userRepository.existsByUsername( username );
+    }
+
+    @Override
+    public Boolean checkPhone(String phone) {
+        return userRepository.existsByPhone( phone );
+    }
 }

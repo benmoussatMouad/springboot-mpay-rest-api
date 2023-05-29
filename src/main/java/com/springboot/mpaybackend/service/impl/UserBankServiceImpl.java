@@ -46,7 +46,6 @@ public class UserBankServiceImpl implements UserBankService {
                 .orElseThrow( () -> new ResourceNotFoundException( "UserBank", "id", id ) );
 
         UserBankResponseDto responseDto = modelMapper.map( userBank, UserBankResponseDto.class );
-        responseDto.setBank( modelMapper.map(userBank.getBank(), BankLightDto.class) );
         responseDto.setUsername( userBank.getUsername().getUsername() );
 
         return responseDto;
@@ -58,7 +57,6 @@ public class UserBankServiceImpl implements UserBankService {
                 .orElseThrow( () -> new ResourceNotFoundException( "UserBank", "username", username ) );
 
         UserBankResponseDto responseDto = modelMapper.map( userBank, UserBankResponseDto.class );
-        responseDto.setBank( modelMapper.map(userBank.getBank(), BankLightDto.class) );
         responseDto.setUsername( userBank.getUsername().getUsername() );
 
         return responseDto;
@@ -136,7 +134,6 @@ public class UserBankServiceImpl implements UserBankService {
         List<UserBankResponseDto> userDtos = users.stream().map( (userBank -> {
 
             UserBankResponseDto dto = modelMapper.map( userBank, UserBankResponseDto.class );
-            dto.setBank( modelMapper.map( userBank.getBank(), BankLightDto.class ) );
             return dto;
         }) ).toList();
 

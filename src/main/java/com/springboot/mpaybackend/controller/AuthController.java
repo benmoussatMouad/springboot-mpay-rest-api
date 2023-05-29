@@ -9,10 +9,9 @@ import com.springboot.mpaybackend.repository.UserRepository;
 import com.springboot.mpaybackend.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -46,5 +45,25 @@ public class AuthController {
     public ResponseEntity<String> register(@RequestBody RegisterDto registerDto){
         String response = authService.registerClient(registerDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("check/username/{username}")
+    public ResponseEntity<String> checkUsername(@PathVariable("username") String username) {
+        Boolean response = authService.checkUsername( username );
+        if( response ) {
+            return new ResponseEntity<>( "Username exists", HttpStatus.ACCEPTED );
+        } else {
+            return new ResponseEntity<>( "Username do not exists", HttpStatus.NOT_FOUND );
+        }
+    }
+
+    @GetMapping("check/phone/{phone}")
+    public ResponseEntity<String> checkPhone(@PathVariable("phone") String phone) {
+        Boolean response = authService.checkPhone( phone );
+        if( response ) {
+            return new ResponseEntity<>( "Phone exists", HttpStatus.ACCEPTED );
+        } else {
+            return new ResponseEntity<>( "Phone do not exists", HttpStatus.NOT_FOUND );
+        }
     }
 }

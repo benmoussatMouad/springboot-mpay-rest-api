@@ -11,4 +11,8 @@ public interface AuthService {
     String registerClient(RegisterDto registerDto);
 
     String registerMerchant(RegisterDto registerDto);
+
+    Boolean checkUsername(String username);
+
+    Boolean checkPhone(String phone);
 }
