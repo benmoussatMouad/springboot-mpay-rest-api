@@ -61,8 +61,8 @@ public class UserAdminController {
         return ResponseEntity.ok( userAdminService.updateUserAdmin( dto, id) );
     }
 
-    @DeleteMapping
-    public ResponseEntity<String> deleteUserAdmin(Long id) {
+    @DeleteMapping("{id}")
+    public ResponseEntity<String> deleteUserAdmin(@PathVariable("id") Long id) {
         userAdminService.deleteUserAdmin( id );
 
         return ResponseEntity.ok("Agency User deleted successfully");

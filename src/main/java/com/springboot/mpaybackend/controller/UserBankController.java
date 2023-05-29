@@ -77,10 +77,10 @@ public class UserBankController {
         return ResponseEntity.ok( userBankService.updateUserBank( dto, id, authentication.getName() ) );
     }
 
-    @DeleteMapping
-    public ResponseEntity<String> deleteUserAgency(Long id) {
+    @DeleteMapping("{id}")
+    public ResponseEntity<String> deleteUserBank(@PathVariable("id") Long id) {
         userBankService.deleteUserBank( id );
 
-        return ResponseEntity.ok("Agency User deleted successfully");
+        return ResponseEntity.ok("Bank User deleted successfully");
     }
 }

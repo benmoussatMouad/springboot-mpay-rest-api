@@ -65,8 +65,8 @@ public class ClientController {
         return ResponseEntity.ok( clientService.updateClient( dto, id ) );
     }
 
-    @DeleteMapping
-    public ResponseEntity<String> deleteClient(Long id) {
+    @DeleteMapping("{id}")
+    public ResponseEntity<String> deleteClient(@PathVariable("id") Long id) {
 
         clientService.deleteClient( id );
         return ResponseEntity.ok( "Client deleted successfully" );

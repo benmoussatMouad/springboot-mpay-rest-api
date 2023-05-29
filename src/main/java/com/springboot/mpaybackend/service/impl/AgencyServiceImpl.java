@@ -128,7 +128,7 @@ public class AgencyServiceImpl implements AgencyService {
 
     @Override
     public List<AgencyResponseDto> getAgenciesByCodeContaining(String agencyCode) {
-        List<Agency> agencies = agencyRepository.findAllByAgencyCode( agencyCode );
+        List<Agency> agencies = agencyRepository.findByAgencyCodeContaining( agencyCode );
 
         return agencies.stream().map( (agency -> modelMapper.map( agency, AgencyResponseDto.class )) )
                 .collect( Collectors.toList() );

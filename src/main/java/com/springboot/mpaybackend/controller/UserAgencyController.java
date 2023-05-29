@@ -77,8 +77,8 @@ public class UserAgencyController {
         return ResponseEntity.ok( userAgencyService.updateUserAgency( dto, id, authentication.getName() ) );
     }
 
-    @DeleteMapping
-    public ResponseEntity<String> deleteUserAgency(Long id) {
+    @DeleteMapping("{id}")
+    public ResponseEntity<String> deleteUserAgency(@PathVariable("id") Long id) {
         userAgencyService.deleteUserAgency( id );
 
         return ResponseEntity.ok("Agency User deleted successfully");

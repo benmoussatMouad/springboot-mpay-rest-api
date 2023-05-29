@@ -13,6 +13,7 @@ public class BankDto {
     private String bankCode;
     private String address;
     private Long wilayaId;
+    private String wilayaName;
     private String commune;
     private String phone;
     private String fax;
