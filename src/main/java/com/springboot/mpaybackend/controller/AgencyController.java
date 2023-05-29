@@ -40,8 +40,7 @@ public class AgencyController {
             @RequestParam(name = "phone",required = false) @Parameter(description = "if this is not null, this will filter the result to agencies containing this phone in their phone number", example = "558 might return qn agency with phone number 0558394565") String phone,
             @RequestParam(name = "agency_name",required = false) @Parameter(description = "if this is not null, this will filter the result by agencies containing the name", example = "Nationale return Banque Nationale and others") String agencyName
     ) {
-        List<AgencyResponseDto> response = agencyService.getAgencies();
-        List<AgencyResponseDto> finalAgencyDto = response;
+        List<AgencyResponseDto> finalAgencyDto = agencyService.getAgencies();
 
         if( bankId != null ) {
             List<AgencyResponseDto>  midResponse = agencyService.getAgenciesByBank( bankId );

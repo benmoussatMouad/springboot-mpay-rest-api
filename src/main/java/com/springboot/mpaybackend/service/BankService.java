@@ -21,4 +21,18 @@ public interface BankService {
     List<BankLightDto> getBanksLightFormat();
 
     BankPageDto getBanks(int page, int size);
+
+    List<BankDto> getBanksByNameContaining(String bankName);
+
+    List<BankDto> getBanksByWilaya(Long wilayaId);
+
+    List<BankDto> getBanksByCodeContaining(String bankCode);
+
+    List<BankDto> getBanksByTotalLicenseLesserOrEqualThan(Integer maxLicense);
+
+    List<BankDto> getBanksByTotalLicenseGreaterOrEqualThan(Integer minLicense);
+
+    List<BankDto> getBanksByAddressContaining(String address);
+
+    List<BankDto> getBanksByPhoneContaining(String phone);
 }

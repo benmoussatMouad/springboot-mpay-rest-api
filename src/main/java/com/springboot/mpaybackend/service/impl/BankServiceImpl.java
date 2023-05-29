@@ -117,5 +117,60 @@ public class BankServiceImpl implements BankService {
         return bankPage;
     }
 
-    //TODO: add pagination
+    @Override
+    public List<BankDto> getBanksByNameContaining(String bankName) {
+        List<Bank> banks = bankRepository.findByNameContaining(bankName);
+
+        return banks.stream().map( (bank -> modelMapper.map( bank, BankDto.class )) )
+                .collect( Collectors.toList() );
+    }
+
+    @Override
+    public List<BankDto> getBanksByWilaya(Long wilayaId) {
+        List<Bank> banks = bankRepository.findByWilayaId(wilayaId);
+
+        return banks.stream().map( (bank -> modelMapper.map( bank, BankDto.class )) )
+                .collect( Collectors.toList() );
+    }
+
+    @Override
+    public List<BankDto> getBanksByCodeContaining(String bankCode) {
+        List<Bank> banks = bankRepository.findByBankCodeContaining(bankCode);
+
+        return banks.stream().map( (bank -> modelMapper.map( bank, BankDto.class )) )
+                .collect( Collectors.toList() );
+    }
+
+    @Override
+    public List<BankDto> getBanksByTotalLicenseLesserOrEqualThan(Integer maxLicense) {
+        List<Bank> banks = bankRepository.findByTotalLicenceLessThanEqual(maxLicense);
+
+        return banks.stream().map( (bank -> modelMapper.map( bank, BankDto.class )) )
+                .collect( Collectors.toList() );
+    }
+
+    @Override
+    public List<BankDto> getBanksByTotalLicenseGreaterOrEqualThan(Integer minLicense) {
+        List<Bank> banks = bankRepository.findByTotalLicenceLessThanEqual(minLicense);
+
+        return banks.stream().map( (bank -> modelMapper.map( bank, BankDto.class )) )
+                .collect( Collectors.toList() );
+    }
+
+    @Override
+    public List<BankDto> getBanksByAddressContaining(String address) {
+        List<Bank> banks = bankRepository.findByAddressContaining(address);
+
+        return banks.stream().map( (bank -> modelMapper.map( bank, BankDto.class )) )
+                .collect( Collectors.toList() );
+    }
+
+    @Override
+    public List<BankDto> getBanksByPhoneContaining(String phone) {
+        List<Bank> banks = bankRepository.findByPhoneContaining(phone);
+
+        return banks.stream().map( (bank -> modelMapper.map( bank, BankDto.class )) )
+                .collect( Collectors.toList() );
+    }
+
 }

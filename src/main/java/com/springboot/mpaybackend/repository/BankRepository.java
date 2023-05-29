@@ -14,6 +14,8 @@ public interface BankRepository extends JpaRepository<Bank, java.lang.Long> {
 
     List<Bank> findByBankCodeContaining(String name);
 
+    List<Bank> findByAddressContaining(String address);
+
     List<Bank> findByWilayaId(Long id);
 
     List<Bank> findByTotalLicenceGreaterThanEqual(Integer min);

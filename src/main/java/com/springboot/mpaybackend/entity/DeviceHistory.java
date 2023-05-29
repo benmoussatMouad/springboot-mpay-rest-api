@@ -29,7 +29,7 @@ public class DeviceHistory {
     private Date addedDate;
     private String userAgent;
     private Integer numberAttempt;
-    private String ipAdress;
+    private String ipAddress;
     private String sessionState;
     private Float latitude;
     private Float longitude;

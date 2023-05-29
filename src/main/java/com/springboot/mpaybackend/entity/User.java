@@ -34,6 +34,8 @@ public class User {
     private AppVersion appVersion;
 
     private Integer employe;
+
+    @Column(unique = true)
     private String phone;
     private Integer suffersAttempts;
     private boolean firstConnexion;
