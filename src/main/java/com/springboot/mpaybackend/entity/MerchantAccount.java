@@ -29,7 +29,8 @@ public class MerchantAccount {
     @JoinColumn(name = "bank_id")
     private Bank bank;
 
-    private String type; // TODO: what is the purpose of this field ?
+
+    // TODO: Filtrage avec ID
 
     @Enumerated(EnumType.STRING)
     private MerchantStatus status;

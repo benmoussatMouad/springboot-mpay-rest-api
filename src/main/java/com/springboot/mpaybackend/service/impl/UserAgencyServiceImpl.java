@@ -165,5 +165,4 @@ public class UserAgencyServiceImpl implements UserAgencyService {
         return userAgencyPageDto;
     }
 
-    // TODO: add putting agency to user, or removing agencies
 }

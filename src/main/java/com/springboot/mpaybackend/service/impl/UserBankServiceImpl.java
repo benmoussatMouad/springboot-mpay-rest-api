@@ -178,4 +178,102 @@ public class UserBankServiceImpl implements UserBankService {
 
         userBankRepository.delete( userBank );
     }
+
+    @Override
+    public UserBankPageDto getAllUserBankByFilter(Integer page, Integer size, String name, String phone, String userType, Long bankId) {
+
+        if( name == null ) {
+            if( phone == null ) {
+                if( userType == null ) {
+                    if( bankId == null ) {
+                        return this.getAllUserBank( page, size );
+                    } else {
+                        Page<UserBank> userBankPage = userBankRepository.findByBankId( PageRequest.of( page, size ), bankId );
+                        return pageDtoOf( userBankPage );
+                    }
+                } else {
+                    if( bankId == null ) {
+                        Page<UserBank> userBankPage = userBankRepository.findByUserType( PageRequest.of( page, size ), UserType.valueOf( userType ) );
+                        return pageDtoOf( userBankPage );
+                    } else {
+                        Page<UserBank> userBankPage = userBankRepository.findByBankIdAndUserType( PageRequest.of( page, size ), bankId, UserType.valueOf( userType ) );
+                        return pageDtoOf( userBankPage );
+                    }
+                }
+            } else {
+                if( userType == null ) {
+                    if( bankId == null ) {
+                        Page<UserBank> userBankPage = userBankRepository.findByPhoneContaining( PageRequest.of( page, size ), phone );
+                        return pageDtoOf( userBankPage );
+                    } else {
+                        Page<UserBank> userBankPage = userBankRepository.findByPhoneContainingAndBankId( PageRequest.of( page, size ), phone, bankId );
+                        return pageDtoOf( userBankPage );
+                    }
+                } else {
+                    if( bankId == null ) {// phone AND usertype only
+                        Page<UserBank> userBankPage = userBankRepository.findByPhoneContainingAndUserType( PageRequest.of( page, size ), phone, UserType.valueOf( userType ) );
+                        return pageDtoOf( userBankPage );
+                    } else {
+                        // phone AND userType AND bankId
+                        Page<UserBank> userBankPage = userBankRepository.findByPhoneContainingAndBankIdAndUserType( PageRequest.of( page, size ), phone, bankId, UserType.valueOf( userType ) );
+                        return pageDtoOf( userBankPage );
+                    }
+                }
+            }
+        } else { // name AND
+            if( phone == null ) {
+                if( userType == null ) {
+                    if( bankId == null ) {
+                        Page<UserBank> userBankPage = userBankRepository.findByFirstNameContainingOrLastNameContaining( PageRequest.of( page, size ), name, name );
+                        return pageDtoOf( userBankPage );
+                    } else {
+                        Page<UserBank> userBankPage = userBankRepository.findByFirstNameContainingOrLastNameContainingAndBankId( PageRequest.of( page, size ), name, name, bankId );
+                        return pageDtoOf( userBankPage );
+                    }
+                } else { // name AND userType
+                    if( bankId == null ) {
+                        Page<UserBank> userBankPage = userBankRepository.findByFirstNameContainingOrLastNameContainingAndUserType( PageRequest.of( page, size ), name, name, UserType.valueOf( userType ) );
+                        return pageDtoOf( userBankPage );
+                    } else {
+                        // name AND userType AND bankId
+                        Page<UserBank> userBankPage = userBankRepository.findByFirstNameContainingOrLastNameContainingAndBankIdAndUserType( PageRequest.of( page, size ), name, name, bankId, UserType.valueOf( userType ) );
+                        return pageDtoOf( userBankPage );
+                    }
+
+                }
+            } else {
+                if( userType == null ) {
+                    Page<UserBank> userBankPage;
+                    if( bankId == null ) { // name AND phone
+                        userBankPage = userBankRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContaining( PageRequest.of( page, size ), phone, name, name );
+                    } else {
+                        // name AND phone AND bankId
+                        userBankPage = userBankRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndBankId( PageRequest.of( page, size ), phone, name, name, bankId );
+                    }
+                    return pageDtoOf( userBankPage );
+                } else {
+                    Page<UserBank> userBankPage;
+                    if( bankId == null ) {
+                        // name AND phone AND userType
+                        userBankPage = userBankRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndUserType( PageRequest.of( page, size ), phone, name, name, UserType.valueOf( userType ) );
+                    } else {
+                        // name AND phone AND userType AND bankId
+                        userBankPage = userBankRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndBankIdAndUserType( PageRequest.of( page, size ), phone, name, name, bankId, UserType.valueOf( userType ) );
+                    }
+                    return pageDtoOf( userBankPage );
+                }
+            }
+        }
+    }
+
+    private UserBankPageDto pageDtoOf(Page<UserBank> userBankPage) {
+        List<UserBankResponseDto> userDtos = userBankPage.stream().map( (userBank -> modelMapper.map( userBank, UserBankResponseDto.class )) ).toList();
+
+        UserBankPageDto userBankPageDto = new UserBankPageDto();
+
+        userBankPageDto.setCount( userBankPage.getTotalElements() );
+        userBankPageDto.setUserPage( userDtos );
+
+        return userBankPageDto;
+    }
 }

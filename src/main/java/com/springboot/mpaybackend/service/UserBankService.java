@@ -23,4 +23,6 @@ public interface UserBankService {
     UserBankDto updateUserBank(UserBankDto dto, Long id, String updatingUsername);
 
     void deleteUserBank(Long id);
+
+    UserBankPageDto getAllUserBankByFilter(Integer page, Integer size, String name, String phone, String userType, Long bankId);
 }

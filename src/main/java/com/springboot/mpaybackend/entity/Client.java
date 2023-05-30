@@ -34,6 +34,4 @@ public class Client {
     private String postalCode;
     private String phone;
 
-    //TODO: add account for client
-
 }

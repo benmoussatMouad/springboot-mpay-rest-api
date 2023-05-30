@@ -38,5 +38,4 @@ public class Merchant {
     @JoinColumn(name = "bm_id")
     private Bm bm;
 
-    // TODO: add account for merchant
 }

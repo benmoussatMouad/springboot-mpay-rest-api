@@ -60,7 +60,7 @@ public class AuthController {
     @GetMapping("check/phone/{phone}")
     public ResponseEntity<String> checkPhone(@PathVariable("phone") String phone) {
         Boolean response = authService.checkPhone( phone );
-        if( response ) {
+        if( response ) {    
             return new ResponseEntity<>( "Phone exists", HttpStatus.ACCEPTED );
         } else {
             return new ResponseEntity<>( "Phone do not exists", HttpStatus.NOT_FOUND );

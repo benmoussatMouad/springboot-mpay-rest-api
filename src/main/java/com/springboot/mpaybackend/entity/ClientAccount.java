@@ -27,10 +27,7 @@ public class ClientAccount {
 
     private String cardNumber;
     private Date cardExpiryDate;
-    private String nameOnCard;
 
-    private String accountNumber;
-    private double balance;
     private double minCredit;
 
     // TODO: Make Client status

@@ -8,6 +8,7 @@ import com.springboot.mpaybackend.service.BankService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class BankController {
     }
 
     @PostMapping
-//    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BankDto> addBank(@RequestBody BankDto bankDto){
         BankDto savedBank = bankService.addBank(bankDto);
         return new ResponseEntity<>(savedBank, HttpStatus.CREATED);
