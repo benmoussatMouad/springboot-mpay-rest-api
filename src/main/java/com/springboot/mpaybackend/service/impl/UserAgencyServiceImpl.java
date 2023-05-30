@@ -41,26 +41,26 @@ public class UserAgencyServiceImpl implements UserAgencyService {
     }
 
     @Override
-    public UserAgencyDto getUserAgency(Long id) {
+    public UserAgencyResponseDto getUserAgency(Long id) {
 
         UserAgency userAgency = userAgencyRepository.findById( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "UserAgency", "id", id ) );
 
-        return modelMapper.map( userAgency, UserAgencyDto.class );
+        return modelMapper.map( userAgency, UserAgencyResponseDto.class );
     }
 
     @Override
-    public UserAgencyDto getUserAgencyByUsername(String username) {
+    public UserAgencyResponseDto getUserAgencyByUsername(String username) {
         UserAgency userAgency = userAgencyRepository.findByUsernameUsername( username )
                 .orElseThrow( () -> new ResourceNotFoundException( "UserAgency", "username", username ) );
-        return modelMapper.map( userAgency, UserAgencyDto.class );
+        return modelMapper.map( userAgency, UserAgencyResponseDto.class );
     }
 
     @Override
-    public List<UserAgencyDto> getUsersAgencyByAgency(Long agencyId) {
+    public List<UserAgencyResponseDto> getUsersAgencyByAgency(Long agencyId) {
         List<UserAgency> usersAgency = userAgencyRepository.findAllByAgencyId( agencyId );
 
-        return usersAgency.stream().map( (userAgency -> modelMapper.map( userAgency, UserAgencyDto.class )) ).collect( Collectors.toList() );
+        return usersAgency.stream().map( (userAgency -> modelMapper.map( userAgency, UserAgencyResponseDto.class )) ).collect( Collectors.toList() );
     }
 
     @Override
@@ -104,14 +104,14 @@ public class UserAgencyServiceImpl implements UserAgencyService {
     }
 
     @Override
-    public List<UserAgencyDto> getUsersAgency() {
+    public List<UserAgencyResponseDto> getUsersAgency() {
         List<UserAgency> userAgencies = userAgencyRepository.findAll();
 
-        return userAgencies.stream().map( (userAgency -> modelMapper.map( userAgency, UserAgencyDto.class )) ).collect( Collectors.toList());
+        return userAgencies.stream().map( (userAgency -> modelMapper.map( userAgency, UserAgencyResponseDto.class )) ).collect( Collectors.toList());
     }
 
     @Override
-    public UserAgencyDto updateUserAgency(UserAgencyDto dto, Long id, String updatingUsername) {
+    public UserAgencyResponseDto updateUserAgency(UserAgencyDto dto, Long id, String updatingUsername) {
         UserAgency userAgency = userAgencyRepository.findById( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "UserAgency", "id", id ) );
 
@@ -133,7 +133,7 @@ public class UserAgencyServiceImpl implements UserAgencyService {
         }
 
         UserAgency savedUserAgency = userAgencyRepository.save( userAgency );
-        UserAgencyDto userAgencyDto = modelMapper.map( savedUserAgency, UserAgencyDto.class );
+        UserAgencyResponseDto userAgencyDto = modelMapper.map( savedUserAgency, UserAgencyResponseDto.class );
         // Not to change the username, but to set a String instead when sending DTO
         userAgencyDto.setUsername( userAgency.getUsername().getUsername() );
         return userAgencyDto;
@@ -152,7 +152,7 @@ public class UserAgencyServiceImpl implements UserAgencyService {
     public UserAgencyPageDto getAllUserAgency(Integer page, Integer size) {
         Page<UserAgency> users = userAgencyRepository.findAll( PageRequest.of( page, size ) );
 
-        List<UserAgencyDto> userDtos = users.stream().map( (user -> modelMapper.map( user, UserAgencyDto.class )) ).toList();
+        List<UserAgencyResponseDto> userDtos = users.stream().map( (user -> modelMapper.map( user, UserAgencyResponseDto.class )) ).toList();
 
         UserAgencyPageDto userAgencyPageDto = new UserAgencyPageDto();
 
@@ -334,9 +334,14 @@ public class UserAgencyServiceImpl implements UserAgencyService {
         }
     }
 
+    @Override
+    public boolean existsById(Long id) {
+        return userAgencyRepository.existsById( id );
+    }
+
 
     private UserAgencyPageDto pageDtoOf(Page<UserAgency> userBankPage) {
-        List<UserAgencyDto> userDtos = userBankPage.stream().map( (userBank -> modelMapper.map( userBank, UserAgencyDto.class )) ).toList();
+        List<UserAgencyResponseDto> userDtos = userBankPage.stream().map( (userBank -> modelMapper.map( userBank, UserAgencyResponseDto.class )) ).toList();
 
         UserAgencyPageDto userBankPageDto = new UserAgencyPageDto();
 

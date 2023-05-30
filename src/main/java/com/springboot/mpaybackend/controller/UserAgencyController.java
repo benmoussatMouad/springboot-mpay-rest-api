@@ -1,7 +1,10 @@
 package com.springboot.mpaybackend.controller;
 
+import com.springboot.mpaybackend.entity.User;
+import com.springboot.mpaybackend.entity.UserType;
 import com.springboot.mpaybackend.payload.UserAgencyDto;
 import com.springboot.mpaybackend.payload.UserAgencyPageDto;
+import com.springboot.mpaybackend.payload.UserAgencyResponseDto;
 import com.springboot.mpaybackend.service.UserAgencyService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.HttpStatus;
@@ -9,7 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/user-agency")
@@ -33,7 +38,7 @@ public class UserAgencyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserAgencyDto>> getUsersAgency(
+    public ResponseEntity<List<UserAgencyResponseDto>> getUsersAgency(
             @RequestParam(name = "by", required = false) @Parameter(description = "specify condition to filter Agency Users", example = "agency") String filter,
             @RequestParam(name = "id", required = false) @Parameter(description = "If 'by' is specified as associated entity, id should be included and should be the id of the associated entity", example = "id of an agency associated to agency user") String id
     ) {
@@ -58,14 +63,36 @@ public class UserAgencyController {
             @RequestParam(name= "bank_id", required = false)
             @Parameter(description = "The size of the page") Long bankId,
             @RequestParam(name= "agency_id", required = false)
-            @Parameter(description = "The size of the page") Long agencyId
-
+            @Parameter(description = "The size of the page") Long agencyId,
+            @RequestParam(name= "id", required = false)
+            @Parameter(description = "The size of the page") Long id
     ) {
+        if(id != null ) {
+            // TODO: FIX string contain
+            UserAgencyResponseDto userAgency = null;
+            if( userAgencyService.existsById( id ) ) {
+                userAgency = userAgencyService.getUserAgency( id );
+                if( userAgency.getPhone().contains( Objects.toString( phone, "" ) ) || userAgency.getAgencyId().equals( agencyId ) || userAgency.getUserType().equals( Objects.toString( userType, "" ) ) || userAgency.getFirstName().contains( Objects.toString(name, "") ) || userAgency.getLastName().contains( Objects.toString(name, "") ) || userAgency.getAgencyBankId().equals( bankId ) ) {
+                    List<UserAgencyResponseDto> dtos = new ArrayList<UserAgencyResponseDto>();
+                    dtos.add( userAgency );
+                    UserAgencyPageDto userAgencyPageDto = new UserAgencyPageDto();
+                    userAgencyPageDto.setCount( 1L );
+                    userAgencyPageDto.setUserPage( dtos );
+
+                    return ResponseEntity.ok( userAgencyPageDto );
+                }
+            } else {
+                UserAgencyPageDto dtos = new UserAgencyPageDto();
+                dtos.setCount( 0L );
+                dtos.setUserPage( new ArrayList<>() );
+                return ResponseEntity.ok( dtos );
+            }
+        }
         return ResponseEntity.ok( userAgencyService.getAllUserAgencyByFilter( page, size, name, phone, userType, bankId, agencyId ) );
     }
 
     @GetMapping("{key}")
-    public ResponseEntity<UserAgencyDto> getUserAgencyBy(
+    public ResponseEntity<UserAgencyResponseDto> getUserAgencyBy(
             @PathVariable("key") String key,
             @RequestParam(name = "by", defaultValue = "id") @Parameter(description = "Specify by which key to get the User", example = "by=id OR by=username") String filter) {
 
@@ -81,7 +108,7 @@ public class UserAgencyController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<UserAgencyDto> updateUserAgency(@RequestBody UserAgencyDto dto,
+    public ResponseEntity<UserAgencyResponseDto> updateUserAgency(@RequestBody UserAgencyDto dto,
                                                           @PathVariable Long id,
                                                           Authentication authentication) {
 

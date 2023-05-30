@@ -2,26 +2,29 @@ package com.springboot.mpaybackend.service;
 
 import com.springboot.mpaybackend.payload.UserAgencyDto;
 import com.springboot.mpaybackend.payload.UserAgencyPageDto;
+import com.springboot.mpaybackend.payload.UserAgencyResponseDto;
 
 import java.util.List;
 
 public interface UserAgencyService {
 
-    UserAgencyDto getUserAgency(Long id);
+    UserAgencyResponseDto getUserAgency(Long id);
 
-    UserAgencyDto getUserAgencyByUsername(String username);
+    UserAgencyResponseDto getUserAgencyByUsername(String username);
 
-    List<UserAgencyDto> getUsersAgencyByAgency(Long agencyId);
+    List<UserAgencyResponseDto> getUsersAgencyByAgency(Long agencyId);
 
     UserAgencyDto addUserAgency(UserAgencyDto dto, String username);
 
-    List<UserAgencyDto> getUsersAgency();
+    List<UserAgencyResponseDto> getUsersAgency();
 
-    UserAgencyDto updateUserAgency(UserAgencyDto dto, Long id, String updatingUsername);
-
+    UserAgencyResponseDto updateUserAgency(UserAgencyDto dto, Long id, String updatingUsername);
+    //TODO: change it to logical suppression
     void deleteUserAgency(Long id);
 
     UserAgencyPageDto getAllUserAgency(Integer page, Integer size);
 
     UserAgencyPageDto getAllUserAgencyByFilter(Integer page, Integer size, String name, String phone, String userType, Long bankId, Long agencyId);
+
+    boolean existsById(Long id);
 }

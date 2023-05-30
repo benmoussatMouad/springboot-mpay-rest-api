@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class UserBankResponseDto {
-
+// TODO: response DTO for agency usre
     private Long id;
     private String firstName;
     private String lastName;

@@ -1,5 +1,6 @@
 package com.springboot.mpaybackend.controller;
 
+import com.springboot.mpaybackend.entity.UserType;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.service.UserBankService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -55,10 +57,23 @@ public class UserBankController {
             @RequestParam(name= "user_type", required = false)
             @Parameter(description = "Filter the results by user type") String userType,
             @RequestParam(name= "bank_id", required = false)
-            @Parameter(description = "The size of the page") Long bankId
+            @Parameter(description = "The size of the page") Long bankId,
+            @RequestParam(name= "id", required = false)
+            @Parameter(description = "Id of the bank user") Long id
             ) {
 
+        if(id != null ) {
+            UserBankResponseDto user = userBankService.getUserBank( id );
+            if( user.getPhone().contains( phone ) || user.getUserType().equals( UserType.valueOf( userType ) ) || user.getFirstName().contains( name ) || user.getLastName().contains( name ) || user.getBankId().equals( bankId ) ) {
+                List<UserBankResponseDto> dtos = new ArrayList<UserBankResponseDto>();
+                dtos.add( user );
+                UserBankPageDto dto = new UserBankPageDto();
+                dto.setCount( 1L );
+                dto.setUserPage( dtos );
 
+                return ResponseEntity.ok( dto );
+            }
+        }
         return ResponseEntity.ok( userBankService.getAllUserBankByFilter( page, size, name, phone, userType, bankId ) );
     }
 

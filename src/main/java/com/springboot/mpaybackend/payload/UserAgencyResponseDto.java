@@ -1,14 +1,10 @@
 package com.springboot.mpaybackend.payload;
 
-import com.springboot.mpaybackend.entity.User;
 import jakarta.validation.constraints.Email;
 import lombok.Data;
 
-import java.util.Date;
-
 @Data
-public class UserAgencyDto {
-
+public class UserAgencyResponseDto {
     private Long id;
     private String firstName;
     private String lastName;
@@ -19,4 +15,8 @@ public class UserAgencyDto {
     private String username;
     private String password;
     private Long agencyId;
+    private String agencyName;
+    private Long agencyBankId;
+    private String agencyBankName;
+    private String agencyBankAcronymName;
 }
