@@ -45,7 +45,7 @@ public class ClientController {
     @GetMapping("{key}")
     public ResponseEntity<ClientDto> getClientByKey(
             @PathVariable("key") String key,
-            @RequestParam(name = "by") @Parameter(description = "Specify by which key to get the User", example = "by=id OR by=username") String filter) {
+            @RequestParam(name = "by", defaultValue = "id") @Parameter(description = "Specify by which key to get the User", example = "by=id OR by=username") String filter) {
 
         switch (filter) {
             case "id":
