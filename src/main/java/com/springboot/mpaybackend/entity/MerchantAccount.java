@@ -30,8 +30,6 @@ public class MerchantAccount {
     private Bank bank;
 
 
-    // TODO: Filtrage avec ID
-
     @Enumerated(EnumType.STRING)
     private MerchantStatus status;
 

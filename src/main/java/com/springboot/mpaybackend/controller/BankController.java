@@ -54,10 +54,17 @@ public class BankController {
                     String address,
             @RequestParam(name = "phone",required = false)
             @Parameter(description = "if this is not null, this will filter the result by banks containing this in their phone number")
-                    String phone
+                    String phone,
+            @RequestParam(name = "id",required = false)
+            @Parameter(description = "if this is not null, this will filter ")
+                    Long id
     ) {
         List<BankDto> finalDto = bankService.getBanks();
 
+        if( id != null ) {
+            BankDto bank = bankService.getBank( id );
+            finalDto.add( bank );
+        }
         if( bankName != null ) {
             List<BankDto> midDto = bankService.getBanksByNameContaining( bankName );
             finalDto = finalDto.stream().distinct().filter( midDto::contains ).collect( Collectors.toList() );
