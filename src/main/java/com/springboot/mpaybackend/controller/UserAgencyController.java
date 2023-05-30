@@ -48,15 +48,26 @@ public class UserAgencyController {
             @RequestParam(name = "page")
             @Parameter(description = "The number of the desired page, start from 0") Integer page,
             @RequestParam(name= "size")
-            @Parameter(description = "The size of the page") Integer size
+            @Parameter(description = "The size of the page") Integer size,
+            @RequestParam(name= "name", required = false)
+            @Parameter(description = "Filter the results by name containing") String name,
+            @RequestParam(name= "phone", required = false)
+            @Parameter(description = "Filter the results by phone containing") String phone,
+            @RequestParam(name= "user_type", required = false)
+            @Parameter(description = "Filter the results by user type") String userType,
+            @RequestParam(name= "bank_id", required = false)
+            @Parameter(description = "The size of the page") Long bankId,
+            @RequestParam(name= "agency_id", required = false)
+            @Parameter(description = "The size of the page") Long agencyId
+
     ) {
-        return ResponseEntity.ok( userAgencyService.getAllUserAgency( page, size ) );
+        return ResponseEntity.ok( userAgencyService.getAllUserAgencyByFilter( page, size, name, phone, userType, bankId, agencyId ) );
     }
 
     @GetMapping("{key}")
     public ResponseEntity<UserAgencyDto> getUserAgencyBy(
             @PathVariable("key") String key,
-            @RequestParam(name = "by") @Parameter(description = "Specify by which key to get the User", example = "by=id OR by=username") String filter) {
+            @RequestParam(name = "by", defaultValue = "id") @Parameter(description = "Specify by which key to get the User", example = "by=id OR by=username") String filter) {
 
         switch (filter) {
             case "id":

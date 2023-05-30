@@ -33,7 +33,7 @@ public class UserBankController {
 
     @GetMapping
     public ResponseEntity<List<UserBankDto>> getUsersAgency(
-            @RequestParam(name = "by", required = false) @Parameter(description = "specify condition to filter Bank Users", example = "bank") String filter,
+            @RequestParam(name = "by",  required = false) @Parameter(description = "specify condition to filter Bank Users", example = "bank") String filter,
             @RequestParam(name = "id", required = false) @Parameter(description = "If 'by' is specified as an associated entity, id should be included and should be the id of the associated entity", example = "id of an agency associated to agency user") String id
     ) {
         if( "bank".equals( filter ) ) {
@@ -66,7 +66,7 @@ public class UserBankController {
     @GetMapping("{key}")
     public ResponseEntity<UserBankResponseDto> getUserAgencyBy(
             @PathVariable("key") String key,
-            @RequestParam(name = "by") @Parameter(description = "Specify by which key to get the User", example = "by=id OR by=username") String filter) {
+            @RequestParam(name = "by", defaultValue = "id") @Parameter(description = "Specify by which key to get the User", example = "by=id OR by=username") String filter) {
 
         switch (filter) {
             case "id":

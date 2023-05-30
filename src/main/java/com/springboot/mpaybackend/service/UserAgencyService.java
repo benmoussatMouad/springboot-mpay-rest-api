@@ -22,4 +22,6 @@ public interface UserAgencyService {
     void deleteUserAgency(Long id);
 
     UserAgencyPageDto getAllUserAgency(Integer page, Integer size);
+
+    UserAgencyPageDto getAllUserAgencyByFilter(Integer page, Integer size, String name, String phone, String userType, Long bankId, Long agencyId);
 }

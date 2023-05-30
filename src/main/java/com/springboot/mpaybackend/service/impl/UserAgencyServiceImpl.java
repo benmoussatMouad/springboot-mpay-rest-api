@@ -3,10 +3,7 @@ package com.springboot.mpaybackend.service.impl;
 import com.springboot.mpaybackend.entity.*;
 import com.springboot.mpaybackend.exception.BlogAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
-import com.springboot.mpaybackend.payload.UserAgencyDto;
-import com.springboot.mpaybackend.payload.UserAgencyPageDto;
-import com.springboot.mpaybackend.payload.UserBankDto;
-import com.springboot.mpaybackend.payload.UserBankPageDto;
+import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.repository.AgencyRepository;
 import com.springboot.mpaybackend.repository.UserAgencyRepository;
 import com.springboot.mpaybackend.repository.UserRepository;
@@ -165,4 +162,187 @@ public class UserAgencyServiceImpl implements UserAgencyService {
         return userAgencyPageDto;
     }
 
+    @Override
+    public UserAgencyPageDto getAllUserAgencyByFilter(Integer page, Integer size, String name, String phone, String userType, Long bankId, Long agencyId) {
+
+        if( agencyId == null ) {
+            if( name == null ) {
+                if( phone == null ) {
+                    if( userType == null ) {
+                        if( bankId == null ) {
+                            return this.getAllUserAgency( page, size );
+                        } else {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByAgencyBankId( PageRequest.of( page, size ), bankId );
+                            return pageDtoOf( userBankPage );
+                        }
+                    } else {
+                        if( bankId == null ) {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByUserType( PageRequest.of( page, size ), UserType.valueOf( userType ) );
+                            return pageDtoOf( userBankPage );
+                        } else {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByAgencyBankIdAndUserType( PageRequest.of( page, size ), bankId, UserType.valueOf( userType ) );
+                            return pageDtoOf( userBankPage );
+                        }
+                    }
+                } else {
+                    if( userType == null ) {
+                        if( bankId == null ) {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContaining( PageRequest.of( page, size ), phone );
+                            return pageDtoOf( userBankPage );
+                        } else {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndAgencyBankId( PageRequest.of( page, size ), phone, bankId );
+                            return pageDtoOf( userBankPage );
+                        }
+                    } else {
+                        if( bankId == null ) {// phone AND usertype only
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndUserType( PageRequest.of( page, size ), phone, UserType.valueOf( userType ) );
+                            return pageDtoOf( userBankPage );
+                        } else {
+                            // phone AND userType AND bankId
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndAgencyBankIdAndUserType( PageRequest.of( page, size ), phone, bankId, UserType.valueOf( userType ) );
+                            return pageDtoOf( userBankPage );
+                        }
+                    }
+                }
+            } else { // name AND
+                if( phone == null ) {
+                    if( userType == null ) {
+                        if( bankId == null ) {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContaining( PageRequest.of( page, size ), name, name );
+                            return pageDtoOf( userBankPage );
+                        } else {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndAgencyBankId( PageRequest.of( page, size ), name, name, bankId );
+                            return pageDtoOf( userBankPage );
+                        }
+                    } else { // name AND userType
+                        if( bankId == null ) {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndUserType( PageRequest.of( page, size ), name, name, UserType.valueOf( userType ) );
+                            return pageDtoOf( userBankPage );
+                        } else {
+                            // name AND userType AND bankId
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndAgencyBankIdAndUserType( PageRequest.of( page, size ), name, name, bankId, UserType.valueOf( userType ) );
+                            return pageDtoOf( userBankPage );
+                        }
+
+                    }
+                } else {
+                    if( userType == null ) {
+                        Page<UserAgency> userBankPage;
+                        if( bankId == null ) { // name AND phone
+                            userBankPage = userAgencyRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContaining( PageRequest.of( page, size ), phone, name, name );
+                        } else {
+                            // name AND phone AND bankId
+                            userBankPage = userAgencyRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndAgencyBankId( PageRequest.of( page, size ), phone, name, name, bankId );
+                        }
+                        return pageDtoOf( userBankPage );
+                    } else {
+                        Page<UserAgency> userBankPage;
+                        if( bankId == null ) {
+                            // name AND phone AND userType
+                            userBankPage = userAgencyRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndUserType( PageRequest.of( page, size ), phone, name, name, UserType.valueOf( userType ) );
+                        } else {
+                            // name AND phone AND userType AND bankId
+                            userBankPage = userAgencyRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndAgencyBankIdAndUserType( PageRequest.of( page, size ), phone, name, name, bankId, UserType.valueOf( userType ) );
+                        }
+                        return pageDtoOf( userBankPage );
+                    }
+                }
+            }
+        } else {
+            if( name == null ) {
+                if( phone == null ) {
+                    if( userType == null ) {
+                        if( bankId == null ) {
+                            return pageDtoOf(userAgencyRepository.findByAgencyId( PageRequest.of(page, size), agencyId ));
+                        } else {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByAgencyIdAndAgencyBankId( PageRequest.of( page, size ), agencyId, bankId );
+                            return pageDtoOf( userBankPage );
+                        }
+                    } else {
+                        if( bankId == null ) {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByAgencyIdAndUserType( PageRequest.of( page, size ), agencyId, UserType.valueOf( userType ) );
+                            return pageDtoOf( userBankPage );
+                        } else {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByAgencyIdAndAgencyBankIdAndUserType( PageRequest.of( page, size ), agencyId, bankId, UserType.valueOf( userType ) );
+                            return pageDtoOf( userBankPage );
+                        }
+                    }
+                } else {
+                    if( userType == null ) {
+                        if( bankId == null ) {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndAgencyId( PageRequest.of( page, size ), phone, agencyId );
+                            return pageDtoOf( userBankPage );
+                        } else {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndAgencyIdAndAgencyBankId( PageRequest.of( page, size ), phone, agencyId, bankId );
+                            return pageDtoOf( userBankPage );
+                        }
+                    } else {
+                        if( bankId == null ) {// phone AND usertype only
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndUserTypeAndAgencyId( PageRequest.of( page, size ), phone, UserType.valueOf( userType ), agencyId );
+                            return pageDtoOf( userBankPage );
+                        } else {
+                            // phone AND userType AND bankId
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndAgencyIdAndAgencyBankIdAndUserType( PageRequest.of( page, size ), phone, agencyId, bankId, UserType.valueOf( userType ) );
+                            return pageDtoOf( userBankPage );
+                        }
+                    }
+                }
+            } else { // name AND
+                if( phone == null ) {
+                    if( userType == null ) {
+                        if( bankId == null ) {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndAgencyId( PageRequest.of( page, size ), name, name, agencyId );
+                            return pageDtoOf( userBankPage );
+                        } else {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndAgencyIdAndAgencyBankId( PageRequest.of( page, size ), name, name, agencyId, bankId );
+                            return pageDtoOf( userBankPage );
+                        }
+                    } else { // name AND userType
+                        if( bankId == null ) {
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndUserTypeAndAgencyId( PageRequest.of( page, size ), name, name, UserType.valueOf( userType ), agencyId );
+                            return pageDtoOf( userBankPage );
+                        } else {
+                            // name AND userType AND bankId
+                            Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndAgencyIdAndAgencyBankIdAndUserType( PageRequest.of( page, size ), name, name, agencyId, bankId, UserType.valueOf( userType ) );
+                            return pageDtoOf( userBankPage );
+                        }
+
+                    }
+                } else {
+                    if( userType == null ) {
+                        Page<UserAgency> userBankPage;
+                        if( bankId == null ) { // name AND phone
+                            userBankPage = userAgencyRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndAgencyId( PageRequest.of( page, size ), phone, name, name, agencyId );
+                        } else {
+                            // name AND phone AND bankId
+                            userBankPage = userAgencyRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndAgencyIdAndAgencyBankId( PageRequest.of( page, size ), phone, name, name, agencyId, bankId );
+                        }
+                        return pageDtoOf( userBankPage );
+                    } else {
+                        Page<UserAgency> userBankPage;
+                        if( bankId == null ) {
+                            // name AND phone AND userType
+                            userBankPage = userAgencyRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndUserTypeAndAgencyId( PageRequest.of( page, size ), phone, name, name, UserType.valueOf( userType ), agencyId );
+                        } else {
+                            // name AND phone AND userType AND bankId
+                            userBankPage = userAgencyRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndAgencyIdAndAgencyBankIdAndUserType( PageRequest.of( page, size ), phone, name, name, agencyId, bankId, UserType.valueOf( userType ) );
+                        }
+                        return pageDtoOf( userBankPage );
+                    }
+                }
+            }
+        }
+    }
+
+
+    private UserAgencyPageDto pageDtoOf(Page<UserAgency> userBankPage) {
+        List<UserAgencyDto> userDtos = userBankPage.stream().map( (userBank -> modelMapper.map( userBank, UserAgencyDto.class )) ).toList();
+
+        UserAgencyPageDto userBankPageDto = new UserAgencyPageDto();
+
+        userBankPageDto.setCount( userBankPage.getTotalElements() );
+        userBankPageDto.setUserPage( userDtos );
+
+        return userBankPageDto;
+    }
 }
