@@ -266,14 +266,14 @@ public class UserBankServiceImpl implements UserBankService {
         }
     }
 
-    private UserBankPageDto pageDtoOf(Page<UserBank> userBankPage) {
-        List<UserBankResponseDto> userDtos = userBankPage.stream().map( (userBank -> modelMapper.map( userBank, UserBankResponseDto.class )) ).toList();
+        private UserBankPageDto pageDtoOf(Page<UserBank> userBankPage) {
+            List<UserBankResponseDto> userDtos = userBankPage.stream().map( (userBank -> modelMapper.map( userBank, UserBankResponseDto.class )) ).toList();
 
-        UserBankPageDto userBankPageDto = new UserBankPageDto();
+            UserBankPageDto userBankPageDto = new UserBankPageDto();
 
-        userBankPageDto.setCount( userBankPage.getTotalElements() );
-        userBankPageDto.setUserPage( userDtos );
+            userBankPageDto.setCount( userBankPage.getTotalElements() );
+            userBankPageDto.setUserPage( userDtos );
 
-        return userBankPageDto;
-    }
+            return userBankPageDto;
+        }
 }
