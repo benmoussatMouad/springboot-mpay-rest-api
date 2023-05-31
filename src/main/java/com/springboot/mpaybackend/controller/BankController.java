@@ -33,7 +33,7 @@ public class BankController {
 
     @GetMapping()
     public ResponseEntity<List<BankDto>> getBanks(
-            @RequestParam(name = "bank_name",required = false)
+            @RequestParam(name = "name",required = false)
             @Parameter(description = "if this is not null, this will filter the result to bank having this string in their name", example = "Exterieur give you Banque Exterieur d'algerie")
                     String bankName,
             @RequestParam(name = "wilaya_id",required = false)
@@ -63,7 +63,7 @@ public class BankController {
 
         if( id != null ) {
             BankDto bank = bankService.getBank( id );
-            finalDto.add( bank );
+            finalDto = finalDto.stream().distinct().filter( bank::equals ).collect( Collectors.toList() );
         }
         if( bankName != null ) {
             List<BankDto> midDto = bankService.getBanksByNameContaining( bankName );
