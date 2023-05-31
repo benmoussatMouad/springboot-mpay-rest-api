@@ -37,7 +37,7 @@ public class AgencyController {
             @RequestParam(name = "wilaya_id",required = false) @Parameter(description = "if this is not null, this will filter the result by wilaya id", example = "1") Long wilayaId,
             @RequestParam(name = "agency_code",required = false) @Parameter(description = "if this is not null, this will filter the result to agencies containing this code in their codename", example = "BE, returns BEA and others") String agencyCode,
             @RequestParam(name = "phone",required = false) @Parameter(description = "if this is not null, this will filter the result to agencies containing this phone in their phone number", example = "558 might return qn agency with phone number 0558394565") String phone,
-            @RequestParam(name = "agency_name",required = false) @Parameter(description = "if this is not null, this will filter the result by agencies containing the name", example = "Nationale return Banque Nationale and others") String agencyName,
+            @RequestParam(name = "name",required = false) @Parameter(description = "if this is not null, this will filter the result by agencies containing the name", example = "Nationale return Banque Nationale and others") String agencyName,
             @RequestParam(name = "id",required = false)
             @Parameter(description = "if this is not null, this will filter ")
                     Long id
@@ -46,7 +46,8 @@ public class AgencyController {
 
         if( id != null ) {
             AgencyDto agencyResponseDto = agencyService.getAgency( id );
-            finalAgencyDto.add( modelMapper.map( agencyResponseDto, AgencyResponseDto.class ) );
+            AgencyResponseDto midResponse = modelMapper.map( agencyResponseDto, AgencyResponseDto.class );
+            finalAgencyDto = finalAgencyDto.stream().distinct().filter( midResponse::equals ).collect( Collectors.toList() );
         }
         if( bankId != null ) {
             List<AgencyResponseDto>  midResponse = agencyService.getAgenciesByBank( bankId );
