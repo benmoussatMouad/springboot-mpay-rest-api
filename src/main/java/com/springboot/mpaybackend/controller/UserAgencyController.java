@@ -65,30 +65,10 @@ public class UserAgencyController {
             @RequestParam(name= "agency_id", required = false)
             @Parameter(description = "The size of the page") Long agencyId,
             @RequestParam(name= "id", required = false)
-            @Parameter(description = "The size of the page") Long id
+            @Parameter(description = "The id of Agency user within the table") Long id
     ) {
-        if(id != null ) {
-            // TODO: FIX string contain
-            UserAgencyResponseDto userAgency = null;
-            if( userAgencyService.existsById( id ) ) {
-                userAgency = userAgencyService.getUserAgency( id );
-                if( userAgency.getPhone().contains( Objects.toString( phone, "" ) ) || userAgency.getAgencyId().equals( agencyId ) || userAgency.getUserType().equals( Objects.toString( userType, "" ) ) || userAgency.getFirstName().contains( Objects.toString(name, "") ) || userAgency.getLastName().contains( Objects.toString(name, "") ) || userAgency.getAgencyBankId().equals( bankId ) ) {
-                    List<UserAgencyResponseDto> dtos = new ArrayList<UserAgencyResponseDto>();
-                    dtos.add( userAgency );
-                    UserAgencyPageDto userAgencyPageDto = new UserAgencyPageDto();
-                    userAgencyPageDto.setCount( 1L );
-                    userAgencyPageDto.setUserPage( dtos );
-
-                    return ResponseEntity.ok( userAgencyPageDto );
-                }
-            } else {
-                UserAgencyPageDto dtos = new UserAgencyPageDto();
-                dtos.setCount( 0L );
-                dtos.setUserPage( new ArrayList<>() );
-                return ResponseEntity.ok( dtos );
-            }
-        }
-        return ResponseEntity.ok( userAgencyService.getAllUserAgencyByFilter( page, size, name, phone, userType, bankId, agencyId ) );
+        System.out.println(id);
+        return ResponseEntity.ok( userAgencyService.getAllUserAgencyByFilter(id, page, size, name, phone, userType, bankId, agencyId ) );
     }
 
     @GetMapping("{key}")

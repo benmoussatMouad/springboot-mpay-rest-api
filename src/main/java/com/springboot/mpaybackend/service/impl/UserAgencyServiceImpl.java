@@ -14,11 +14,14 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -163,44 +166,78 @@ public class UserAgencyServiceImpl implements UserAgencyService {
     }
 
     @Override
-    public UserAgencyPageDto getAllUserAgencyByFilter(Integer page, Integer size, String name, String phone, String userType, Long bankId, Long agencyId) {
+    public UserAgencyPageDto getAllUserAgencyByFilter(Long id, Integer page, Integer size, String name, String phone, String userType, Long bankId, Long agencyId) {
+        UserAgencyPageDto toReturn = null;
+        System.out.printf( "id in service is : " + id );
+        if( id != null ) {
+            // TODO: FIX string contain
+            UserAgency userAgency = null;
+            if( userAgencyRepository.existsById( id ) ) {
+                userAgency = userAgencyRepository.findById( id )
+                        .orElseThrow( () -> new ResourceNotFoundException( "Agency User", "id", id ) );
+                if( userAgency.getPhone().contains( Objects.toString( phone, "" ) )
+                        && userAgency.getAgency().getId().equals( (agencyId != null ? agencyId : userAgency.getAgency().getId()) )
+                        && userAgency.getUserType().equals( (userType !=null ? UserType.valueOf( userType ) : userAgency.getUserType()) )
+                        && userAgency.getFirstName().contains( Objects.toString( name, "" ) )
+                        && userAgency.getLastName().contains( Objects.toString( name, "" ) )
+                        && userAgency.getAgency().getBank().getId().equals( (bankId != null ? bankId : userAgency.getAgency().getBank().getId() ) ) ) {
 
-        if( agencyId == null ) {
+                    List<UserAgencyResponseDto> dtos = new ArrayList<UserAgencyResponseDto>();
+                    dtos.add( modelMapper.map( userAgency, UserAgencyResponseDto.class ) );
+                    UserAgencyPageDto userAgencyPageDto = new UserAgencyPageDto();
+                    userAgencyPageDto.setCount( 1L );
+                    userAgencyPageDto.setUserPage( dtos );
+
+                    toReturn = userAgencyPageDto;
+                } else {
+                    UserAgencyPageDto dtos = new UserAgencyPageDto();
+                    dtos.setCount( 0L );
+                    dtos.setUserPage( new ArrayList<>() );
+                    toReturn = dtos;
+                }
+            } else {
+                UserAgencyPageDto dtos = new UserAgencyPageDto();
+                dtos.setCount( 0L );
+                dtos.setUserPage( new ArrayList<>() );
+                toReturn = dtos;
+            }
+        } else if( agencyId == null ) {
+
             if( name == null ) {
                 if( phone == null ) {
                     if( userType == null ) {
                         if( bankId == null ) {
-                            return this.getAllUserAgency( page, size );
+                            toReturn = this.getAllUserAgency( page, size );
                         } else {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByAgencyBankId( PageRequest.of( page, size ), bankId );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         }
                     } else {
                         if( bankId == null ) {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByUserType( PageRequest.of( page, size ), UserType.valueOf( userType ) );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         } else {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByAgencyBankIdAndUserType( PageRequest.of( page, size ), bankId, UserType.valueOf( userType ) );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         }
                     }
                 } else {
                     if( userType == null ) {
                         if( bankId == null ) {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContaining( PageRequest.of( page, size ), phone );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         } else {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndAgencyBankId( PageRequest.of( page, size ), phone, bankId );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         }
                     } else {
                         if( bankId == null ) {// phone AND usertype only
                             Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndUserType( PageRequest.of( page, size ), phone, UserType.valueOf( userType ) );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         } else {
                             // phone AND userType AND bankId
                             Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndAgencyBankIdAndUserType( PageRequest.of( page, size ), phone, bankId, UserType.valueOf( userType ) );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         }
                     }
                 }
@@ -209,19 +246,19 @@ public class UserAgencyServiceImpl implements UserAgencyService {
                     if( userType == null ) {
                         if( bankId == null ) {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContaining( PageRequest.of( page, size ), name, name );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         } else {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndAgencyBankId( PageRequest.of( page, size ), name, name, bankId );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         }
                     } else { // name AND userType
                         if( bankId == null ) {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndUserType( PageRequest.of( page, size ), name, name, UserType.valueOf( userType ) );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         } else {
                             // name AND userType AND bankId
                             Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndAgencyBankIdAndUserType( PageRequest.of( page, size ), name, name, bankId, UserType.valueOf( userType ) );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         }
 
                     }
@@ -234,7 +271,7 @@ public class UserAgencyServiceImpl implements UserAgencyService {
                             // name AND phone AND bankId
                             userBankPage = userAgencyRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndAgencyBankId( PageRequest.of( page, size ), phone, name, name, bankId );
                         }
-                        return pageDtoOf( userBankPage );
+                        toReturn = pageDtoOf( userBankPage );
                     } else {
                         Page<UserAgency> userBankPage;
                         if( bankId == null ) {
@@ -244,7 +281,7 @@ public class UserAgencyServiceImpl implements UserAgencyService {
                             // name AND phone AND userType AND bankId
                             userBankPage = userAgencyRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndAgencyBankIdAndUserType( PageRequest.of( page, size ), phone, name, name, bankId, UserType.valueOf( userType ) );
                         }
-                        return pageDtoOf( userBankPage );
+                        toReturn = pageDtoOf( userBankPage );
                     }
                 }
             }
@@ -253,37 +290,37 @@ public class UserAgencyServiceImpl implements UserAgencyService {
                 if( phone == null ) {
                     if( userType == null ) {
                         if( bankId == null ) {
-                            return pageDtoOf(userAgencyRepository.findByAgencyId( PageRequest.of(page, size), agencyId ));
+                            toReturn = pageDtoOf( userAgencyRepository.findByAgencyId( PageRequest.of( page, size ), agencyId ) );
                         } else {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByAgencyIdAndAgencyBankId( PageRequest.of( page, size ), agencyId, bankId );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         }
                     } else {
                         if( bankId == null ) {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByAgencyIdAndUserType( PageRequest.of( page, size ), agencyId, UserType.valueOf( userType ) );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         } else {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByAgencyIdAndAgencyBankIdAndUserType( PageRequest.of( page, size ), agencyId, bankId, UserType.valueOf( userType ) );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         }
                     }
                 } else {
                     if( userType == null ) {
                         if( bankId == null ) {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndAgencyId( PageRequest.of( page, size ), phone, agencyId );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         } else {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndAgencyIdAndAgencyBankId( PageRequest.of( page, size ), phone, agencyId, bankId );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         }
                     } else {
                         if( bankId == null ) {// phone AND usertype only
                             Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndUserTypeAndAgencyId( PageRequest.of( page, size ), phone, UserType.valueOf( userType ), agencyId );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         } else {
                             // phone AND userType AND bankId
                             Page<UserAgency> userBankPage = userAgencyRepository.findByPhoneContainingAndAgencyIdAndAgencyBankIdAndUserType( PageRequest.of( page, size ), phone, agencyId, bankId, UserType.valueOf( userType ) );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         }
                     }
                 }
@@ -292,19 +329,19 @@ public class UserAgencyServiceImpl implements UserAgencyService {
                     if( userType == null ) {
                         if( bankId == null ) {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndAgencyId( PageRequest.of( page, size ), name, name, agencyId );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         } else {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndAgencyIdAndAgencyBankId( PageRequest.of( page, size ), name, name, agencyId, bankId );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         }
                     } else { // name AND userType
                         if( bankId == null ) {
                             Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndUserTypeAndAgencyId( PageRequest.of( page, size ), name, name, UserType.valueOf( userType ), agencyId );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         } else {
                             // name AND userType AND bankId
                             Page<UserAgency> userBankPage = userAgencyRepository.findByFirstNameContainingOrLastNameContainingAndAgencyIdAndAgencyBankIdAndUserType( PageRequest.of( page, size ), name, name, agencyId, bankId, UserType.valueOf( userType ) );
-                            return pageDtoOf( userBankPage );
+                            toReturn = pageDtoOf( userBankPage );
                         }
 
                     }
@@ -317,7 +354,7 @@ public class UserAgencyServiceImpl implements UserAgencyService {
                             // name AND phone AND bankId
                             userBankPage = userAgencyRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndAgencyIdAndAgencyBankId( PageRequest.of( page, size ), phone, name, name, agencyId, bankId );
                         }
-                        return pageDtoOf( userBankPage );
+                        toReturn = pageDtoOf( userBankPage );
                     } else {
                         Page<UserAgency> userBankPage;
                         if( bankId == null ) {
@@ -327,11 +364,12 @@ public class UserAgencyServiceImpl implements UserAgencyService {
                             // name AND phone AND userType AND bankId
                             userBankPage = userAgencyRepository.findByPhoneContainingAndFirstNameContainingOrLastNameContainingAndAgencyIdAndAgencyBankIdAndUserType( PageRequest.of( page, size ), phone, name, name, agencyId, bankId, UserType.valueOf( userType ) );
                         }
-                        return pageDtoOf( userBankPage );
+                        toReturn = pageDtoOf( userBankPage );
                     }
                 }
             }
         }
+        return toReturn;
     }
 
     @Override

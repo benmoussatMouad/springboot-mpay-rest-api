@@ -24,7 +24,7 @@ public interface UserAgencyService {
 
     UserAgencyPageDto getAllUserAgency(Integer page, Integer size);
 
-    UserAgencyPageDto getAllUserAgencyByFilter(Integer page, Integer size, String name, String phone, String userType, Long bankId, Long agencyId);
+    UserAgencyPageDto getAllUserAgencyByFilter(Long id, Integer page, Integer size, String name, String phone, String userType, Long bankId, Long agencyId);
 
     boolean existsById(Long id);
 }
