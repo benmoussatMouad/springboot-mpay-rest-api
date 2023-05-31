@@ -24,5 +24,5 @@ public interface UserBankService {
 
     void deleteUserBank(Long id);
 
-    UserBankPageDto getAllUserBankByFilter(Integer page, Integer size, String name, String phone, String userType, Long bankId);
+    UserBankPageDto getAllUserBankByFilter(Long id, Integer page, Integer size, String name, String phone, String userType, Long bankId);
 }

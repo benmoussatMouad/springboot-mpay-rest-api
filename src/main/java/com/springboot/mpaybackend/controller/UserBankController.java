@@ -62,19 +62,8 @@ public class UserBankController {
             @Parameter(description = "Id of the bank user") Long id
             ) {
 
-        if(id != null ) {
-            UserBankResponseDto user = userBankService.getUserBank( id );
-            if( user.getPhone().contains( phone ) || user.getUserType().equals( UserType.valueOf( userType ) ) || user.getFirstName().contains( name ) || user.getLastName().contains( name ) || user.getBankId().equals( bankId ) ) {
-                List<UserBankResponseDto> dtos = new ArrayList<UserBankResponseDto>();
-                dtos.add( user );
-                UserBankPageDto dto = new UserBankPageDto();
-                dto.setCount( 1L );
-                dto.setUserPage( dtos );
 
-                return ResponseEntity.ok( dto );
-            }
-        }
-        return ResponseEntity.ok( userBankService.getAllUserBankByFilter( page, size, name, phone, userType, bankId ) );
+        return ResponseEntity.ok( userBankService.getAllUserBankByFilter(id, page, size, name, phone, userType, bankId ) );
     }
 
 

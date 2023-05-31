@@ -14,9 +14,11 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -180,8 +182,37 @@ public class UserBankServiceImpl implements UserBankService {
     }
 
     @Override
-    public UserBankPageDto getAllUserBankByFilter(Integer page, Integer size, String name, String phone, String userType, Long bankId) {
+    public UserBankPageDto getAllUserBankByFilter(Long id, Integer page, Integer size, String name, String phone, String userType, Long bankId) {
 
+        if(id != null ) {
+            if( userBankRepository.existsById( id ) ) {
+                UserBank user = userBankRepository.findById( id )
+                        .orElseThrow( () -> new ResourceNotFoundException( "Bank User", "id", id ) );
+                if( (phone == null || user.getPhone().contains( phone ))
+                        && (userType == null || user.getUserType().equals( UserType.valueOf( userType ) ))
+                        && (name == null || user.getFirstName().contains( name ))
+                        && (name == null || user.getLastName().contains( name ))
+                        && (bankId == null || user.getBank().getId().equals( bankId )) ) {
+
+                    List<UserBankResponseDto> dtos = new ArrayList<UserBankResponseDto>();
+                    dtos.add( modelMapper.map( user, UserBankResponseDto.class ) );
+                    UserBankPageDto dto = new UserBankPageDto();
+                    dto.setCount( 1L );
+                    dto.setUserPage( dtos );
+
+                    return dto;
+                } else {
+                    UserBankPageDto userBankPageDto = new UserBankPageDto();
+                    userBankPageDto.setCount( 0L );
+                    userBankPageDto.setUserPage( new ArrayList<>() );
+                    return userBankPageDto;}
+            } else {
+                UserBankPageDto userBankPageDto = new UserBankPageDto();
+                userBankPageDto.setCount( 0L );
+                userBankPageDto.setUserPage( new ArrayList<>() );
+                return userBankPageDto;
+            }
+        } else
         if( name == null ) {
             if( phone == null ) {
                 if( userType == null ) {
