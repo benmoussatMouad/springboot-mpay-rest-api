@@ -35,7 +35,6 @@ public class User {
 
     private Integer employe;
 
-    @Column(unique = true)
     private String phone;
     private Integer suffersAttempts;
     private boolean firstConnexion;

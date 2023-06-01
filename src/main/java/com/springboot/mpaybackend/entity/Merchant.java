@@ -1,26 +1,27 @@
 package com.springboot.mpaybackend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Merchant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "merchant_id")
     private Long id;
+    @Column(columnDefinition = "boolean default false")
+    private boolean deleted;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "username", referencedColumnName = "username")
     private User username;
+
 
     private String firstName;
     private String lastName;
@@ -38,4 +39,12 @@ public class Merchant {
     @JoinColumn(name = "bm_id")
     private Bm bm;
 
+    private String identityCardNumber;
+    private String fiscalNumber;
+    private String registreCommerceNumber;
+    private String articleImpotsNumber;
+
+
+    @Enumerated(EnumType.STRING)
+    private MerchantStatus status;
 }
