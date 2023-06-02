@@ -91,7 +91,6 @@ public class UserBankServiceImpl implements UserBankService {
         user.setPhone( dto.getPhone() );
         user.setFirstConnexion( true );
         user.setUserType( UserType.BANK_USER );
-        System.out.println(dto.getUsername());
         userRepository.save( user );
 
         UserBank userBank = modelMapper.map( dto, UserBank.class );
