@@ -1,16 +1,16 @@
 package com.springboot.mpaybackend.controller;
 
-import com.springboot.mpaybackend.entity.Bank;
-import com.springboot.mpaybackend.payload.BankDto;
-import com.springboot.mpaybackend.payload.BankLightDto;
-import com.springboot.mpaybackend.payload.BankPageDto;
+import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.service.BankService;
+import com.springboot.mpaybackend.service.MerchantFileService;
+import com.springboot.mpaybackend.service.MerchantService;
 import io.swagger.v3.oas.annotations.Parameter;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,9 +19,15 @@ import java.util.stream.Collectors;
 public class BankController {
 
     private BankService bankService;
+    private MerchantService merchantService;
+    private MerchantFileService merchantFileService;
+    private ModelMapper modelMapper;
 
-    public BankController(BankService bankService) {
+    public BankController(BankService bankService, MerchantService merchantService, MerchantFileService merchantFileService, ModelMapper modelMapper) {
         this.bankService = bankService;
+        this.merchantService = merchantService;
+        this.merchantFileService = merchantFileService;
+        this.modelMapper = modelMapper;
     }
 
     @PostMapping
@@ -29,6 +35,24 @@ public class BankController {
     public ResponseEntity<BankDto> addBank(@RequestBody BankDto bankDto){
         BankDto savedBank = bankService.addBank(bankDto);
         return new ResponseEntity<>(savedBank, HttpStatus.CREATED);
+    }
+    @PostMapping("merchant")
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> addMerchantThroughBank(@RequestBody MerchantByBankUserDto dto) {
+        // TODO: When to create a bank account object ?
+        try {
+            MerchantResponseDto merchantResponseDto =  merchantService.addMerchant( modelMapper.map( dto, MerchantDto.class ) );
+            for (MerchantFileDto document:
+                 dto.getDocuments()) {
+
+                document.setMerchantId( merchantResponseDto.getId() );
+                merchantFileService.saveMerchantFile( document );
+            }
+
+            return ResponseEntity.ok( "Merchant saved" );
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body( "Error saving file" );
+        }
     }
 
     @GetMapping()
