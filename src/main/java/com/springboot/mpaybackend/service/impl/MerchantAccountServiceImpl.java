@@ -47,7 +47,7 @@ public class MerchantAccountServiceImpl implements MerchantAccountService {
         Merchant merchant = merchantRepository.findById( merchantId )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", merchantId ) );
 
-        String bankCode = rib.substring( 0, SIZE_OF_BANK_CODE - 1 );
+        String bankCode = rib.substring( 0, SIZE_OF_BANK_CODE );
 
         Bank bank = bankRepository.findByBankCode( bankCode )
                 .orElseThrow( () -> new ResourceNotFoundException( "Bank", "Bank Code", bankCode ) );
