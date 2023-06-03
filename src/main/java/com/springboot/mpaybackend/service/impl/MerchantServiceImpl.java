@@ -6,9 +6,7 @@ import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.MerchantDto;
 import com.springboot.mpaybackend.payload.MerchantPageDto;
 import com.springboot.mpaybackend.payload.MerchantResponseDto;
-import com.springboot.mpaybackend.repository.MerchantRepository;
-import com.springboot.mpaybackend.repository.UserRepository;
-import com.springboot.mpaybackend.repository.WilayaRepository;
+import com.springboot.mpaybackend.repository.*;
 import com.springboot.mpaybackend.service.MerchantService;
 import jakarta.transaction.Transactional;
 import org.modelmapper.Converter;
@@ -19,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,13 +29,19 @@ public class MerchantServiceImpl implements MerchantService {
     PasswordEncoder passwordEncoder;
     ModelMapper modelMapper;
     WilayaRepository wilayaRepository;
+    MerchantAccountRepository merchantAccountRepository;
+    BankRepository bankRepository;
+    MerchantStatusTraceRepository merchantStatusTraceRepository;
 
-    public MerchantServiceImpl(MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository) {
+    public MerchantServiceImpl(MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository) {
         this.merchantRepository = merchantRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.modelMapper = modelMapper;
         this.wilayaRepository = wilayaRepository;
+        this.merchantAccountRepository = merchantAccountRepository;
+        this.bankRepository = bankRepository;
+        this.merchantStatusTraceRepository = merchantStatusTraceRepository;
 
         this.modelMapper.getConfiguration().setSkipNullEnabled(true);
 
@@ -60,7 +65,7 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     @Transactional(rollbackOn = Exception.class)
-    public MerchantResponseDto addMerchant(MerchantDto dto) {
+    public MerchantResponseDto addMerchant(MerchantDto dto, Boolean byBankUser) {
 
         // check if Merchant exists by phone
         if(merchantRepository.existsByPhone( dto.getPhone() ) ) {
@@ -74,13 +79,26 @@ public class MerchantServiceImpl implements MerchantService {
 
         // 1- Creating Merchant, User object is created by model Mapper
         Merchant merchant = modelMapper.map( dto, Merchant.class );
+        if( byBankUser ) { // If the merchant is created by bank user, make status to In Progress + Create an account directly
+            merchant.setStatus( MerchantStatus.IN_PROGRESS );
+        }
 
         // 2- Setting up User
         User user = merchant.getUsername();
         user.setUsername( dto.getUsername() );
         user.setUserType( UserType.MERCHANT );
         user.setPhone( dto.getPhone() );
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setPassword( passwordEncoder.encode( dto.getPassword() ) );
+
+        //TODO: Move it elsewhere
+        // 3 Creating the trace
+        if( !byBankUser ) {
+            MerchantStatusTrace trace = new MerchantStatusTrace();
+            trace.setMerchant( merchant );
+            trace.setCreatedAt( new Date() );
+            trace.setUser( user );
+            trace.setStatus( MerchantStatus.NON_VERIFIED );
+        }
 
         Merchant savedMerchant = merchantRepository.save( merchant );
 

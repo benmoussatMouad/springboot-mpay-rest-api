@@ -1,10 +1,10 @@
 package com.springboot.mpaybackend.controller;
 
 import com.springboot.mpaybackend.payload.*;
+import com.springboot.mpaybackend.service.MerchantAccountService;
 import com.springboot.mpaybackend.service.MerchantService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import org.slf4j.Logger;
@@ -19,15 +19,17 @@ public class MerchantController {
 
 
     private MerchantService merchantService;
+    private MerchantAccountService merchantAccountService;
 
-    public MerchantController(MerchantService merchantService) {
+    public MerchantController(MerchantService merchantService, MerchantAccountService merchantAccountService) {
         this.merchantService = merchantService;
+        this.merchantAccountService = merchantAccountService;
     }
 
     @PostMapping
     public ResponseEntity<MerchantResponseDto> createMerchant(@RequestBody MerchantDto dto) {
 
-        return ResponseEntity.ok(merchantService.addMerchant(dto));
+        return ResponseEntity.ok(merchantService.addMerchant(dto, false ));
     }
 
     @GetMapping
@@ -36,6 +38,13 @@ public class MerchantController {
         return ResponseEntity.ok( merchantService.getAllMerchants() );
     }
 
+    @GetMapping("trace/{merchantId}")
+    public ResponseEntity<List<MerchantAccountTraceDto>> getMerchantTraces(@PathVariable("merchantId") Long id) {
+
+        return ResponseEntity.ok(merchantAccountService.getAllMerchantStatusTraces( id ));
+    }
+
+    // TODO: Actions for changing the merchant status, when to create an account if the merchant is not directly created by a bank user
 
     @GetMapping("page")
     public ResponseEntity<MerchantPageDto> getMerchantsByPageByFilter(
