@@ -46,5 +46,6 @@ public class Merchant {
 
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(255) default 'NON_VERIFIED'")
     private MerchantStatus status;
 }

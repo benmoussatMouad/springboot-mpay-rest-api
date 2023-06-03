@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface MerchantService {
 
-    MerchantResponseDto addMerchant(MerchantDto dto);
+    MerchantResponseDto addMerchant(MerchantDto dto, Boolean byBankUser);
 
     MerchantResponseDto getMerchant(Long id);
 
@@ -24,4 +24,5 @@ public interface MerchantService {
     MerchantResponseDto updateMerchant(MerchantDto dto, Long id);
 
     void deleteMerchant(Long id);
+
 }

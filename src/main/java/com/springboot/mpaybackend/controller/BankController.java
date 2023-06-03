@@ -2,6 +2,7 @@ package com.springboot.mpaybackend.controller;
 
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.service.BankService;
+import com.springboot.mpaybackend.service.MerchantAccountService;
 import com.springboot.mpaybackend.service.MerchantFileService;
 import com.springboot.mpaybackend.service.MerchantService;
 import com.springboot.mpaybackend.utils.Base64Checker;
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,12 +25,14 @@ public class BankController {
     private MerchantService merchantService;
     private MerchantFileService merchantFileService;
     private ModelMapper modelMapper;
+    private MerchantAccountService merchantAccountService;
 
-    public BankController(BankService bankService, MerchantService merchantService, MerchantFileService merchantFileService, ModelMapper modelMapper) {
+    public BankController(BankService bankService, MerchantService merchantService, MerchantFileService merchantFileService, ModelMapper modelMapper, MerchantAccountService merchantAccountService) {
         this.bankService = bankService;
         this.merchantService = merchantService;
         this.merchantFileService = merchantFileService;
         this.modelMapper = modelMapper;
+        this.merchantAccountService = merchantAccountService;
     }
 
     @PostMapping
@@ -45,7 +47,6 @@ public class BankController {
     @Transactional(rollbackOn = Exception.class)
     public ResponseEntity<String> addMerchantThroughBank(@RequestBody MerchantByBankUserDto dto) {
 
-        // TODO: When to create a bank account object ?
         try {
             // Check if files exists
             if( dto.getDocuments() == null ) {
@@ -62,13 +63,19 @@ public class BankController {
                 }
             }
 
-            MerchantResponseDto merchantResponseDto = merchantService.addMerchant( modelMapper.map( dto, MerchantDto.class ) );
+            //Create Merchant
+            MerchantResponseDto merchantResponseDto = merchantService.addMerchant( modelMapper.map( dto, MerchantDto.class ), true );
+
+            //Save Merchant files
             for (MerchantFileDto document :
                     dto.getDocuments()) {
 
                 document.setMerchantId( merchantResponseDto.getId() );
                 merchantFileService.saveMerchantFile( document );
             }
+
+            // Create Merchant account
+            merchantAccountService.createAccountForMerchantByBankCode( merchantResponseDto.getId(), dto.getRib() );
 
             return ResponseEntity.ok( "Merchant saved" );
         } catch (IOException e) {
