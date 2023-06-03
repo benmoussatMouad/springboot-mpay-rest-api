@@ -1,8 +1,5 @@
 package com.springboot.mpaybackend.payload;
 
-import com.springboot.mpaybackend.entity.FileType;
-import com.springboot.mpaybackend.entity.MerchantStatus;
-import com.springboot.mpaybackend.utils.EnumValidator;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 

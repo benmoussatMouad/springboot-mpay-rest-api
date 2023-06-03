@@ -48,4 +48,6 @@ public interface MerchantRepository extends JpaRepository<Merchant, Long> {
 
 
     Boolean existsByPhone(String phone);
+
+    Boolean existsByIdAndDeletedFalse(Long id);
 }

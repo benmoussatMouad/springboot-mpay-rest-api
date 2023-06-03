@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MerchantFileServiceImpl implements MerchantFileService {
@@ -45,9 +47,8 @@ public class MerchantFileServiceImpl implements MerchantFileService {
 
     @Override
     public MerchantFile getMerchantFileById(Long fileId) {
-        MerchantFile merchantFile = merchantFileRepository.findById( fileId )
+        return merchantFileRepository.findById( fileId )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant File", "id", fileId ) );
-        return merchantFile;
     }
 
     @Override
@@ -62,5 +63,25 @@ public class MerchantFileServiceImpl implements MerchantFileService {
         dto.setPiece( file.getPiece().toString() );
 
         return dto;
+    }
+
+    @Override
+    public List<MerchantFileResponseDto> getMerchantFilesByMerchantId(Long id) {
+        if( !merchantRepository.existsByIdAndDeletedFalse( id ) ) {
+            throw new ResourceNotFoundException( "Merchant", "id", id );
+        }
+
+        List<MerchantFile> merchantFiles = merchantFileRepository.findByMerchantId( id );
+
+        return merchantFiles.stream().map( e -> {
+            MerchantFileResponseDto dto = new MerchantFileResponseDto();
+            dto.setMerchantId( e.getMerchant().getId() );
+            dto.setName( e.getName() );
+            dto.setId( e.getId() );
+            dto.setPiece( e.getPiece().toString() );
+            dto.setContent( Base64.getEncoder().encodeToString( e.getContent() ) );
+
+            return dto;
+        } ).collect( Collectors.toList());
     }
 }
