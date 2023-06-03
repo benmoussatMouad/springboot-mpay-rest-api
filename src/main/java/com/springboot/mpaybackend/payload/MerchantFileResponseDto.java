@@ -8,4 +8,5 @@ public class MerchantFileResponseDto {
     private Long merchantId;
     private String name;
     private String piece;
+    private String content;
 }

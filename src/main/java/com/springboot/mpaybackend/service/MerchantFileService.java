@@ -5,6 +5,7 @@ import com.springboot.mpaybackend.payload.MerchantFileDto;
 import com.springboot.mpaybackend.payload.MerchantFileResponseDto;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface MerchantFileService {
 
@@ -13,4 +14,6 @@ public interface MerchantFileService {
     MerchantFile getMerchantFileById(Long fileId);
 
     MerchantFileDto getMerchantFileInfo(Long id);
+
+    List<MerchantFileResponseDto> getMerchantFilesByMerchantId(Long id);
 }

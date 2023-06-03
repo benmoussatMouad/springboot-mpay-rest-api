@@ -25,6 +25,5 @@ public class MerchantFile {
     @Enumerated(EnumType.STRING)
     private FileType piece;
 
-    @Lob
     private byte[] content;
 }
