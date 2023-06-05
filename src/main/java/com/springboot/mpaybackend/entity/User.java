@@ -26,7 +26,10 @@ public class User {
     private String username;
 
     private String password;
+
+    @Column(columnDefinition = "boolean default false")
     private boolean enabled;
+
     private String code;
 
     @ManyToOne

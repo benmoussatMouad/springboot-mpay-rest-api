@@ -1,13 +1,15 @@
 package com.springboot.mpaybackend.service.impl;
 
 import com.springboot.mpaybackend.entity.*;
-import com.springboot.mpaybackend.exception.BlogAPIException;
+import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
+import com.springboot.mpaybackend.payload.MerchantBankInfoDto;
 import com.springboot.mpaybackend.payload.MerchantDto;
 import com.springboot.mpaybackend.payload.MerchantPageDto;
 import com.springboot.mpaybackend.payload.MerchantResponseDto;
 import com.springboot.mpaybackend.repository.*;
 import com.springboot.mpaybackend.service.MerchantService;
+import com.springboot.mpaybackend.utils.RibProcessor;
 import jakarta.transaction.Transactional;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -32,8 +34,9 @@ public class MerchantServiceImpl implements MerchantService {
     MerchantAccountRepository merchantAccountRepository;
     BankRepository bankRepository;
     MerchantStatusTraceRepository merchantStatusTraceRepository;
+    MerchantLicenseRepository merchantLicenseRepository;
 
-    public MerchantServiceImpl(MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository) {
+    public MerchantServiceImpl(MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository, MerchantLicenseRepository merchantLicenseRepository) {
         this.merchantRepository = merchantRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -42,6 +45,7 @@ public class MerchantServiceImpl implements MerchantService {
         this.merchantAccountRepository = merchantAccountRepository;
         this.bankRepository = bankRepository;
         this.merchantStatusTraceRepository = merchantStatusTraceRepository;
+        this.merchantLicenseRepository = merchantLicenseRepository;
 
         this.modelMapper.getConfiguration().setSkipNullEnabled(true);
 
@@ -69,12 +73,12 @@ public class MerchantServiceImpl implements MerchantService {
 
         // check if Merchant exists by phone
         if(merchantRepository.existsByPhone( dto.getPhone() ) ) {
-            throw new BlogAPIException( HttpStatus.BAD_REQUEST, "Phone already exists.");
+            throw new MPayAPIException( HttpStatus.BAD_REQUEST, "Phone already exists.");
         }
 
         // check if username is taken by other users
         if(userRepository.existsByUsername(dto.getUsername())){
-            throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Username already exists.");
+            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Username already exists.");
         }
 
         // 1- Creating Merchant, User object is created by model Mapper
@@ -98,6 +102,8 @@ public class MerchantServiceImpl implements MerchantService {
             trace.setCreatedAt( new Date() );
             trace.setUser( user );
             trace.setStatus( MerchantStatus.NON_VERIFIED );
+
+            merchantStatusTraceRepository.save( trace );
         }
 
         Merchant savedMerchant = merchantRepository.save( merchant );
@@ -110,15 +116,37 @@ public class MerchantServiceImpl implements MerchantService {
         Merchant merchant = merchantRepository.findByIdAndDeletedFalse( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", id ) );
 
-        return modelMapper.map( merchant, MerchantResponseDto.class );
+        MerchantResponseDto dto = modelMapper.map( merchant, MerchantResponseDto.class );
+        List<MerchantLicense> licenses = merchantLicenseRepository.findByMerchantId( id );
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( id )
+                .orElse( null );
+
+        if( licenses.get( 0 ) != null ) {
+            dto.setTerminalId( licenses.get( 0 ).getTerminalId() );
+        }
+        if( account != null ) {
+            dto.setAccountStatus( account.isAccountStatus() );
+        }
+        return dto;
     }
 
     @Override
     public MerchantResponseDto getMerchantByUsername(String username) {
         Merchant merchant = merchantRepository.findByUsernameUsernameAndDeletedFalse( username )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "username", username ) );
+        MerchantResponseDto dto = modelMapper.map( merchant, MerchantResponseDto.class );
+        List<MerchantLicense> licenses = merchantLicenseRepository.findByMerchantId( merchant.getId() );
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( merchant.getId() )
+                .orElse( null );
 
-        return modelMapper.map( merchant, MerchantResponseDto.class );
+        if( licenses.get( 0 ) != null ) {
+            dto.setTerminalId( licenses.get( 0 ).getTerminalId() );
+        }
+        if( account != null ) {
+            dto.setAccountStatus( account.isAccountStatus() );
+        }
+
+        return dto;
     }
 
     @Override
@@ -182,5 +210,54 @@ public class MerchantServiceImpl implements MerchantService {
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", id ) );
         merchant.setDeleted( true );
         merchantRepository.save( merchant );
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public MerchantResponseDto fillInfo(MerchantBankInfoDto dto, Long id) {
+
+
+        // Find merchant, check if his status is non verified i.e initial status
+        Merchant merchant = merchantRepository.findById( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", id ) );
+
+        if( !merchant.getStatus().equals( MerchantStatus.NON_VERIFIED ) ) {
+            throw new MPayAPIException( "Merchant status should be in initial state NON_VERIFIED, action not authorized", HttpStatus.FORBIDDEN, "Unaccepted action, status should be Non verified" );
+        }
+
+
+        merchant.setNumberCheckoutRequested( dto.getNbCheckout() );
+        merchant.setArticleImpotsNumber( dto.getAi() );
+        merchant.setIdentityCardNumber( dto.getCni() );
+        merchant.setRegistreCommerceNumber( dto.getRc() );
+        merchant.setFiscalNumber( dto.getNif() );
+
+        // Create merchants account
+        MerchantAccount account = new MerchantAccount();
+        account.setBalance( 0 );
+        account.setMerchant( merchant );
+        account.setAccountNumber( dto.getRib() );
+        account.setBank( RibProcessor.extractBankFrom( dto.getRib() ) );
+
+        //Set Status and save trace
+        merchant.setStatus( MerchantStatus.FILLED_INFO );
+
+        MerchantStatusTrace trace = new MerchantStatusTrace();
+        trace.setBank( RibProcessor.extractBankFrom( dto.getRib() ) );
+        trace.setMerchant( merchant );
+        trace.setUser( merchant.getUsername() );
+        trace.setStatus( merchant.getStatus() );
+        trace.setCreatedAt( new Date() );
+
+        merchantStatusTraceRepository.save( trace );
+        merchantAccountRepository.save( account );
+        merchantRepository.save( merchant );
+
+        MerchantResponseDto responseDto = modelMapper.map( merchant, MerchantResponseDto.class );
+
+        responseDto.setRib( dto.getRib() );
+        responseDto.setTerminalId( null );
+
+        return responseDto;
     }
 }

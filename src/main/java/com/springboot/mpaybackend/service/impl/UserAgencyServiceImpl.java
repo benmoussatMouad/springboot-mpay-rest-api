@@ -1,7 +1,7 @@
 package com.springboot.mpaybackend.service.impl;
 
 import com.springboot.mpaybackend.entity.*;
-import com.springboot.mpaybackend.exception.BlogAPIException;
+import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.repository.AgencyRepository;
@@ -14,7 +14,6 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +73,7 @@ public class UserAgencyServiceImpl implements UserAgencyService {
 
         // check if username is taken by other users
         if(userRepository.existsByUsername(dto.getUsername())){
-            throw new BlogAPIException( HttpStatus.BAD_REQUEST, "Username already exists!.");
+            throw new MPayAPIException( HttpStatus.BAD_REQUEST, "Username already exists!.");
         }
 
 

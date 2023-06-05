@@ -56,7 +56,7 @@ public class MerchantAccountServiceImpl implements MerchantAccountService {
         account.setMerchant( merchant );
         account.setBalance( 0 );
         account.setBank( bank );
-        account.setStatus( merchant.getStatus() );
+        account.setAccountStatus( true );
 
         //Creating the first trace when creating
         this.createTraceForAccount( account );
@@ -70,7 +70,7 @@ public class MerchantAccountServiceImpl implements MerchantAccountService {
         trace.setMerchant( account.getMerchant() );
         trace.setBank( account.getBank() );
         trace.setUser( account.getMerchant().getUsername() );
-        trace.setStatus( account.getStatus() );
+        trace.setStatus( account.getMerchant().getStatus() );
 
         merchantStatusTraceRepository.save( trace );
     }

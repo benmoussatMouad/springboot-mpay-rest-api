@@ -1,32 +1,30 @@
 package com.springboot.mpaybackend.entity;
 
+
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Date;
+
+@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Entity
-public class MerchantFile {
+public class MerchantLicense {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "merchant_file_id")
+    @Column(name = "merchant_license_id")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "merchant_id")
     private Merchant merchant;
 
-    private String name;
+    private String terminalId;
+    private String postNumber;
 
-    @Enumerated(EnumType.STRING)
-    private FileType piece;
-
-    private byte[] content;
-
-    @Column(columnDefinition = "boolean default false")
-    private boolean rejected;
+    private Date expiryDate;
 }

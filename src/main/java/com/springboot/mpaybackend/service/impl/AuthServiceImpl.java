@@ -1,7 +1,7 @@
 package com.springboot.mpaybackend.service.impl;
 
 import com.springboot.mpaybackend.entity.*;
-import com.springboot.mpaybackend.exception.BlogAPIException;
+import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.LoginDto;
 import com.springboot.mpaybackend.payload.RegisterDto;
@@ -67,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
 
         // add check for username exists in database
         if(userRepository.existsByUsername(registerDto.getUsername())){
-            throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Username is already exists!.");
+            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Username is already exists!.");
         }
 
         User user = new User();
@@ -90,12 +90,12 @@ public class AuthServiceImpl implements AuthService {
 
         // check if Client exists by phone
         if(clientRepository.existsByPhone( registerDto.getPhone() ) ) {
-            throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Phone already exists!.");
+            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Phone already exists!.");
         }
 
         // check if username is taken by other users
         if(userRepository.existsByUsername(registerDto.getUsername())){
-            throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Username already exists!.");
+            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Username already exists!.");
         }
 
 

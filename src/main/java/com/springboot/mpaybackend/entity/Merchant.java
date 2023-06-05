@@ -43,9 +43,12 @@ public class Merchant {
     private String fiscalNumber;
     private String registreCommerceNumber;
     private String articleImpotsNumber;
+    private Integer numberCheckoutRequested;
 
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(255) default 'NON_VERIFIED'")
     private MerchantStatus status;
+
+    private boolean enabled;
 }

@@ -1,5 +1,6 @@
 package com.springboot.mpaybackend.service;
 
+import com.springboot.mpaybackend.payload.MerchantBankInfoDto;
 import com.springboot.mpaybackend.payload.MerchantDto;
 import com.springboot.mpaybackend.payload.MerchantPageDto;
 import com.springboot.mpaybackend.payload.MerchantResponseDto;
@@ -25,4 +26,5 @@ public interface MerchantService {
 
     void deleteMerchant(Long id);
 
+    MerchantResponseDto fillInfo(MerchantBankInfoDto dto, Long id);
 }

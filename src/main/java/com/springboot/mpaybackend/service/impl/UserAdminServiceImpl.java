@@ -1,10 +1,9 @@
 package com.springboot.mpaybackend.service.impl;
 
 import com.springboot.mpaybackend.entity.*;
-import com.springboot.mpaybackend.exception.BlogAPIException;
+import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.UserAdminDto;
-import com.springboot.mpaybackend.payload.UserAgencyDto;
 import com.springboot.mpaybackend.repository.UserAdminRepository;
 import com.springboot.mpaybackend.repository.UserRepository;
 import com.springboot.mpaybackend.service.UserAdminService;
@@ -12,11 +11,9 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,7 +77,7 @@ public class UserAdminServiceImpl implements UserAdminService {
 
         // check if username is taken by other users
         if(userRepository.existsByUsername(dto.getUsername())){
-            throw new BlogAPIException( HttpStatus.BAD_REQUEST, "Username already exists!.");
+            throw new MPayAPIException( HttpStatus.BAD_REQUEST, "Username already exists!.");
         }
 
 

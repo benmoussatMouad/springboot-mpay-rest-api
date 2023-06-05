@@ -27,5 +27,11 @@ public class MerchantResponseDto {
     private String fiscalNumber;
     private String registreCommerceNumber;
     private String articleImpotsNumber;
+    private String numberCheckoutRequested;
+    private String rib;
+    private String terminalId;
+    // private String licenseId;
     private String status;
+    private boolean accountStatus;
+    private boolean enabled;
 }
