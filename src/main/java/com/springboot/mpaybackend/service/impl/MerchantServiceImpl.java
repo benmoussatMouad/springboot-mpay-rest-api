@@ -218,7 +218,7 @@ public class MerchantServiceImpl implements MerchantService {
 
 
         // Find merchant, check if his status is non verified i.e initial status
-        Merchant merchant = merchantRepository.findById( id )
+        Merchant merchant = merchantRepository.findByIdAndDeletedFalse( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", id ) );
 
         if( !merchant.getStatus().equals( MerchantStatus.NON_VERIFIED ) ) {
@@ -232,12 +232,17 @@ public class MerchantServiceImpl implements MerchantService {
         merchant.setRegistreCommerceNumber( dto.getRc() );
         merchant.setFiscalNumber( dto.getNif() );
 
-        // Create merchants account
+        // Create merchants account, but first check if he has an account
+        if( merchantAccountRepository.existsByMerchantIdAndMerchantDeletedFalse( merchant.getId() ) ) {
+            throw new MPayAPIException( HttpStatus.CONFLICT, "Merchant already has an account, status should not be NON_VERIFIED" );
+        }
+        RibProcessor.setBankRepository( bankRepository );
         MerchantAccount account = new MerchantAccount();
         account.setBalance( 0 );
         account.setMerchant( merchant );
         account.setAccountNumber( dto.getRib() );
         account.setBank( RibProcessor.extractBankFrom( dto.getRib() ) );
+        account.setAccountStatus( true );
 
         //Set Status and save trace
         merchant.setStatus( MerchantStatus.FILLED_INFO );
@@ -259,5 +264,18 @@ public class MerchantServiceImpl implements MerchantService {
         responseDto.setTerminalId( null );
 
         return responseDto;
+    }
+
+    @Override
+    public void blockMerchantAccount(Long id) {
+        MerchantAccount account;
+        if( merchantRepository.existsByIdAndDeletedFalse( id ) ) {
+            account = merchantAccountRepository.findByMerchantId( id )
+                    .orElseThrow( () -> new ResourceNotFoundException("Merchant Account", "Merchant id", id ));
+        } else throw new MPayAPIException( HttpStatus.NOT_FOUND, "Merchant does not exist or is deleted" );
+
+        account.setAccountStatus( false );
+
+        merchantAccountRepository.save( account );
     }
 }

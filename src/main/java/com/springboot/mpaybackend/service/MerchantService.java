@@ -27,4 +27,6 @@ public interface MerchantService {
     void deleteMerchant(Long id);
 
     MerchantResponseDto fillInfo(MerchantBankInfoDto dto, Long id);
+
+    void blockMerchantAccount(Long id);
 }

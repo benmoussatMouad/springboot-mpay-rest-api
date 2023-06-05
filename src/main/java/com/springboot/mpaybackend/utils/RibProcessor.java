@@ -15,4 +15,8 @@ public class RibProcessor {
         return bankRepository.findByBankCode( bankCode )
                 .orElseThrow( () -> new ResourceNotFoundException( "Bank", "Bank Code", bankCode ) );
     }
+
+    public static void setBankRepository(BankRepository bankRepository) {
+        RibProcessor.bankRepository = bankRepository;
+    }
 }

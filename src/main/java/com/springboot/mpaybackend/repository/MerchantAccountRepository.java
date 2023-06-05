@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface MerchantAccountRepository extends JpaRepository<MerchantAccount, Long> {
 
     Optional<MerchantAccount> findByMerchantId(Long id);
+
+    Boolean existsByMerchantIdAndMerchantDeletedFalse(Long id);
 }
