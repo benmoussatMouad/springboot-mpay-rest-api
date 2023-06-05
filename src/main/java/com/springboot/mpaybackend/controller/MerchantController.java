@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/merchant")
 public class MerchantController {
-    private static final Logger logger = LoggerFactory.getLogger(MerchantController.class);
+    private static final Logger logger = LoggerFactory.getLogger( MerchantController.class );
 
 
     private MerchantService merchantService;
@@ -29,7 +29,7 @@ public class MerchantController {
     @PostMapping
     public ResponseEntity<MerchantResponseDto> createMerchant(@RequestBody MerchantDto dto) {
 
-        return ResponseEntity.ok(merchantService.addMerchant(dto, false ));
+        return ResponseEntity.ok( merchantService.addMerchant( dto, false ) );
     }
 
     @GetMapping
@@ -41,7 +41,7 @@ public class MerchantController {
     @GetMapping("trace/{merchantId}")
     public ResponseEntity<List<MerchantAccountTraceDto>> getMerchantTraces(@PathVariable("merchantId") Long id) {
 
-        return ResponseEntity.ok(merchantAccountService.getAllMerchantStatusTraces( id ));
+        return ResponseEntity.ok( merchantAccountService.getAllMerchantStatusTraces( id ) );
     }
 
     // TODO: Actions for changing the merchant status, when to create an account if the merchant is not directly created by a bank user
@@ -50,29 +50,30 @@ public class MerchantController {
     public ResponseEntity<MerchantPageDto> getMerchantsByPageByFilter(
             @RequestParam(name = "page")
             @Parameter(description = "The number of the desired page, start from 0") Integer page,
-            @RequestParam(name= "size")
+            @RequestParam(name = "size")
             @Parameter(description = "The size of the page") Integer size,
-            @RequestParam(name= "name", required = false)
+            @RequestParam(name = "name", required = false)
             @Parameter(description = "Filter the results by name containing") String name,
-            @RequestParam(name= "phone", required = false)
+            @RequestParam(name = "phone", required = false)
             @Parameter(description = "Filter the results by phone containing") String phone,
-            @RequestParam(name= "status", required = false)
+            @RequestParam(name = "status", required = false)
             @Parameter(description = "Filter the results by user type") String status,
-            @RequestParam(name= "reg_commerce", required = false)
+            @RequestParam(name = "reg_commerce", required = false)
             @Parameter(description = "Filter the results by name containing") String regCommerce,
-            @RequestParam(name= "nif", required = false)
+            @RequestParam(name = "nif", required = false)
             @Parameter(description = "Filter the results by name containing") String nif,
-            @RequestParam(name= "id", required = false)
+            @RequestParam(name = "id", required = false)
             @Parameter(description = "The id of merchant within the table") Long id
     ) {
-        System.out.println(name);
+        System.out.println( name );
         try {
-            System.out.println(phone);
-            return ResponseEntity.ok(merchantService.getAllMerchantsByFilter(page, size, id, name, name, phone, regCommerce, nif, status));
+            System.out.println( phone );
+            return ResponseEntity.ok( merchantService.getAllMerchantsByFilter( page, size, id, name, name, phone, regCommerce, nif, status ) );
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
-        }}
+        }
+    }
 
 
     @GetMapping("{key}")
@@ -83,7 +84,7 @@ public class MerchantController {
         switch (filter) {
             case "id":
                 Long id = Long.valueOf( key );
-                return ResponseEntity.ok(merchantService.getMerchant( id ));
+                return ResponseEntity.ok( merchantService.getMerchant( id ) );
             case "username":
                 return ResponseEntity.ok( merchantService.getMerchantByUsername( key ) );
             default:
@@ -94,7 +95,7 @@ public class MerchantController {
 
     @PutMapping("{id}")
     public ResponseEntity<MerchantResponseDto> updateMerchant(@RequestBody MerchantDto dto,
-                                                                  @PathVariable Long id) {
+                                                              @PathVariable Long id) {
 
         return ResponseEntity.ok( merchantService.updateMerchant( dto, id ) );
     }
@@ -103,7 +104,13 @@ public class MerchantController {
     public ResponseEntity<String> deleteUserAgency(@PathVariable("id") Long id) {
         merchantService.deleteMerchant( id );
 
-        return ResponseEntity.ok("Merchant deleted successfully");
+        return ResponseEntity.ok( "Merchant deleted successfully" );
+    }
+
+    @PutMapping("{id}/fill")
+    public ResponseEntity<MerchantResponseDto> fillMerchantInfo(@RequestBody MerchantBankInfoDto dto, @PathVariable Long id) {
+
+        return ResponseEntity.ok( merchantService.fillInfo( dto, id ) );
     }
 }
 

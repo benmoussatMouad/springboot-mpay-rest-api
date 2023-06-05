@@ -1,7 +1,7 @@
 package com.springboot.mpaybackend.service.impl;
 
 import com.springboot.mpaybackend.entity.*;
-import com.springboot.mpaybackend.exception.BlogAPIException;
+import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.repository.BankRepository;
@@ -14,7 +14,6 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -81,7 +80,7 @@ public class UserBankServiceImpl implements UserBankService {
 
         // check if username is taken by other users
         if(userRepository.existsByUsername(dto.getUsername())){
-            throw new BlogAPIException( HttpStatus.BAD_REQUEST, "Username already exists!.");
+            throw new MPayAPIException( HttpStatus.BAD_REQUEST, "Username already exists!.");
         }
 
 
@@ -109,7 +108,7 @@ public class UserBankServiceImpl implements UserBankService {
         if( Objects.equals( dto.getUserType(), "BANK_ADMIN" ) || Objects.equals( dto.getUserType(), "BANK_USER" ) ) {
             userBank.setUserType( UserType.valueOf( dto.getUserType() ) );
         } else
-            throw new BlogAPIException( HttpStatus.BAD_REQUEST, "Wrong user type, should be BANK_USER or BANK_ADMIN" );
+            throw new MPayAPIException( HttpStatus.BAD_REQUEST, "Wrong user type, should be BANK_USER or BANK_ADMIN" );
 
         userBank.setUsername( user );
 
