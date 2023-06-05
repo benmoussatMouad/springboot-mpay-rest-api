@@ -32,8 +32,9 @@ public class MerchantServiceImpl implements MerchantService {
     MerchantAccountRepository merchantAccountRepository;
     BankRepository bankRepository;
     MerchantStatusTraceRepository merchantStatusTraceRepository;
+    MerchantLicenseRepository merchantLicenseRepository;
 
-    public MerchantServiceImpl(MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository) {
+    public MerchantServiceImpl(MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository, MerchantLicenseRepository merchantLicenseRepository) {
         this.merchantRepository = merchantRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -42,6 +43,7 @@ public class MerchantServiceImpl implements MerchantService {
         this.merchantAccountRepository = merchantAccountRepository;
         this.bankRepository = bankRepository;
         this.merchantStatusTraceRepository = merchantStatusTraceRepository;
+        this.merchantLicenseRepository = merchantLicenseRepository;
 
         this.modelMapper.getConfiguration().setSkipNullEnabled(true);
 
@@ -112,15 +114,37 @@ public class MerchantServiceImpl implements MerchantService {
         Merchant merchant = merchantRepository.findByIdAndDeletedFalse( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", id ) );
 
-        return modelMapper.map( merchant, MerchantResponseDto.class );
+        MerchantResponseDto dto = modelMapper.map( merchant, MerchantResponseDto.class );
+        List<MerchantLicense> licenses = merchantLicenseRepository.findByMerchantId( id );
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( id )
+                .orElse( null );
+
+        if( licenses.get( 0 ) != null ) {
+            dto.setTerminalId( licenses.get( 0 ).getTerminalId() );
+        }
+        if( account != null ) {
+            dto.setAccountStatus( account.isAccountStatus() );
+        }
+        return dto;
     }
 
     @Override
     public MerchantResponseDto getMerchantByUsername(String username) {
         Merchant merchant = merchantRepository.findByUsernameUsernameAndDeletedFalse( username )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "username", username ) );
+        MerchantResponseDto dto = modelMapper.map( merchant, MerchantResponseDto.class );
+        List<MerchantLicense> licenses = merchantLicenseRepository.findByMerchantId( merchant.getId() );
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( merchant.getId() )
+                .orElse( null );
 
-        return modelMapper.map( merchant, MerchantResponseDto.class );
+        if( licenses.get( 0 ) != null ) {
+            dto.setTerminalId( licenses.get( 0 ).getTerminalId() );
+        }
+        if( account != null ) {
+            dto.setAccountStatus( account.isAccountStatus() );
+        }
+
+        return dto;
     }
 
     @Override
