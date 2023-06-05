@@ -50,5 +50,6 @@ public class Merchant {
     @Column(columnDefinition = "varchar(255) default 'NON_VERIFIED'")
     private MerchantStatus status;
 
+    @Column(columnDefinition = "boolean default false")
     private boolean enabled;
 }

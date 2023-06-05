@@ -1,5 +1,6 @@
 package com.springboot.mpaybackend.controller;
 
+import com.springboot.mpaybackend.entity.Merchant;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.service.MerchantAccountService;
 import com.springboot.mpaybackend.service.MerchantService;
@@ -111,6 +112,14 @@ public class MerchantController {
     public ResponseEntity<MerchantResponseDto> fillMerchantInfo(@RequestBody MerchantBankInfoDto dto, @PathVariable Long id) {
 
         return ResponseEntity.ok( merchantService.fillInfo( dto, id ) );
+    }
+
+    @PutMapping("{id}/block")
+    public ResponseEntity<String> blockMerchantAccount(@PathVariable Long id) {
+        merchantService.blockMerchantAccount( id );
+
+        return ResponseEntity.ok( "Merchant Account has been disabled" );
+
     }
 }
 
