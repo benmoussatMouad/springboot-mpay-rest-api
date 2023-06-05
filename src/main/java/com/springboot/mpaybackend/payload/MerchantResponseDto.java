@@ -27,5 +27,6 @@ public class MerchantResponseDto {
     private String fiscalNumber;
     private String registreCommerceNumber;
     private String articleImpotsNumber;
+    private String numberCheckoutRequested;
     private String status;
 }

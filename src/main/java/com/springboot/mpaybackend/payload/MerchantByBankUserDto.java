@@ -28,6 +28,7 @@ public class MerchantByBankUserDto {
     private String fiscalNumber;
     private String registreCommerceNumber;
     private String articleImpotsNumber;
+    private String numberCheckoutRequested;
 
     private String rib;
 

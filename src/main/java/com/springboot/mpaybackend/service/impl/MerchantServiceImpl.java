@@ -98,6 +98,8 @@ public class MerchantServiceImpl implements MerchantService {
             trace.setCreatedAt( new Date() );
             trace.setUser( user );
             trace.setStatus( MerchantStatus.NON_VERIFIED );
+
+            merchantStatusTraceRepository.save( trace );
         }
 
         Merchant savedMerchant = merchantRepository.save( merchant );

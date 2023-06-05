@@ -29,9 +29,7 @@ public class MerchantAccount {
     @JoinColumn(name = "bank_id")
     private Bank bank;
 
-
-    @Enumerated(EnumType.STRING)
-    private MerchantStatus status;
+    private boolean accountStatus;
 
 
 }
