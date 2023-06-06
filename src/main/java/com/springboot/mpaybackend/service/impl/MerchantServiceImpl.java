@@ -127,6 +127,7 @@ public class MerchantServiceImpl implements MerchantService {
         }
         if( account != null ) {
             dto.setAccountStatus( account.isAccountStatus() );
+            dto.setRib( account.getAccountNumber() );
         }
         return dto;
     }
