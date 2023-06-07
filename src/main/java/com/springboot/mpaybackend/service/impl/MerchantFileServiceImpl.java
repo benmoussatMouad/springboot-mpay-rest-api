@@ -31,7 +31,7 @@ public class MerchantFileServiceImpl implements MerchantFileService {
     }
 
     @Override
-    public MerchantFileResponseDto saveMerchantFile(MerchantFileDto dto) throws IOException {
+    public MerchantFileResponseDto saveMerchantFile(MerchantFileDto dto) {
         MerchantFile merchantFile = new MerchantFile();
         Merchant merchant = merchantRepository.findByIdAndDeletedFalse( dto.getMerchantId() )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", dto.getMerchantId() ) );
@@ -80,7 +80,7 @@ public class MerchantFileServiceImpl implements MerchantFileService {
             dto.setId( e.getId() );
             dto.setPiece( e.getPiece().toString() );
             dto.setContent( Base64.getEncoder().encodeToString( e.getContent() ) );
-
+            dto.setRejected( e.isRejected() );
             return dto;
         } ).collect( Collectors.toList());
     }

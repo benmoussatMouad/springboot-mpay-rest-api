@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface MerchantFileService {
 
-    MerchantFileResponseDto saveMerchantFile(MerchantFileDto file) throws IOException;
+    MerchantFileResponseDto saveMerchantFile(MerchantFileDto file) ;
 
     MerchantFile getMerchantFileById(Long fileId);
 
