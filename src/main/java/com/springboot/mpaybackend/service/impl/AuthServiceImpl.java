@@ -9,6 +9,7 @@ import com.springboot.mpaybackend.repository.*;
 import com.springboot.mpaybackend.security.JwtTokenProvider;
 import com.springboot.mpaybackend.service.AuthService;
 import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,13 +33,15 @@ public class AuthServiceImpl implements AuthService {
     private WilayaRepository wilayaRepository;
     private PasswordEncoder passwordEncoder;
     private JwtTokenProvider jwtTokenProvider;
+    private MerchantRepository merchantRepository;
+    private ModelMapper modelMapper;
 
 
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            ClientRepository clientRepository, RoleRepository roleRepository,
                            OtpRepository otpRepository, WilayaRepository wilayaRepository, PasswordEncoder passwordEncoder,
-                           JwtTokenProvider jwtTokenProvider) {
+                           JwtTokenProvider jwtTokenProvider, MerchantRepository merchantRepository, ModelMapper modelMapper) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.clientRepository = clientRepository;
@@ -47,6 +50,8 @@ public class AuthServiceImpl implements AuthService {
         this.wilayaRepository = wilayaRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.merchantRepository = merchantRepository;
+        this.modelMapper = modelMapper;
     }
 
     @Override
@@ -132,36 +137,42 @@ public class AuthServiceImpl implements AuthService {
         return "User client registered successfully!.";
     }
 
-    private Otp createOtp(User user) {
-
-        Integer random = (int) ((Math.random() * (999999) + 0));
-
-        Otp otp;
-        if( otpRepository.existsByUser( user ) ) {
-            otp = otpRepository.findByUser( user )
-                    .orElseThrow( () ->
-                            new ResourceNotFoundException( "Otp", "Id", user.getUserId() ) );
-
-            otp.setCode( String.format( "%1$06d", random ) );
-            otpRepository.save( otp );
-        } else {
-
-            otp = new Otp();
-            otp.setUser( user );
-            otp.setExpired( false );
-            otp.setUsed( false );
-            otp.setAttempts( 0 );
-            otp.setCode( String.format( "%1$06d", random ) );
-            otp.setCreatedAt( new Date() );
-            otpRepository.save( otp );
-        }
-
-        return null;
-    }
 
     @Override
-    public String registerMerchant(RegisterDto registerDto) {
-        return null;
+    @Transactional(rollbackOn = Exception.class)
+    public String registerMerchant(RegisterDto dto) {
+        // check if merchant exists by phone
+        if(merchantRepository.existsByPhone( dto.getPhone() ) ) {
+            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Phone already exists!.");
+        }
+
+        // check if username is taken by other users
+        if(userRepository.existsByUsername(dto.getUsername())){
+            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Username already exists!.");
+        }
+
+        // *** 1- Creating User
+        // ***
+        User user = new User();
+        user.setUsername( dto.getUsername() );
+        user.setPassword( passwordEncoder.encode( dto.getPassword() ) );
+        user.setPhone( dto.getPhone() );
+        user.setFirstConnexion( true );
+        user.setUserType( UserType.CLIENT );
+        user.setEnabled( false );
+        user.setSuffersAttempts( 0 );
+        userRepository.save( user );
+        // ***
+
+        // *** 2- Creating Merchant
+        // ***
+        Merchant merchant = modelMapper.map( dto, Merchant.class );
+        merchant.setUsername( user );
+        merchant.setStatus( MerchantStatus.NON_VERIFIED );
+        merchant.setEnabled( false );
+        merchantRepository.save( merchant );
+
+        return "Merchant registered successfully";
     }
 
     @Override

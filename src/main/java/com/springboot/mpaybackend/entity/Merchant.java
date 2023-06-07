@@ -33,6 +33,8 @@ public class Merchant {
 
     private String commune;
     private String postalCode;
+
+    @Column(unique = true)
     private String phone;
 
     @OneToOne

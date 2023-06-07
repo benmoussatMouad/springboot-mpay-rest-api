@@ -8,7 +8,7 @@ import lombok.Setter;
 
 import java.util.Date;
 
-@Entity
+@Entity(name = "device_history")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,7 +16,8 @@ import java.util.Date;
 public class DeviceHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer deviceHistoryId;
+    @Column(name = "device_history_id")
+    private Integer id;
 
     @OneToOne
     @JoinColumn(name = "username", referencedColumnName = "username")

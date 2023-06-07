@@ -32,6 +32,7 @@ public class Client {
 
     private String commune;
     private String postalCode;
+    @Column(unique = true)
     private String phone;
 
 }
