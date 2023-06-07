@@ -2,10 +2,7 @@ package com.springboot.mpaybackend.controller;
 
 import com.springboot.mpaybackend.entity.User;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
-import com.springboot.mpaybackend.payload.CheckOtpDto;
-import com.springboot.mpaybackend.payload.JWTAuthResponse;
-import com.springboot.mpaybackend.payload.LoginDto;
-import com.springboot.mpaybackend.payload.RegisterDto;
+import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.repository.UserRepository;
 import com.springboot.mpaybackend.service.AuthService;
 import com.springboot.mpaybackend.service.DeviceHistoryService;
@@ -88,22 +85,22 @@ public class AuthController {
     }
 
     @GetMapping("check/username/{username}")
-    public ResponseEntity<String> checkUsername(@PathVariable("username") String username) {
+    public ResponseEntity<ExistanceDto> checkUsername(@PathVariable("username") String username) {
         Boolean response = authService.checkUsername( username );
-        if( response ) {
-            return new ResponseEntity<>( "Username exists", HttpStatus.ACCEPTED );
-        } else {
-            return new ResponseEntity<>( "Username do not exists", HttpStatus.NOT_FOUND );
-        }
+        return new ResponseEntity<>( new ExistanceDto( response ), HttpStatus.ACCEPTED );
+
     }
 
-    @GetMapping("check/phone/{phone}")
-    public ResponseEntity<String> checkPhone(@PathVariable("phone") String phone) {
-        Boolean response = authService.checkPhone( phone );
-        if( response ) {    
-            return new ResponseEntity<>( "Phone exists", HttpStatus.ACCEPTED );
-        } else {
-            return new ResponseEntity<>( "Phone do not exists", HttpStatus.NOT_FOUND );
-        }
+    @GetMapping("check/phone/client/{phone}")
+    public ResponseEntity<ExistanceDto> checkClientPhone(@PathVariable("phone") String phone) {
+        Boolean response = authService.checkClientPhone( phone );
+        return new ResponseEntity<>( new ExistanceDto( response ), HttpStatus.ACCEPTED );
+
+    }
+
+    @GetMapping("check/phone/merchant/{phone}")
+    public ResponseEntity<ExistanceDto> checkMerchantPhone(@PathVariable("phone") String phone) {
+        Boolean response = authService.checkMerchantPhone( phone );
+        return new ResponseEntity<>( new ExistanceDto( response ), HttpStatus.ACCEPTED );
     }
 }

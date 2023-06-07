@@ -184,4 +184,14 @@ public class AuthServiceImpl implements AuthService {
     public Boolean checkPhone(String phone) {
         return userRepository.existsByPhone( phone );
     }
+
+    @Override
+    public Boolean checkClientPhone(String phone) {
+        return clientRepository.existsByPhone( phone );
+    }
+
+    @Override
+    public Boolean checkMerchantPhone(String phone) {
+        return merchantRepository.existsByPhone( phone );
+    }
 }
