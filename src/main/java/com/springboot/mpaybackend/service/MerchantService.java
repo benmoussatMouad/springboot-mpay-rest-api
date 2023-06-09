@@ -30,4 +30,6 @@ public interface MerchantService {
     void unBlockMerchantAccount(Long id, BlockRequestDto dto, String usernameOfBlocker);
 
     MerchantDto putInProgress(Long id);
+
+    MerchantDto demandReviewFile(Long id, String feedback);
 }

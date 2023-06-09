@@ -327,8 +327,8 @@ public class MerchantServiceImpl implements MerchantService {
         Merchant merchant = merchantRepository.findByIdAndDeletedFalse( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", id ) );
 
-        if( !merchant.getStatus().equals( MerchantStatus.FILLED_INFO ) ) {
-            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Forbidden action: Merchant current status must be 'FILLED_INFO'" );
+        if( !merchant.getStatus().equals( MerchantStatus.FILLED_INFO ) || !merchant.getStatus().equals( MerchantStatus.IN_PROGRESS )  ) {
+            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Forbidden action: Merchant current status must be 'FILLED_INFO' or 'IN_PROGRESS'" );
         }
 
         merchant.setStatus( MerchantStatus.IN_PROGRESS );
@@ -343,6 +343,34 @@ public class MerchantServiceImpl implements MerchantService {
         trace.setUser( merchant.getUsername() );
         trace.setCreatedAt( new Date() );
         trace.setStatus( MerchantStatus.IN_PROGRESS );
+        merchantStatusTraceRepository.save( trace );
+
+        return modelMapper.map( merchant, MerchantDto.class );
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public MerchantDto demandReviewFile(Long id, String feedback) {
+        Merchant merchant = merchantRepository.findByIdAndDeletedFalse( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", id ) );
+
+        if( !merchant.getStatus().equals( MerchantStatus.IN_PROGRESS ) ) {
+            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Forbidden action: Merchant current status must be 'IN_PROGRESS'" );
+        }
+
+        merchant.setStatus( MerchantStatus.REVIEW );
+        merchantRepository.save( merchant );
+
+        // Save trace
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant Account ", "merchant id", id ) );
+        MerchantStatusTrace trace = new MerchantStatusTrace();
+        trace.setMerchant( merchant );
+        trace.setBank( account.getBank() );
+        trace.setUser( merchant.getUsername() );
+        trace.setCreatedAt( new Date() );
+        trace.setStatus( MerchantStatus.REVIEW );
+        trace.setFeedback( feedback );
         merchantStatusTraceRepository.save( trace );
 
         return modelMapper.map( merchant, MerchantDto.class );

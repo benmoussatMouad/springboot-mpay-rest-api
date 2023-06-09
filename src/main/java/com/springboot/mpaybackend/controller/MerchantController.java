@@ -7,6 +7,7 @@ import com.springboot.mpaybackend.service.MerchantAccountService;
 import com.springboot.mpaybackend.service.MerchantFileService;
 import com.springboot.mpaybackend.service.MerchantService;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.springboot.mpaybackend.utils.AppConstants.MERCHANT_FILES_NUMBER;
 
@@ -142,7 +144,8 @@ public class MerchantController {
     }
 
     @PutMapping("{id}/in-progress")
-    @PreAuthorize( "hasAuthority('ADMIN') OR hasAuthority('BANK_ADMIN') OR hasAuthority('MERCHANT')" )
+    @PreAuthorize("hasAuthority('ADMIN') OR hasAuthority('BANK_ADMIN') OR hasAuthority('MERCHANT')")
+    @Transactional(rollbackOn = Exception.class)
     public ResponseEntity<MerchantDto> putMerchantFiles(@PathVariable Long id, @RequestBody ScannedFilesRequestDto dto) {
 
         // Get existing files
@@ -152,7 +155,7 @@ public class MerchantController {
         // Check if size of docs is as needed
         if( dto.getFiles().size() != (MERCHANT_FILES_NUMBER - existingFilesNumber) ) {
 
-            throw new MPayAPIException( HttpStatus.BAD_REQUEST, "Number of documents must be " + (MERCHANT_FILES_NUMBER - existingFilesNumber));
+            throw new MPayAPIException( HttpStatus.BAD_REQUEST, "Number of documents must be " + (MERCHANT_FILES_NUMBER - existingFilesNumber) );
         }
 
         // Check if all files are being sent, first get existing uploaded files, and check what is needed
@@ -183,6 +186,31 @@ public class MerchantController {
 
         // Setting merchant status to IN_PROGRESS
         return ResponseEntity.ok( merchantService.putInProgress( id ) );
+    }
+
+    @PutMapping("/{id}/review")
+    @PreAuthorize("hasAuthority('BANK_USER') OR hasAuthority('BANK_ADMIN') OR hasAuthority('ADMIN')")
+    @Transactional(rollbackOn = Exception.class)
+    public ResponseEntity<MerchantDto> demandReviewForMerchantInfos(@PathVariable Long id, @RequestBody FilesReviewDemandDto dto) {
+
+        // Get existing files
+        List<MerchantFileResponseDto> existingFiles = merchantFileService.getNonRejectedMerchantFilesByMerchantId( id );
+        int existingFilesNumber = (existingFiles == null) ? 0 : existingFiles.size();
+
+        // Checking if files Ids correspond to the merchant
+        List<Long> ids = existingFiles.stream().map( MerchantFileResponseDto::getId ).toList();
+        if( !ids.containsAll( dto.getIdFilesToReview() ) ) {
+            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Files do not belong to the target merchant" );
+        }
+
+        // Put files to Rejected
+        for (Long fileId :
+                dto.getIdFilesToReview()) {
+            merchantFileService.rejectFileById( fileId );
+        }
+
+        // change status and save trace with feedback
+        return ResponseEntity.ok( merchantService.demandReviewFile( id, dto.getFeedback() ) );
     }
 }
 
