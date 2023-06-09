@@ -29,7 +29,7 @@ public class FileController {
             merchantFileService.saveMerchantFile( fileDto );
 
             return ResponseEntity.ok( "File uploaded successfully" );
-        } catch (IOException e) {
+        } catch (Exception e) {
             return ResponseEntity.status( HttpStatus.INTERNAL_SERVER_ERROR ).body( "Failed to read multipart file" );
         }
     }
