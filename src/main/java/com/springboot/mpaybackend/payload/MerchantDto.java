@@ -6,6 +6,7 @@ import com.springboot.mpaybackend.utils.EnumValidator;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
@@ -27,13 +28,15 @@ public class MerchantDto {
     private String postalCode;
     @NotEmpty
     private String phone;
+    @Size()
     private String identityCardNumber;
+    @Size()
     private String fiscalNumber;
     private String registreCommerceNumber;
     private String articleImpotsNumber;
     private String numberCheckoutRequested;
 
-    @EnumValidator(enumClass = MerchantStatus.class)
+    @EnumValidator(enumClass = MerchantStatus.class, message = "Must")
     private String status;
 
 }

@@ -1,6 +1,7 @@
 package com.springboot.mpaybackend.payload;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
@@ -30,6 +31,7 @@ public class MerchantByBankUserDto {
     private String articleImpotsNumber;
     private String numberCheckoutRequested;
 
+    @Size(min = 20, max = 20)
     private String rib;
 
     private List<MerchantFileDto> documents;

@@ -15,4 +15,8 @@ public interface AuthService {
     Boolean checkUsername(String username);
 
     Boolean checkPhone(String phone);
+
+    Boolean checkClientPhone(String phone);
+
+    Boolean checkMerchantPhone(String phone);
 }

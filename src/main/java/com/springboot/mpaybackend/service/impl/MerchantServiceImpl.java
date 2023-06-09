@@ -3,10 +3,7 @@ package com.springboot.mpaybackend.service.impl;
 import com.springboot.mpaybackend.entity.*;
 import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
-import com.springboot.mpaybackend.payload.MerchantBankInfoDto;
-import com.springboot.mpaybackend.payload.MerchantDto;
-import com.springboot.mpaybackend.payload.MerchantPageDto;
-import com.springboot.mpaybackend.payload.MerchantResponseDto;
+import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.repository.*;
 import com.springboot.mpaybackend.service.MerchantService;
 import com.springboot.mpaybackend.utils.RibProcessor;
@@ -35,8 +32,9 @@ public class MerchantServiceImpl implements MerchantService {
     BankRepository bankRepository;
     MerchantStatusTraceRepository merchantStatusTraceRepository;
     MerchantLicenseRepository merchantLicenseRepository;
+    MerchantAccountBlockTraceRepository merchantAccountBlockTraceRepository;
 
-    public MerchantServiceImpl(MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository, MerchantLicenseRepository merchantLicenseRepository) {
+    public MerchantServiceImpl(MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository, MerchantLicenseRepository merchantLicenseRepository, MerchantAccountBlockTraceRepository merchantAccountBlockTraceRepository) {
         this.merchantRepository = merchantRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -46,6 +44,7 @@ public class MerchantServiceImpl implements MerchantService {
         this.bankRepository = bankRepository;
         this.merchantStatusTraceRepository = merchantStatusTraceRepository;
         this.merchantLicenseRepository = merchantLicenseRepository;
+        this.merchantAccountBlockTraceRepository = merchantAccountBlockTraceRepository;
 
         this.modelMapper.getConfiguration().setSkipNullEnabled(true);
 
@@ -269,15 +268,71 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     @Override
-    public void blockMerchantAccount(Long id) {
+    @Transactional(rollbackOn = Exception.class)
+    public void blockMerchantAccount(Long id, BlockRequestDto dto, String usernameOfBlocker) {
+
+        // Checking if merchant exists
         MerchantAccount account;
         if( merchantRepository.existsByIdAndDeletedFalse( id ) ) {
             account = merchantAccountRepository.findByMerchantId( id )
-                    .orElseThrow( () -> new ResourceNotFoundException("Merchant Account", "Merchant id", id ));
+                    .orElseThrow( () -> new ResourceNotFoundException( "Merchant Account", "Merchant id", id ) );
         } else throw new MPayAPIException( HttpStatus.NOT_FOUND, "Merchant does not exist or is deleted" );
 
+        // Blocking merchant
         account.setAccountStatus( false );
 
+        //Creating trace
+        MerchantAccountBlockTrace trace = modelMapper.map( dto, MerchantAccountBlockTrace.class );
+        trace.setAccount( account );
+        User user = userRepository.findByUsername( usernameOfBlocker )
+                .orElseThrow( () -> new ResourceNotFoundException( "User", "username", usernameOfBlocker ) );
+        trace.setCreatedBy( user );
+        trace.setCreatedOn( new Date() );
+        trace.setAccountStatus( false );
+        merchantAccountBlockTraceRepository.save( trace );
+
         merchantAccountRepository.save( account );
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public void unBlockMerchantAccount(Long id, BlockRequestDto dto, String usernameOfBlocker) {
+
+        // Checking if merchant exists
+        MerchantAccount account;
+        if( merchantRepository.existsByIdAndDeletedFalse( id ) ) {
+            account = merchantAccountRepository.findByMerchantId( id )
+                    .orElseThrow( () -> new ResourceNotFoundException( "Merchant Account", "Merchant id", id ) );
+        } else throw new MPayAPIException( HttpStatus.NOT_FOUND, "Merchant does not exist or is deleted" );
+
+        // Blocking merchant
+        account.setAccountStatus( true );
+
+        //Creating trace
+        MerchantAccountBlockTrace trace = modelMapper.map( dto, MerchantAccountBlockTrace.class );
+        trace.setAccount( account );
+        User user = userRepository.findByUsername( usernameOfBlocker )
+                .orElseThrow( () -> new ResourceNotFoundException( "User", "username", usernameOfBlocker ) );
+        trace.setCreatedBy( user );
+        trace.setCreatedOn( new Date() );
+        trace.setAccountStatus( true );
+        merchantAccountBlockTraceRepository.save( trace );
+
+        merchantAccountRepository.save( account );
+    }
+
+    @Override
+    public MerchantDto putInProgress(Long id) {
+        Merchant merchant = merchantRepository.findByIdAndDeletedFalse( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", id ) );
+
+        if( !merchant.getStatus().equals( MerchantStatus.FILLED_INFO ) ) {
+            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Forbidden action: Merchant current status must be 'FILLED_INFO'" );
+        }
+
+        merchant.setStatus( MerchantStatus.IN_PROGRESS );
+        merchantRepository.save( merchant );
+
+        return modelMapper.map( merchant, MerchantDto.class );
     }
 }

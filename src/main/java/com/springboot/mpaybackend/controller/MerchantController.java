@@ -1,17 +1,23 @@
 package com.springboot.mpaybackend.controller;
 
-import com.springboot.mpaybackend.entity.Merchant;
+import com.springboot.mpaybackend.entity.FileType;
+import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.service.MerchantAccountService;
+import com.springboot.mpaybackend.service.MerchantFileService;
 import com.springboot.mpaybackend.service.MerchantService;
 import io.swagger.v3.oas.annotations.Parameter;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("api/v1/merchant")
@@ -21,10 +27,12 @@ public class MerchantController {
 
     private MerchantService merchantService;
     private MerchantAccountService merchantAccountService;
+    private MerchantFileService merchantFileService;
 
-    public MerchantController(MerchantService merchantService, MerchantAccountService merchantAccountService) {
+    public MerchantController(MerchantService merchantService, MerchantAccountService merchantAccountService, MerchantFileService merchantFileService) {
         this.merchantService = merchantService;
         this.merchantAccountService = merchantAccountService;
+        this.merchantFileService = merchantFileService;
     }
 
     @PostMapping
@@ -115,11 +123,62 @@ public class MerchantController {
     }
 
     @PutMapping("{id}/block")
-    public ResponseEntity<String> blockMerchantAccount(@PathVariable Long id) {
-        merchantService.blockMerchantAccount( id );
+    public ResponseEntity<String> blockMerchantAccount(@PathVariable Long id, BlockRequestDto dto, Authentication authentication) {
+        merchantService.blockMerchantAccount( id, dto, authentication.getName() );
 
         return ResponseEntity.ok( "Merchant Account has been disabled" );
 
+    }
+
+    @PutMapping("{id}/unblock")
+    public ResponseEntity<String> unBlockMerchantAccount(@PathVariable Long id, BlockRequestDto dto, Authentication authentication) {
+        merchantService.unBlockMerchantAccount( id, dto, authentication.getName() );
+
+        return ResponseEntity.ok( "Merchant Account has been enabled" );
+
+    }
+
+    @PutMapping("{id}/in-progress")
+    public ResponseEntity<MerchantDto> putMerchantFiles(@PathVariable Long id, ScannedFilesRequestDto dto) {
+
+        // Get existing files
+        List<MerchantFileResponseDto> existingFiles = merchantFileService.getMerchantFilesByMerchantId( id );
+
+;
+
+        // Check if size of docs is as needed
+        if( dto.getFiles().size() != 5 ) {
+
+            throw new MPayAPIException( HttpStatus.BAD_REQUEST, "Number of documents must be 5");
+        }
+
+        // Check if all files are being sent, first get existing uploaded files, and check what is needed
+
+        Set<FileType> uniqueFileTypes = new HashSet<>();
+        for (MerchantFileResponseDto file : existingFiles) {
+            FileType type = FileType.valueOf( file.getPiece() );
+
+            //adding the existing file types to the set
+            uniqueFileTypes.add( type );
+        }
+
+        // Checking if the all files have been included and not duplicated
+        for (MerchantFileDto file : dto.getFiles()) {
+            FileType type = FileType.valueOf( file.getPiece() );
+
+            if( uniqueFileTypes.contains( type ) && !file.isRejected() ) {
+                throw new MPayAPIException( HttpStatus.BAD_REQUEST, "File : " + type + " already exists or is duplicated" );
+            } else {
+                uniqueFileTypes.add( type );
+            }
+        }
+
+        for (MerchantFileDto file : dto.getFiles()) {
+            merchantFileService.saveMerchantFile( file );
+        }
+
+        // Setting merchant status to IN_PROGRESS
+        return ResponseEntity.ok( merchantService.putInProgress( id ) );
     }
 }
 

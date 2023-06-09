@@ -15,5 +15,5 @@ public class MerchantFileDto {
     private String name;
     @EnumValidator( enumClass = FileType.class)
     private String piece;
-    private Integer rejected;
+    private boolean rejected;
 }

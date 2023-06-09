@@ -9,4 +9,5 @@ public class MerchantFileResponseDto {
     private String name;
     private String piece;
     private String content;
+    private boolean rejected;
 }
