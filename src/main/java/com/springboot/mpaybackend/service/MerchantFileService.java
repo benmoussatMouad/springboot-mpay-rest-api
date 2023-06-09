@@ -16,4 +16,6 @@ public interface MerchantFileService {
     MerchantFileDto getMerchantFileInfo(Long id);
 
     List<MerchantFileResponseDto> getMerchantFilesByMerchantId(Long id);
+
+    List<MerchantFileResponseDto> getNonRejectedMerchantFilesByMerchantId(Long id);
 }
