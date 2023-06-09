@@ -9,6 +9,7 @@ import com.springboot.mpaybackend.service.MerchantService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static com.springboot.mpaybackend.utils.AppConstants.MERCHANT_FILES_NUMBER;
 
 @RestController
 @RequestMapping("api/v1/merchant")
@@ -139,17 +142,17 @@ public class MerchantController {
     }
 
     @PutMapping("{id}/in-progress")
-    public ResponseEntity<MerchantDto> putMerchantFiles(@PathVariable Long id, ScannedFilesRequestDto dto) {
+    @PreAuthorize( "hasAuthority('ADMIN') OR hasAuthority('BANK_ADMIN') OR hasAuthority('MERCHANT')" )
+    public ResponseEntity<MerchantDto> putMerchantFiles(@PathVariable Long id, @RequestBody ScannedFilesRequestDto dto) {
 
         // Get existing files
-        List<MerchantFileResponseDto> existingFiles = merchantFileService.getMerchantFilesByMerchantId( id );
-
-;
+        List<MerchantFileResponseDto> existingFiles = merchantFileService.getNonRejectedMerchantFilesByMerchantId( id );
+        int existingFilesNumber = (existingFiles == null) ? 0 : existingFiles.size();
 
         // Check if size of docs is as needed
-        if( dto.getFiles().size() != 5 ) {
+        if( dto.getFiles().size() != (MERCHANT_FILES_NUMBER - existingFilesNumber) ) {
 
-            throw new MPayAPIException( HttpStatus.BAD_REQUEST, "Number of documents must be 5");
+            throw new MPayAPIException( HttpStatus.BAD_REQUEST, "Number of documents must be " + (MERCHANT_FILES_NUMBER - existingFilesNumber));
         }
 
         // Check if all files are being sent, first get existing uploaded files, and check what is needed
@@ -174,6 +177,7 @@ public class MerchantController {
         }
 
         for (MerchantFileDto file : dto.getFiles()) {
+            file.setMerchantId( id );
             merchantFileService.saveMerchantFile( file );
         }
 

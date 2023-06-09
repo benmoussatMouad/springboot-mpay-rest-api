@@ -10,4 +10,5 @@ public interface MerchantFileRepository extends JpaRepository<MerchantFile, Long
 
     List<MerchantFile> findByMerchantId(Long id);
 
+    List<MerchantFile> findByMerchantIdAndRejectedFalse(Long id);
 }

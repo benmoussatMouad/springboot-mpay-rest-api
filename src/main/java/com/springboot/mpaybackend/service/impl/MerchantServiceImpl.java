@@ -322,6 +322,7 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
     public MerchantDto putInProgress(Long id) {
         Merchant merchant = merchantRepository.findByIdAndDeletedFalse( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", id ) );
@@ -332,6 +333,17 @@ public class MerchantServiceImpl implements MerchantService {
 
         merchant.setStatus( MerchantStatus.IN_PROGRESS );
         merchantRepository.save( merchant );
+
+        // Save merchant trace
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant Account ", "merchant id", id ) );
+        MerchantStatusTrace trace = new MerchantStatusTrace();
+        trace.setMerchant( merchant );
+        trace.setBank( account.getBank() );
+        trace.setUser( merchant.getUsername() );
+        trace.setCreatedAt( new Date() );
+        trace.setStatus( MerchantStatus.IN_PROGRESS );
+        merchantStatusTraceRepository.save( trace );
 
         return modelMapper.map( merchant, MerchantDto.class );
     }

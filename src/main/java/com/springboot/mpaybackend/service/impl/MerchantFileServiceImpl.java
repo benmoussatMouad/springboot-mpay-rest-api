@@ -73,6 +73,21 @@ public class MerchantFileServiceImpl implements MerchantFileService {
 
         List<MerchantFile> merchantFiles = merchantFileRepository.findByMerchantId( id );
 
+        return getMerchantFileResponseDtos( merchantFiles );
+    }
+
+    @Override
+    public List<MerchantFileResponseDto> getNonRejectedMerchantFilesByMerchantId(Long id) {
+        if( !merchantRepository.existsByIdAndDeletedFalse( id ) ) {
+            throw new ResourceNotFoundException( "Merchant", "id", id );
+        }
+
+        List<MerchantFile> merchantFiles = merchantFileRepository.findByMerchantIdAndRejectedFalse( id );
+
+        return getMerchantFileResponseDtos( merchantFiles );
+    }
+
+    private List<MerchantFileResponseDto> getMerchantFileResponseDtos(List<MerchantFile> merchantFiles) {
         return merchantFiles.stream().map( e -> {
             MerchantFileResponseDto dto = new MerchantFileResponseDto();
             dto.setMerchantId( e.getMerchant().getId() );

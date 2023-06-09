@@ -7,5 +7,6 @@ public class AppConstants {
     public static final String DEFAULT_SORT_BY = "id";
     public static final String DEFAULT_SORT_DIRECTION = "asc";
     public static final int SIZE_OF_BANK_CODE = 3;
+    public static final int MERCHANT_FILES_NUMBER = 5;
 
 }

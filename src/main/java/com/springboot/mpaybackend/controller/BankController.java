@@ -78,7 +78,7 @@ public class BankController {
             merchantAccountService.createAccountForMerchantByBankCode( merchantResponseDto.getId(), dto.getRib() );
 
             return ResponseEntity.ok( "Merchant saved" );
-        } catch (IOException e) {
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().body( "Error saving file" );
         }
     }
