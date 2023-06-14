@@ -35,6 +35,8 @@ public class OtpServiceImpl implements OtpService {
                             new ResourceNotFoundException( "Otp", "Id", user.getId() ) );
 
             otp.setCode( String.format( "%1$06d", random ) );
+            otp.setUsed( false );
+            otp.setExpired( false );
             otpRepository.save( otp );
         } else {
 
