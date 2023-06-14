@@ -202,8 +202,8 @@ public class AuthServiceImpl implements AuthService {
         if( !deviceHistoryRepository.existsByDevice( dto.getDevice() ) ) {
             return false;
         } else {
-            DeviceHistory deviceHistory = deviceHistoryRepository.findByDevice( dto.getDevice() )
-                    .orElseThrow( () -> new ResourceNotFoundException( "Device History", "Device name", dto.getDevice() ) );
+            /*DeviceHistory deviceHistory = deviceHistoryRepository.findByDevice( dto.getDevice() )
+                    .orElseThrow( () -> new ResourceNotFoundException( "Device History", "Device name", dto.getDevice() ) );*/
 
             // TODO: Do checks for when to ask for a new OTP
             return true;
