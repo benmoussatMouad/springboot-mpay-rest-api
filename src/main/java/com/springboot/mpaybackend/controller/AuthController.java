@@ -1,6 +1,7 @@
 package com.springboot.mpaybackend.controller;
 
 import com.springboot.mpaybackend.entity.User;
+import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.repository.UserRepository;
@@ -46,11 +47,22 @@ public class AuthController {
         return ResponseEntity.ok(jwtAuthResponse);
     }
 
+    @PostMapping({"/login/merchant", "signin/merchant"})
+    public ResponseEntity<JWTAuthResponse> merchantLogin(@RequestBody ActorLoginDto dto) {
+        // check if device exists
+        if( !authService.verifyMerchantLogin( dto ) ) {
+            throw new MPayAPIException( HttpStatus.PERMANENT_REDIRECT, "Verify new device" );
+        }
+
+        return this.login( dto );
+    }
+
     // Build Register REST API
     @PostMapping(value = {"/register/client", "/signup/client"})
-    public ResponseEntity<String> registerClient(@RequestBody RegisterDto registerDto){
-        String response = authService.registerClient(registerDto);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    public ResponseEntity<String> registerClient(@RequestBody RegisterDto registerDto) {
+
+        String response = authService.registerClient( registerDto );
+        return new ResponseEntity<>( response, HttpStatus.CREATED );
     }
 
     // Merchant Sign up

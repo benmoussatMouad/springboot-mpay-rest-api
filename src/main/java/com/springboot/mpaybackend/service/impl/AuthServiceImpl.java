@@ -3,6 +3,7 @@ package com.springboot.mpaybackend.service.impl;
 import com.springboot.mpaybackend.entity.*;
 import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
+import com.springboot.mpaybackend.payload.ActorLoginDto;
 import com.springboot.mpaybackend.payload.LoginDto;
 import com.springboot.mpaybackend.payload.RegisterDto;
 import com.springboot.mpaybackend.repository.*;
@@ -18,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,13 +35,14 @@ public class AuthServiceImpl implements AuthService {
     private JwtTokenProvider jwtTokenProvider;
     private MerchantRepository merchantRepository;
     private ModelMapper modelMapper;
+    private DeviceHistoryRepository deviceHistoryRepository;
 
 
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            ClientRepository clientRepository, RoleRepository roleRepository,
                            OtpRepository otpRepository, WilayaRepository wilayaRepository, PasswordEncoder passwordEncoder,
-                           JwtTokenProvider jwtTokenProvider, MerchantRepository merchantRepository, ModelMapper modelMapper) {
+                           JwtTokenProvider jwtTokenProvider, MerchantRepository merchantRepository, ModelMapper modelMapper, DeviceHistoryRepository deviceHistoryRepository) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.clientRepository = clientRepository;
@@ -52,6 +53,7 @@ public class AuthServiceImpl implements AuthService {
         this.jwtTokenProvider = jwtTokenProvider;
         this.merchantRepository = merchantRepository;
         this.modelMapper = modelMapper;
+        this.deviceHistoryRepository = deviceHistoryRepository;
     }
 
     @Override
@@ -193,5 +195,18 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public Boolean checkMerchantPhone(String phone) {
         return merchantRepository.existsByPhone( phone );
+    }
+
+    @Override
+    public Boolean verifyMerchantLogin(ActorLoginDto dto) {
+        if( !deviceHistoryRepository.existsByDevice( dto.getDevice() ) ) {
+            return false;
+        } else {
+            DeviceHistory deviceHistory = deviceHistoryRepository.findByDevice( dto.getDevice() )
+                    .orElseThrow( () -> new ResourceNotFoundException( "Device History", "Device name", dto.getDevice() ) );
+
+            // TODO: Do checks for when to ask for a new OTP
+            return true;
+        }
     }
 }
