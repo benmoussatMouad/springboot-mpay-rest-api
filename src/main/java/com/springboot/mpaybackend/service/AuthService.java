@@ -1,5 +1,6 @@
 package com.springboot.mpaybackend.service;
 
+import com.springboot.mpaybackend.payload.ActorLoginDto;
 import com.springboot.mpaybackend.payload.LoginDto;
 import com.springboot.mpaybackend.payload.RegisterDto;
 
@@ -19,4 +20,6 @@ public interface AuthService {
     Boolean checkClientPhone(String phone);
 
     Boolean checkMerchantPhone(String phone);
+
+    Boolean verifyMerchantLogin(ActorLoginDto dto);
 }
