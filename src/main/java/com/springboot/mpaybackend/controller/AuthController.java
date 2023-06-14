@@ -23,11 +23,12 @@ public class AuthController {
     private DeviceHistoryService deviceHistoryService;
     private UserService userService;
 
-    public AuthController(AuthService authService, UserRepository userRepository, OtpService otpService, DeviceHistoryService deviceHistoryService) {
+    public AuthController(AuthService authService, UserRepository userRepository, OtpService otpService, DeviceHistoryService deviceHistoryService, UserService userService) {
         this.authService = authService;
         this.userRepository = userRepository;
         this.otpService = otpService;
         this.deviceHistoryService = deviceHistoryService;
+        this.userService = userService;
     }
 
     // Build Login REST API
