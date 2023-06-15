@@ -375,4 +375,33 @@ public class MerchantServiceImpl implements MerchantService {
 
         return modelMapper.map( merchant, MerchantDto.class );
     }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public MerchantDto rejectMerchant(Long id) {
+        Merchant merchant = merchantRepository.findByIdAndDeletedFalse( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", id ) );
+
+        // Check if merchant is in IN PROGRESS
+        if( !merchant.getStatus().equals( MerchantStatus.IN_PROGRESS ) ) {
+            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Merchant status should be IN_PROGRESS" );
+        }
+
+
+        merchant.setStatus( MerchantStatus.REJECTED );
+        merchantRepository.save( merchant );
+
+        // Save trace
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant Account ", "merchant id", id ) );
+        MerchantStatusTrace trace = new MerchantStatusTrace();
+        trace.setMerchant( merchant );
+        trace.setBank( account.getBank() );
+        trace.setUser( merchant.getUsername() );
+        trace.setCreatedAt( new Date() );
+        trace.setStatus( MerchantStatus.REJECTED );
+        merchantStatusTraceRepository.save( trace );
+
+        return modelMapper.map( merchant, MerchantDto.class );
+    }
 }
