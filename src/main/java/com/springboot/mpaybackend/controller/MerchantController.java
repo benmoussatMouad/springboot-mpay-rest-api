@@ -1,6 +1,7 @@
 package com.springboot.mpaybackend.controller;
 
 import com.springboot.mpaybackend.entity.FileType;
+import com.springboot.mpaybackend.entity.Merchant;
 import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.service.MerchantAccountService;
@@ -211,6 +212,18 @@ public class MerchantController {
 
         // change status and save trace with feedback
         return ResponseEntity.ok( merchantService.demandReviewFile( id, dto.getFeedback() ) );
+    }
+
+    @PutMapping("/{id}/reject")
+    @PreAuthorize("hasAuthority('BANK_USER') OR hasAuthority('BANK_ADMIN') OR hasAuthority('ADMIN')")
+    public ResponseEntity<MerchantDto> rejectMerchantDemand(@PathVariable Long id) {
+        return ResponseEntity.ok( merchantService.rejectMerchant( id ) );
+    }
+
+    @PutMapping("/{id}/accept")
+    @PreAuthorize("hasAuthority('BANK_USER') OR hasAuthority('BANK_ADMIN') OR hasAuthority('ADMIN')")
+    public ResponseEntity<MerchantDto> acceptMerchantDemand(@PathVariable Long id, @RequestBody AcceptMerchantDemandDto dto) {
+        return null;
     }
 }
 

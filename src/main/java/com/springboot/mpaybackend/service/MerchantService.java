@@ -32,4 +32,6 @@ public interface MerchantService {
     MerchantDto putInProgress(Long id);
 
     MerchantDto demandReviewFile(Long id, String feedback);
+
+    MerchantDto rejectMerchant(Long id);
 }

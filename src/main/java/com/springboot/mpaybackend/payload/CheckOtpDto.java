@@ -18,6 +18,6 @@ public class CheckOtpDto {
     private String ipAddress;
     private Float latitude;
     private Float longitude;
-    private String wilayaName;
+    private Integer wilayaNumber;
     private String commune;
 }
