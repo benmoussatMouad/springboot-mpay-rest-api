@@ -11,6 +11,6 @@ public class ActorLoginDto extends LoginDto {
     private String ipAddress;
     private Float latitude;
     private Float longitude;
-    private String wilayaName;
+    private String wilayaNumber;
     private String commune;
 }
