@@ -20,7 +20,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -199,14 +201,19 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Boolean verifyMerchantLogin(ActorLoginDto dto) {
+
+        if( !merchantRepository.existsByUsernameUsername( dto.getUsernameOrEmail() ) ) {
+            throw new ResourceNotFoundException( "Merchant", "username", dto.getUsernameOrEmail() );
+        }
+
         if( !deviceHistoryRepository.existsByDevice( dto.getDevice() ) ) {
             return false;
         } else {
-            /*DeviceHistory deviceHistory = deviceHistoryRepository.findByDevice( dto.getDevice() )
-                    .orElseThrow( () -> new ResourceNotFoundException( "Device History", "Device name", dto.getDevice() ) );*/
+            List<DeviceHistory> deviceHistory = deviceHistoryRepository.findByDevice( dto.getDevice() );
 
             // TODO: Do checks for when to ask for a new OTP
-            return true;
+            // Check if the device is for the corresponding user
+            return deviceHistory.stream().map( e -> e.getUsername().getUsername() ).toList().contains( dto.getUsernameOrEmail() );
         }
     }
 }

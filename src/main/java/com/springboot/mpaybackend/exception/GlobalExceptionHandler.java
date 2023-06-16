@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -24,34 +25,35 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // handle specific exceptions
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorDetails> handleResourceNotFoundException(ResourceNotFoundException exception,
-                                                                        WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(),
-                webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+                                                                        WebRequest webRequest) {
+        ErrorDetails errorDetails = new ErrorDetails( new Date(), exception.getMessage(),
+                webRequest.getDescription( false ) );
+        return new ResponseEntity<>( errorDetails, HttpStatus.NOT_FOUND );
     }
 
     @ExceptionHandler(IOException.class)
     public ResponseEntity<ErrorDetails> handleResourceNotFoundException(IOException exception,
-                                                                        WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(),
-                webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+                                                                        WebRequest webRequest) {
+        ErrorDetails errorDetails = new ErrorDetails( new Date(), exception.getMessage(),
+                webRequest.getDescription( false ) );
+        return new ResponseEntity<>( errorDetails, HttpStatus.INTERNAL_SERVER_ERROR );
     }
 
     @ExceptionHandler(MPayAPIException.class)
     public ResponseEntity<ErrorDetails> handleBlogAPIException(MPayAPIException exception,
-                                                               WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(),
-                webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+                                                               WebRequest webRequest) {
+        ErrorDetails errorDetails = new ErrorDetails( new Date(), exception.getMessage(),
+                webRequest.getDescription( false ) );
+        return new ResponseEntity<>( errorDetails, exception.getStatus() );
     }
+
     // global exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDetails> handleGlobalException(Exception exception,
-                                                               WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(),
-                webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+                                                              WebRequest webRequest) {
+        ErrorDetails errorDetails = new ErrorDetails( new Date(), exception.getMessage(),
+                webRequest.getDescription( false ) );
+        return new ResponseEntity<>( errorDetails, HttpStatus.INTERNAL_SERVER_ERROR );
     }
 
     @Override
@@ -60,13 +62,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpStatusCode status,
                                                                   WebRequest request) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) ->{
-            String fieldName = ((FieldError)error).getField();
+        ex.getBindingResult().getAllErrors().forEach( (error) -> {
+            String fieldName = ((FieldError) error).getField();
             String message = error.getDefaultMessage();
-            errors.put(fieldName, message);
-        });
+            errors.put( fieldName, message );
+        } );
 
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>( errors, HttpStatus.BAD_REQUEST );
     }
 
 //    @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -83,9 +85,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorDetails> handleAccessDeniedException(AccessDeniedException exception,
-                                                                        WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(),
-                webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+                                                                    WebRequest webRequest) {
+        ErrorDetails errorDetails = new ErrorDetails( new Date(), exception.getMessage(),
+                webRequest.getDescription( false ) );
+        return new ResponseEntity<>( errorDetails, HttpStatus.UNAUTHORIZED );
+    }
+
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<ErrorDetails> handleAuthencticationError(AuthenticationException exception, WebRequest webRequest) {
+        ErrorDetails errorDetails = new ErrorDetails( new Date(), exception.getMessage(),
+                webRequest.getDescription( false ) );
+        return new ResponseEntity<>( errorDetails, HttpStatus.BAD_REQUEST );
     }
 }

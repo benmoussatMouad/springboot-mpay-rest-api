@@ -51,7 +51,7 @@ public class AuthController {
     public ResponseEntity<JWTAuthResponse> merchantLogin(@RequestBody ActorLoginDto dto) {
         // check if device exists
         if( !authService.verifyMerchantLogin( dto ) ) {
-            throw new MPayAPIException( HttpStatus.PERMANENT_REDIRECT, "Verify new device" );
+            throw new MPayAPIException( HttpStatus.UNAUTHORIZED, "Verify new device" );
         }
 
         return this.login( dto );

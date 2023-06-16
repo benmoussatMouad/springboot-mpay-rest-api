@@ -35,9 +35,6 @@ public class DeviceHistoryServiceImpl implements DeviceHistoryService {
     @Override
     public void addDeviceHistory(CheckOtpDto dto) {
 
-        if( deviceHistoryRepository.existsByDevice( dto.getDevice() ) ) {
-            return;
-        }
 
         DeviceHistory device = modelMapper.map( dto, DeviceHistory.class );
         User user = userRepository.findByUsername( dto.getUsername() )

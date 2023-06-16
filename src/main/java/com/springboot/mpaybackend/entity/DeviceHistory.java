@@ -24,6 +24,7 @@ public class DeviceHistory {
     private User username;
 
     private String device;
+
     private String model;
     private String operatingSystem;
     private String state;

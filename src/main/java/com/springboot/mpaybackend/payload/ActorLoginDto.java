@@ -1,9 +1,13 @@
 package com.springboot.mpaybackend.payload;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class ActorLoginDto extends LoginDto {
+    @NotNull
+    @NotEmpty
     private String device;
     private String model;
     private String operatingSystem;
