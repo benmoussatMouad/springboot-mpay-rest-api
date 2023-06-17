@@ -19,10 +19,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -38,13 +38,14 @@ public class AuthServiceImpl implements AuthService {
     private MerchantRepository merchantRepository;
     private ModelMapper modelMapper;
     private DeviceHistoryRepository deviceHistoryRepository;
+    private MerchantStatusTraceRepository merchantStatusTraceRepository;
 
 
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            ClientRepository clientRepository, RoleRepository roleRepository,
                            OtpRepository otpRepository, WilayaRepository wilayaRepository, PasswordEncoder passwordEncoder,
-                           JwtTokenProvider jwtTokenProvider, MerchantRepository merchantRepository, ModelMapper modelMapper, DeviceHistoryRepository deviceHistoryRepository) {
+                           JwtTokenProvider jwtTokenProvider, MerchantRepository merchantRepository, ModelMapper modelMapper, DeviceHistoryRepository deviceHistoryRepository, MerchantStatusTraceRepository merchantStatusTraceRepository) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.clientRepository = clientRepository;
@@ -56,6 +57,7 @@ public class AuthServiceImpl implements AuthService {
         this.merchantRepository = merchantRepository;
         this.modelMapper = modelMapper;
         this.deviceHistoryRepository = deviceHistoryRepository;
+        this.merchantStatusTraceRepository = merchantStatusTraceRepository;
     }
 
     @Override
@@ -175,6 +177,15 @@ public class AuthServiceImpl implements AuthService {
         merchant.setStatus( MerchantStatus.NON_VERIFIED );
         merchant.setEnabled( false );
         merchantRepository.save( merchant );
+
+        // *** 3- Saving first trace
+        // ***
+        MerchantStatusTrace trace = new MerchantStatusTrace();
+        trace.setMerchant( merchant );
+        trace.setUser( user );
+        trace.setCreatedAt( new Date() );
+        trace.setStatus( MerchantStatus.NON_VERIFIED );
+        merchantStatusTraceRepository.save(trace);
 
         return "Merchant registered successfully";
     }
