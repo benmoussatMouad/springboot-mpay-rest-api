@@ -140,7 +140,7 @@ public class MerchantServiceImpl implements MerchantService {
         MerchantAccount account = merchantAccountRepository.findByMerchantId( merchant.getId() )
                 .orElse( null );
 
-        if( licenses.get( 0 ) != null ) {
+        if( licenses.size() != 0 ) {
             dto.setTerminalId( licenses.get( 0 ).getTerminalId() );
         }
         if( account != null ) {
