@@ -47,6 +47,16 @@ public class AuthController {
         return ResponseEntity.ok(jwtAuthResponse);
     }
 
+    @PostMapping({"/login/client", "signin/client"})
+    public ResponseEntity<JWTAuthResponse> clientLogin(@RequestBody ActorLoginDto dto) {
+        // check if device exists
+        if( !authService.verifyClientLogin( dto ) ) {
+            throw new MPayAPIException( HttpStatus.UNAUTHORIZED, "Verify new device" );
+        }
+
+        return this.login( dto );
+    }
+
     @PostMapping({"/login/merchant", "signin/merchant"})
     public ResponseEntity<JWTAuthResponse> merchantLogin(@RequestBody ActorLoginDto dto) {
         // check if device exists

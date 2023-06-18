@@ -22,4 +22,6 @@ public interface AuthService {
     Boolean checkMerchantPhone(String phone);
 
     Boolean verifyMerchantLogin(ActorLoginDto dto);
+
+    Boolean verifyClientLogin(ActorLoginDto dto);
 }

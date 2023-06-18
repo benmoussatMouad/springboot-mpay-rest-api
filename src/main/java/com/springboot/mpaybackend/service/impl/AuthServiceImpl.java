@@ -119,10 +119,6 @@ public class AuthServiceImpl implements AuthService {
         user.setUserType( UserType.CLIENT );
         userRepository.save( user );
 
-        // 1.2- Create OTP and send it
-
-        //createOtp( user );
-
         // 2-Create a client
         Client client = new Client();
         client.setUsername( user );
@@ -164,7 +160,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword( passwordEncoder.encode( dto.getPassword() ) );
         user.setPhone( dto.getPhone() );
         user.setFirstConnexion( true );
-        user.setUserType( UserType.CLIENT );
+        user.setUserType( UserType.MERCHANT );
         user.setEnabled( false );
         user.setSuffersAttempts( 0 );
         userRepository.save( user );
@@ -215,6 +211,23 @@ public class AuthServiceImpl implements AuthService {
 
         if( !merchantRepository.existsByUsernameUsername( dto.getUsernameOrEmail() ) ) {
             throw new ResourceNotFoundException( "Merchant", "username", dto.getUsernameOrEmail() );
+        }
+
+        if( !deviceHistoryRepository.existsByDevice( dto.getDevice() ) ) {
+            return false;
+        } else {
+            List<DeviceHistory> deviceHistory = deviceHistoryRepository.findByDevice( dto.getDevice() );
+
+            // TODO: Do checks for when to ask for a new OTP
+            // Check if the device is for the corresponding user
+            return deviceHistory.stream().map( e -> e.getUsername().getUsername() ).toList().contains( dto.getUsernameOrEmail() );
+        }
+    }
+
+    @Override
+    public Boolean verifyClientLogin(ActorLoginDto dto) {
+        if( !clientRepository.existsByUsernameUsername( dto.getUsernameOrEmail() ) ) {
+            throw new ResourceNotFoundException( "Client", "username", dto.getUsernameOrEmail() );
         }
 
         if( !deviceHistoryRepository.existsByDevice( dto.getDevice() ) ) {
