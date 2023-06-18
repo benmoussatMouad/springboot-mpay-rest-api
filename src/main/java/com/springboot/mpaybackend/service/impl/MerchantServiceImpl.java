@@ -33,8 +33,9 @@ public class MerchantServiceImpl implements MerchantService {
     MerchantStatusTraceRepository merchantStatusTraceRepository;
     MerchantLicenseRepository merchantLicenseRepository;
     MerchantAccountBlockTraceRepository merchantAccountBlockTraceRepository;
+    AgencyRepository agencyRepository;
 
-    public MerchantServiceImpl(MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository, MerchantLicenseRepository merchantLicenseRepository, MerchantAccountBlockTraceRepository merchantAccountBlockTraceRepository) {
+    public MerchantServiceImpl(MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository, MerchantLicenseRepository merchantLicenseRepository, MerchantAccountBlockTraceRepository merchantAccountBlockTraceRepository, AgencyRepository agencyRepository) {
         this.merchantRepository = merchantRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -45,6 +46,7 @@ public class MerchantServiceImpl implements MerchantService {
         this.merchantStatusTraceRepository = merchantStatusTraceRepository;
         this.merchantLicenseRepository = merchantLicenseRepository;
         this.merchantAccountBlockTraceRepository = merchantAccountBlockTraceRepository;
+        this.agencyRepository = agencyRepository;
 
         this.modelMapper.getConfiguration().setSkipNullEnabled(true);
 
@@ -238,6 +240,7 @@ public class MerchantServiceImpl implements MerchantService {
             throw new MPayAPIException( HttpStatus.CONFLICT, "Merchant already has an account, status should not be NON_VERIFIED" );
         }
         RibProcessor.setBankRepository( bankRepository );
+        RibProcessor.setAgencyRepository( agencyRepository );
         MerchantAccount account = new MerchantAccount();
         account.setBalance( 0 );
         account.setMerchant( merchant );
