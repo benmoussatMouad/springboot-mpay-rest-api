@@ -327,8 +327,8 @@ public class MerchantServiceImpl implements MerchantService {
         Merchant merchant = merchantRepository.findByIdAndDeletedFalse( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", id ) );
 
-        if( !merchant.getStatus().equals( MerchantStatus.FILLED_INFO ) || !merchant.getStatus().equals( MerchantStatus.IN_PROGRESS )  ) {
-            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Forbidden action: Merchant current status must be 'FILLED_INFO' or 'IN_PROGRESS'" );
+        if( !merchant.getStatus().equals( MerchantStatus.FILLED_INFO ) && !merchant.getStatus().equals( MerchantStatus.REVIEW )  ) {
+            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Forbidden action: Merchant current status must be 'FILLED_INFO' or 'REVIEW'" );
         }
 
         merchant.setStatus( MerchantStatus.IN_PROGRESS );
