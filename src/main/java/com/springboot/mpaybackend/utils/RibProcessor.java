@@ -19,7 +19,7 @@ public class RibProcessor {
         String bankCode = rib.substring( 0, SIZE_OF_BANK_CODE );
 
         // Check if agency is part of bank
-        String agencyCode = rib.substring( 3, SIZE_OF_AGENCY_CODE );
+        String agencyCode = rib.substring( 3, 3 + SIZE_OF_AGENCY_CODE );
         Agency agency = agencyRepository.findByAgencyCode( agencyCode )
                 .orElseThrow( () -> new ResourceNotFoundException( "Agency", "Agency Code", agencyCode ) );
 
