@@ -169,6 +169,8 @@ public class AuthServiceImpl implements AuthService {
         // *** 2- Creating Merchant
         // ***
         Merchant merchant = modelMapper.map( dto, Merchant.class );
+        //FIXME
+        merchant.setId( null );
         merchant.setUsername( user );
         merchant.setStatus( MerchantStatus.NON_VERIFIED );
         merchant.setEnabled( false );
