@@ -22,7 +22,9 @@ public interface AgencyRepository extends JpaRepository<Agency, java.lang.Long> 
 
     List<Agency> findAllByAgencyCode(String agencyCode);
 
-    Optional<Agency> findByAgencyCode(String agencyCode);
+    List<Agency> findByAgencyCode(String agencyCode);
 
     List<Agency> findAllByPhone(String phone);
+
+    Boolean existsByAgencyCode(String agencyCode);
 }
