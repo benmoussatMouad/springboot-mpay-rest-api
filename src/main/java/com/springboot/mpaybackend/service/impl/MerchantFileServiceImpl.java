@@ -12,9 +12,9 @@ import com.springboot.mpaybackend.service.MerchantFileService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,12 +32,23 @@ public class MerchantFileServiceImpl implements MerchantFileService {
 
     @Override
     public MerchantFileResponseDto saveMerchantFile(MerchantFileDto dto) {
-        MerchantFile merchantFile = new MerchantFile();
+
+        List<MerchantFile> files = merchantFileRepository.findByMerchantId( dto.getMerchantId() );
+
+        MerchantFile merchantFile;
+
+        if( files.stream().map( MerchantFile::getPiece ).toList().contains( FileType.valueOf( dto.getPiece() ) ) ) {
+            merchantFile = files.stream().filter( f -> f.getPiece().equals( FileType.valueOf( dto.getPiece() ) ) ).findFirst().orElse( null );
+
+        } else {
+            merchantFile = new MerchantFile();
+        }
+
         Merchant merchant = merchantRepository.findByIdAndDeletedFalse( dto.getMerchantId() )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", dto.getMerchantId() ) );
+
         merchantFile.setMerchant( merchant );
         merchantFile.setContent( Base64.getDecoder().decode(dto.getContent()) );
-        merchantFile.setPiece( FileType.valueOf( dto.getPiece() ) );
         merchantFile.setName( dto.getName() );
 
         merchantFileRepository.save( merchantFile );

@@ -160,7 +160,6 @@ public class MerchantController {
         }
 
         // Check if all files are being sent, first get existing uploaded files, and check what is needed
-
         Set<FileType> uniqueFileTypes = new HashSet<>();
         for (MerchantFileResponseDto file : existingFiles) {
             FileType type = FileType.valueOf( file.getPiece() );
