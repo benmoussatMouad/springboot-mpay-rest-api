@@ -8,6 +8,8 @@ import com.springboot.mpaybackend.repository.AgencyRepository;
 import com.springboot.mpaybackend.repository.BankRepository;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
+
 import static com.springboot.mpaybackend.utils.AppConstants.SIZE_OF_AGENCY_CODE;
 import static com.springboot.mpaybackend.utils.AppConstants.SIZE_OF_BANK_CODE;
 
@@ -20,10 +22,9 @@ public class RibProcessor {
 
         // Check if agency is part of bank
         String agencyCode = rib.substring( 3, 3 + SIZE_OF_AGENCY_CODE );
-        Agency agency = agencyRepository.findByAgencyCode( agencyCode )
-                .orElseThrow( () -> new ResourceNotFoundException( "Agency", "Agency Code", agencyCode ) );
+        List<Agency> agencies = agencyRepository.findByAgencyCode( agencyCode );
 
-        if( !agency.getBank().getBankCode().equals( bankCode ) ) {
+        if( !agencies.stream().map( a -> a.getBank().getBankCode() ).toList().contains( bankCode ) ) {
             throw new MPayAPIException( HttpStatus.CONFLICT, "RIB is faulty, Agency is not part of bank" );
         }
 
