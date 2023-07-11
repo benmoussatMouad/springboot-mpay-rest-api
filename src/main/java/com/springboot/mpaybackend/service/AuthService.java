@@ -26,5 +26,4 @@ public interface AuthService {
 
     Boolean verifyClientLogin(ActorLoginDto dto);
 
-    Boolean changePassword(String username, PasswordChangeDto dto);
 }
