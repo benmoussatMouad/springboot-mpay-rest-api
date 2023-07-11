@@ -24,4 +24,6 @@ public interface BankRepository extends JpaRepository<Bank, java.lang.Long> {
     List<Bank> findByTotalLicenceLessThanEqual(Integer max);
 
     Optional<Bank> findByBankCode(String code);
+
+    Boolean existsByBankCode(String bankCode);
 }

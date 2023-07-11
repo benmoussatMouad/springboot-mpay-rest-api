@@ -19,6 +19,7 @@ public class ClientDto {
     private String address;
 
     private Long wilayaId;
+    private Long wilayaName;
 
     private String commune;
     private String postalCode;

@@ -1,5 +1,6 @@
 package com.springboot.mpaybackend.security;
 
+import com.springboot.mpaybackend.exception.MPayAPIException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    FilterChain filterChain) throws ServletException, IOException, MPayAPIException {
 
         // get JWT token from http request
         String token = getTokenFromRequest(request);

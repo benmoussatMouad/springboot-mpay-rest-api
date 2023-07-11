@@ -2,6 +2,7 @@ package com.springboot.mpaybackend.service;
 
 import com.springboot.mpaybackend.payload.ActorLoginDto;
 import com.springboot.mpaybackend.payload.LoginDto;
+import com.springboot.mpaybackend.payload.PasswordChangeDto;
 import com.springboot.mpaybackend.payload.RegisterDto;
 
 public interface AuthService {
@@ -24,4 +25,6 @@ public interface AuthService {
     Boolean verifyMerchantLogin(ActorLoginDto dto);
 
     Boolean verifyClientLogin(ActorLoginDto dto);
+
+    Boolean changePassword(String username, PasswordChangeDto dto);
 }

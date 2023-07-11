@@ -37,7 +37,7 @@ public class Tm {
     private String trxRemb;
     private String trxSolde;
     private String trxAnnul;
-    private String trxPauthor;
+    private String trxPAutor;
     private String trxPhone;
     private String trxWithdraw;
     private String trxCashAdvancing;
