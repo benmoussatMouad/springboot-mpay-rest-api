@@ -5,6 +5,7 @@ import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.ActorLoginDto;
 import com.springboot.mpaybackend.payload.LoginDto;
+import com.springboot.mpaybackend.payload.PasswordChangeDto;
 import com.springboot.mpaybackend.payload.RegisterDto;
 import com.springboot.mpaybackend.repository.*;
 import com.springboot.mpaybackend.security.JwtTokenProvider;
@@ -240,6 +241,36 @@ public class AuthServiceImpl implements AuthService {
             // TODO: Do checks for when to ask for a new OTP
             // Check if the device is for the corresponding user
             return deviceHistory.stream().map( e -> e.getUsername().getUsername() ).toList().contains( dto.getUsernameOrEmail() );
+        }
+    }
+
+    @Override
+    public Boolean changePassword(String username, PasswordChangeDto dto) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+
+        // Check if the old password is correct
+        if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Old password doesn't match");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+
+        return true;
+    }
+
+    @Override
+    public void setNewPassword(String username, String newPassword) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+
+        Otp otp = otpRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Otp", "user", user.getUsername()));
+
+        if (otp.isUsed()) { // Verify if expired
+            user.setPassword(passwordEncoder.encode(newPassword));
+        } else {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Device should be verified");
         }
     }
 }

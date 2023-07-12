@@ -9,5 +9,7 @@ public class AppConstants {
     public static final int SIZE_OF_BANK_CODE = 3;
     public static final int SIZE_OF_AGENCY_CODE = 5;
     public static final int MERCHANT_FILES_NUMBER = 5;
+    public static final long ONE_MINUTE_IN_MILLIS = 60000;
+    public static final int DEFAULT_OTP_EXPIRATION_TIME = 3; // minutes
 
 }

@@ -12,6 +12,8 @@ import com.springboot.mpaybackend.service.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -126,4 +128,31 @@ public class AuthController {
         Boolean response = authService.checkMerchantPhone( phone );
         return new ResponseEntity<>( new ExistanceDto( response ), HttpStatus.ACCEPTED );
     }
+
+    @PutMapping("password/change")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'BANK_USER', 'BANK_ADMIN', 'AGENCY_USER', 'AGENCY_ADMIN', 'CLIENT', 'MERCHANT')")
+    public ResponseEntity<String> changeMyPassword(Authentication authentication, @RequestBody PasswordChangeDto dto) {
+        String username = authentication.getName();
+        authService.changePassword(username, dto);
+
+        return ResponseEntity.ok("Password changed");
+    }
+
+    @PostMapping("password/{username}/otp/check")
+    @Transactional(rollbackOn = Exception.class)
+    public ResponseEntity<String> checkPasswordOtp(@RequestBody ForgetPasswordCheckOtpDto dto, @PathVariable String username) {
+        if (otpService.checkOtp(dto, username)) {
+            return ResponseEntity.ok("Otp checked successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Otp is wrong");
+        }
+
+    }
+
+    @PostMapping("password/forgot")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordDto dto, Authentication authentication) {
+        authService.setNewPassword(authentication.getName(), dto.getNewPassword());
+        return ResponseEntity.ok("Password changed");
+    }
+
 }
