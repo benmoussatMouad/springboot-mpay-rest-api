@@ -6,6 +6,7 @@ import com.springboot.mpaybackend.entity.Wilaya;
 import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.CheckOtpDto;
+import com.springboot.mpaybackend.payload.DeviceHistoryDto;
 import com.springboot.mpaybackend.repository.DeviceHistoryRepository;
 import com.springboot.mpaybackend.repository.UserRepository;
 import com.springboot.mpaybackend.repository.WilayaRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class DeviceHistoryServiceImpl implements DeviceHistoryService {
@@ -50,5 +52,12 @@ public class DeviceHistoryServiceImpl implements DeviceHistoryService {
         device.setWilaya( wilaya );
 
         deviceHistoryRepository.save( device );
+    }
+
+    @Override
+    public List<DeviceHistoryDto> getDeviceHistoryByUsername(String name) {
+        List<DeviceHistory> deviceHistoryList = deviceHistoryRepository.findByUsernameUsername( name );
+
+        return deviceHistoryList.stream().map( d -> modelMapper.map( d, DeviceHistoryDto.class ) ).toList();
     }
 }

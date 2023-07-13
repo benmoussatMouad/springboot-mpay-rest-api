@@ -10,4 +10,6 @@ public interface DeviceHistoryRepository extends JpaRepository<DeviceHistory, Lo
     Boolean existsByDevice(String device);
 
     List<DeviceHistory> findByDevice(String device);
+
+    List<DeviceHistory> findByUsernameUsername(String name);
 }
