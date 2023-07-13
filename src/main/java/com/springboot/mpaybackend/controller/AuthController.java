@@ -10,6 +10,7 @@ import com.springboot.mpaybackend.service.DeviceHistoryService;
 import com.springboot.mpaybackend.service.OtpService;
 import com.springboot.mpaybackend.service.UserService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,8 +36,7 @@ public class AuthController {
     }
 
     // Build Login REST API
-    @PostMapping(value = {"/login", "/signin"})
-    public ResponseEntity<JWTAuthResponse> login(@RequestBody LoginDto loginDto){
+    public ResponseEntity<JWTAuthResponse> login(LoginDto loginDto){
         String token = authService.login(loginDto);
 
         JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
@@ -60,7 +60,7 @@ public class AuthController {
     }
 
     @PostMapping({"/login/merchant", "signin/merchant"})
-    public ResponseEntity<JWTAuthResponse> merchantLogin(@RequestBody ActorLoginDto dto) {
+    public ResponseEntity<JWTAuthResponse> merchantLogin(@RequestBody @Valid ActorLoginDto dto) {
         // check if device exists
         if( !authService.verifyMerchantLogin( dto ) ) {
             throw new MPayAPIException( HttpStatus.UNAUTHORIZED, "Verify new device" );
@@ -98,7 +98,7 @@ public class AuthController {
 
     @PostMapping("/otp/check")
     @Transactional(rollbackOn = Exception.class)
-    public ResponseEntity<String> checkOtp(@RequestBody CheckOtpDto dto) {
+public ResponseEntity<String> checkOtp(@RequestBody CheckOtpDto dto) {
         if( otpService.checkOtp( dto ) ) {
             deviceHistoryService.addDeviceHistory( dto );
             userService.enableUserByUsername( dto.getUsername() );

@@ -14,7 +14,6 @@ import com.springboot.mpaybackend.service.DeviceHistoryService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.ModelMap;
 
 import java.util.Date;
 import java.util.List;
@@ -56,8 +55,21 @@ public class DeviceHistoryServiceImpl implements DeviceHistoryService {
 
     @Override
     public List<DeviceHistoryDto> getDeviceHistoryByUsername(String name) {
-        List<DeviceHistory> deviceHistoryList = deviceHistoryRepository.findByUsernameUsername( name );
+        List<DeviceHistory> deviceHistoryList = deviceHistoryRepository.findByUsernameUsernameAndDeletedFalse( name );
 
         return deviceHistoryList.stream().map( d -> modelMapper.map( d, DeviceHistoryDto.class ) ).toList();
+    }
+
+    @Override
+    public void deleteDeviceHistory(String username, Long id) {
+        DeviceHistory deviceHistory = deviceHistoryRepository.findById( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Device History", "id", id ) );
+
+        if( !deviceHistory.getUsername().getUsername().equals( username ) ) {
+            throw new MPayAPIException( HttpStatus.FORBIDDEN, "This device history does not belong to current user" );
+        } else {
+            deviceHistory.setDeleted( true );
+            deviceHistoryRepository.save( deviceHistory );
+    }
     }
 }

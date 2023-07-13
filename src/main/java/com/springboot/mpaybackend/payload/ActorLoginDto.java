@@ -6,8 +6,7 @@ import lombok.Data;
 
 @Data
 public class ActorLoginDto extends LoginDto {
-    @NotNull
-    @NotEmpty
+    @NotEmpty(message = "Device is required")
     private String device;
     private String model;
     private String operatingSystem;

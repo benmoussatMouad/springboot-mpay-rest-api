@@ -9,6 +9,7 @@ import java.util.Date;
 
 @Data
 public class DeviceHistoryDto {
+    private Long id;
     private String model;
     private String operatingSystem;
     private String state;

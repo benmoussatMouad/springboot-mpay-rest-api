@@ -10,4 +10,6 @@ public interface DeviceHistoryService {
     void addDeviceHistory(CheckOtpDto dto);
 
     List<DeviceHistoryDto> getDeviceHistoryByUsername(String name);
+
+    void deleteDeviceHistory(String username, Long id);
 }

@@ -5,9 +5,7 @@ import com.springboot.mpaybackend.service.DeviceHistoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -24,6 +22,14 @@ public class DeviceHistoryController {
     @GetMapping("/me")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'CLIENT', 'MERCHANT')")
     public ResponseEntity<List<DeviceHistoryDto>> getMyHistory(Authentication authentication) {
-        return ResponseEntity.ok(deviceHistoryService.getDeviceHistoryByUsername( authentication.getName() ));
+        return ResponseEntity.ok( deviceHistoryService.getDeviceHistoryByUsername( authentication.getName() ) );
+    }
+
+    @DeleteMapping("/me/{device-id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'CLIENT', 'MERCHANT')")
+    public ResponseEntity<String> deleteOneHistory(Authentication authentication, @PathVariable("device-id") Long id) {
+        deviceHistoryService.deleteDeviceHistory( authentication.getName(), id );
+
+        return ResponseEntity.ok("Device history deleted succesfully");
     }
 }

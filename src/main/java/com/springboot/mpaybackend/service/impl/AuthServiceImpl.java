@@ -219,11 +219,14 @@ public class AuthServiceImpl implements AuthService {
         if( !deviceHistoryRepository.existsByDevice( dto.getDevice() ) ) {
             return false;
         } else {
-            List<DeviceHistory> deviceHistory = deviceHistoryRepository.findByDevice( dto.getDevice() );
+            List<DeviceHistory> deviceHistories = deviceHistoryRepository.findByDevice( dto.getDevice() );
 
             // TODO: Do checks for when to ask for a new OTP
+
+            deviceHistories.stream().filter( d -> d.getWilaya().getNumber().equals( dto.getWilayaNumber() ) ).findAny().orElse( null );
+
             // Check if the device is for the corresponding user
-            return deviceHistory.stream().map( e -> e.getUsername().getUsername() ).toList().contains( dto.getUsernameOrEmail() );
+            return deviceHistories.stream().map( e -> e.getUsername().getUsername() ).toList().contains( dto.getUsernameOrEmail() );
         }
     }
 

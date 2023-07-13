@@ -39,4 +39,7 @@ public class DeviceHistory {
     @JoinColumn(name = "wilaya_id")
     private Wilaya wilaya;
     private String commune;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean deleted;
 }
