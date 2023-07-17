@@ -90,7 +90,7 @@ public class TmServiceImpl implements TmService {
             dto.getTerminalUpdateCode().setValue( String.valueOf( line.charAt( 10 ) ) );
         }
 
-        if(checkIsNumeric( line, dto.getMerchantContractNumber(), 11, 26, "Merchant contract number must be an alphanumeric value with 15 positions" ) ) {
+        if(checkIsNumeric( line, dto.getMerchantContractNumber(), 11, 26, "Merchant contract number must be an numeric value with 15 positions" ) ) {
             dto.setAllCorrect( false );
         }
 
@@ -130,7 +130,7 @@ public class TmServiceImpl implements TmService {
             dto.setAllCorrect( false );
         }
 
-        if( checkIsNumeric( line, dto.getTerminalPhoneNumber(), 176, 191, "Terminal phone number must be a numeric value in 15 poistions" ) ) {
+        if( checkIsNumericOrBlank( line, dto.getTerminalPhoneNumber(), 176, 191, "Terminal phone number must be a numeric value in 15 poistions" ) ) {
             dto.setAllCorrect( false );
         }
 
