@@ -34,14 +34,18 @@ public class TmServiceImpl implements TmService {
         TmFileCheckDto dto = new TmFileCheckDto();
         dto.setAllCorrect( true );
 
-        //Check header record
-        dto = checkHeaderRecord( lines[0], dto );
+        try {
+            //Check header record
+            dto = checkHeaderRecord( lines[0], dto );
 
-        // Check second record
-        dto = checkSecondRecord( lines[1], dto );
+            // Check second record
+            dto = checkSecondRecord( lines[1], dto );
 
-        // Check last record
-        dto = checkLastRecord( lines[2], dto );
+            // Check last record
+            dto = checkLastRecord( lines[2], dto );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return dto;
     }
@@ -59,8 +63,8 @@ public class TmServiceImpl implements TmService {
         if( line.charAt( 10 ) != 'X' ) {
             dto.getLastRecordEndCharacter().setCorrect( false );
             dto.getLastRecordEndCharacter().setLine( 2 );
-            dto.getLastRecordEndCharacter().setPositionStart( 379 );
-            dto.getLastRecordEndCharacter().setPositionEnd( 379 );
+            dto.getLastRecordEndCharacter().setPositionStart( 10 );
+            dto.getLastRecordEndCharacter().setPositionEnd( 10 );
             dto.getLastRecordEndCharacter().setFeedback( "End character must be X" );
             dto.getLastRecordEndCharacter().setValue( String.valueOf( line.charAt( 10 ) ) );
             dto.setAllCorrect( false );
@@ -177,6 +181,12 @@ public class TmServiceImpl implements TmService {
         }
 
         if( line.charAt( 288 ) != 'A' && line.charAt( 288 ) != 'D' ) {
+            dto.getTerminalCardTypeUpdate().setCorrect(false);
+            dto.getTerminalCardTypeUpdate().setValue(String.valueOf(line.charAt( 288 )));
+            dto.getTerminalCardTypeUpdate().setLine(2);
+            dto.getTerminalCardTypeUpdate().setPositionStart(288);
+            dto.getTerminalCardTypeUpdate().setPositionEnd(288);
+            dto.getTerminalCardTypeUpdate().setFeedback("Terminal card type should be A or D");
             dto.setAllCorrect( false );
         }
 
@@ -201,45 +211,45 @@ public class TmServiceImpl implements TmService {
             dto.setAllCorrect( false );
         }
 
-        if( checkCardType( line, dto.getCardType3(), 322, 325, 3, "Card type 3 must be of value 'C3' or blank", true ) ) {
+        if( checkCardType( line, dto.getCardType3(), 322, 324, 3, "Card type 3 must be of value 'C3' or blank", true ) ) {
             dto.setAllCorrect( false );
         }
-        if( checkIsNumericOrBlank( line, dto.getLimit3(), 325, 334, "Limit 3 must be a numerical value in 9 positions or blank" ) ) {
-            dto.setAllCorrect( false );
-        }
-
-        if( checkCardType( line, dto.getCardType4(), 334, 336, 4, "Card type 4 must be of value 'C4' or blank", true ) ) {
-            dto.setAllCorrect( false );
-        }
-        if( checkIsNumericOrBlank( line, dto.getLimit4(), 336, 345, "Limit 4 must be a numerical value in 9 positions or blank" ) ) {
+        if( checkIsNumericOrBlank( line, dto.getLimit3(), 324, 333, "Limit 3 must be a numerical value in 9 positions or blank" ) ) {
             dto.setAllCorrect( false );
         }
 
-        if( checkCardType( line, dto.getCardType5(), 345, 347, 4, "Card type 5 must be of value 'C5' or blank", true ) ) {
+        if( checkCardType( line, dto.getCardType4(), 333, 335, 4, "Card type 4 must be of value 'C4' or blank", true ) ) {
             dto.setAllCorrect( false );
         }
-        if( checkIsNumericOrBlank( line, dto.getLimit5(), 347, 356, "Limit 5 must be a numerical value in 9 positions or blank" ) ) {
-            dto.setAllCorrect( false );
-        }
-
-        if( checkCardType( line, dto.getCardType6(), 356, 358, 4, "Card type 6 must be of value 'C6' or blank", true ) ) {
-            dto.setAllCorrect( false );
-        }
-        if( checkIsNumericOrBlank( line, dto.getLimit6(), 358, 367, "Limit 6 must be a numerical value in 9 positions or blank" ) ) {
+        if( checkIsNumericOrBlank( line, dto.getLimit4(), 335, 344, "Limit 4 must be a numerical value in 9 positions or blank" ) ) {
             dto.setAllCorrect( false );
         }
 
-        if( checkIsNumericOrBlank( line, dto.getTerminalType(), 367, 369, "Terminal type must be a numerical value in two positions" ) ) {
+        if( checkCardType( line, dto.getCardType5(), 344, 346, 4, "Card type 5 must be of value 'C5' or blank", true ) ) {
+            dto.setAllCorrect( false );
+        }
+        if( checkIsNumericOrBlank( line, dto.getLimit5(), 346, 355, "Limit 5 must be a numerical value in 9 positions or blank" ) ) {
             dto.setAllCorrect( false );
         }
 
-        if( line.charAt( 369 ) != 'X' ) {
+        if( checkCardType( line, dto.getCardType6(), 355, 357, 4, "Card type 6 must be of value 'C6' or blank", true ) ) {
+            dto.setAllCorrect( false );
+        }
+        if( checkIsNumericOrBlank( line, dto.getLimit6(), 357, 366, "Limit 6 must be a numerical value in 9 positions or blank" ) ) {
+            dto.setAllCorrect( false );
+        }
+
+        if( checkIsNumericOrBlank( line, dto.getTerminalType(), 366, 368, "Terminal type must be a numerical value in two positions" ) ) {
+            dto.setAllCorrect( false );
+        }
+
+        if( line.charAt( 368 ) != 'X' ) {
             dto.getSecondRecordEndCharacter().setCorrect( false );
             dto.getSecondRecordEndCharacter().setLine( 2 );
-            dto.getSecondRecordEndCharacter().setPositionStart( 369 );
-            dto.getSecondRecordEndCharacter().setPositionEnd( 369 );
+            dto.getSecondRecordEndCharacter().setPositionStart( 368 );
+            dto.getSecondRecordEndCharacter().setPositionEnd( 368 );
             dto.getSecondRecordEndCharacter().setFeedback( "End character must be X" );
-            dto.getSecondRecordEndCharacter().setValue( String.valueOf( line.charAt( 379 ) ) );
+            dto.getSecondRecordEndCharacter().setValue( String.valueOf( line.charAt( 368 ) ) );
             dto.setAllCorrect( false );
         }
 
