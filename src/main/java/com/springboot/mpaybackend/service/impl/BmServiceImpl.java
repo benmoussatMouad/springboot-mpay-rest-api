@@ -59,10 +59,10 @@ public class BmServiceImpl implements BmService {
         if( line.charAt( 10 ) != 'X' ) {
             dto.getLastRecordEndCharacter().setCorrect( false );
             dto.getLastRecordEndCharacter().setLine( 2 );
-            dto.getLastRecordEndCharacter().setPositionStart( 564 );
-            dto.getLastRecordEndCharacter().setPositionEnd( 564 );
+            dto.getLastRecordEndCharacter().setPositionStart( 9 );
+            dto.getLastRecordEndCharacter().setPositionEnd( 9 );
             dto.getLastRecordEndCharacter().setFeedback( "End character must be X" );
-            dto.getLastRecordEndCharacter().setValue( String.valueOf( line.charAt( 564 ) ) );
+            dto.getLastRecordEndCharacter().setValue( String.valueOf( line.charAt( 10 ) ) );
             dto.setAllCorrect( false );
         }
         return dto;
@@ -237,7 +237,7 @@ public class BmServiceImpl implements BmService {
             dto.getSecondRecordEndCharacter().setPositionStart( 564 );
             dto.getSecondRecordEndCharacter().setPositionEnd( 564 );
             dto.getSecondRecordEndCharacter().setFeedback( "End character must be X" );
-            dto.getSecondRecordEndCharacter().setValue( String.valueOf( line.charAt( 564 ) ) );
+            dto.getSecondRecordEndCharacter().setValue( String.valueOf( line.charAt( 565 ) ) );
             dto.setAllCorrect( false );
         }
 

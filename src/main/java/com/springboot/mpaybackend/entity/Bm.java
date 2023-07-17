@@ -1,10 +1,7 @@
 package com.springboot.mpaybackend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 
@@ -13,6 +10,7 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Bm {
 
     @Id
@@ -49,12 +47,13 @@ public class Bm {
     private String merchantAgencyLabel;
     private String merchantTransactionThreshold;
     private String enteteBm;
+    @Column(columnDefinition = "text")
     private String debutInfoBm;
     private String finBm;
     private Integer automatic;
 
 
-    private Integer flag;
+    private Boolean deleted;
 
     private Date CreatedOn;
 

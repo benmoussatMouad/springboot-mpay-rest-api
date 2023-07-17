@@ -61,6 +61,7 @@ public class Tm {
     private String limit6;
     private String terminalType;
     private String enteteTm;
+    @Column(columnDefinition = "text")
     private String debutInfoTm;
     private String finTm;
     private Integer flag;

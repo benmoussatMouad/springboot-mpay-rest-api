@@ -63,10 +63,10 @@ public class TmServiceImpl implements TmService {
         if( line.charAt( 10 ) != 'X' ) {
             dto.getLastRecordEndCharacter().setCorrect( false );
             dto.getLastRecordEndCharacter().setLine( 2 );
-            dto.getLastRecordEndCharacter().setPositionStart( 10 );
-            dto.getLastRecordEndCharacter().setPositionEnd( 10 );
+            dto.getLastRecordEndCharacter().setPositionStart( 11 );
+            dto.getLastRecordEndCharacter().setPositionEnd( 11 );
             dto.getLastRecordEndCharacter().setFeedback( "End character must be X" );
-            dto.getLastRecordEndCharacter().setValue( String.valueOf( line.charAt( 10 ) ) );
+            dto.getLastRecordEndCharacter().setValue( "" + line.charAt( 10 ) );
             dto.setAllCorrect( false );
         }
 
@@ -83,8 +83,8 @@ public class TmServiceImpl implements TmService {
         }
         if( line.charAt( 10 ) != 'A' && line.charAt( 10 ) != 'C' && line.charAt( 10 ) != 'D' ) {
             dto.getTerminalUpdateCode().setCorrect( false );
-            dto.getTerminalUpdateCode().setPositionStart( 10 );
-            dto.getTerminalUpdateCode().setPositionEnd( 10 );
+            dto.getTerminalUpdateCode().setPositionStart( 11 );
+            dto.getTerminalUpdateCode().setPositionEnd( 11 );
             dto.getTerminalUpdateCode().setLine( 2 );
             dto.getTerminalUpdateCode().addFeedback( "Terminal update code must be A or C or D" );
             dto.getTerminalUpdateCode().setValue( String.valueOf( line.charAt( 10 ) ) );
@@ -264,21 +264,21 @@ public class TmServiceImpl implements TmService {
                 cardTypeField.setLine( Arrays.asList( this.lines ).indexOf( line ) + 1 );
                 cardTypeField.setPositionStart( positionStart );
                 cardTypeField.setPositionEnd( positionEnd -1 );
-                cardTypeField.setValue( line.substring( positionStart, positionEnd ) );
                 cardTypeField.addFeedback( feedback );
                 return true;
             }
+
         } else {
             if( !line.substring( positionStart, positionEnd ).equals( "C" + cardType ) &&  line.substring( positionStart, positionEnd ).isBlank()) {
                 cardTypeField.setCorrect( false );
                 cardTypeField.setLine( Arrays.asList( this.lines ).indexOf( line ) + 1 );
                 cardTypeField.setPositionStart( positionStart );
                 cardTypeField.setPositionEnd( positionEnd -1 );
-                cardTypeField.setValue( line.substring( positionStart, positionEnd ) );
                 cardTypeField.addFeedback( feedback );
                 return true;
             }
         }
+        cardTypeField.setValue( line.substring( positionStart, positionEnd ) );
         return false;
     }
 
@@ -288,7 +288,7 @@ public class TmServiceImpl implements TmService {
             trxField.setLine( Arrays.asList( this.lines ).indexOf( line ) + 1 );
             trxField.setPositionStart( position );
             trxField.setPositionEnd( position );
-            trxField.setValue( String.valueOf( line.charAt( position ) ) );
+            trxField.setValue( "" + ( line.charAt( position ) ) );
             trxField.addFeedback( feedback );
             return true;
         }
@@ -311,6 +311,7 @@ public class TmServiceImpl implements TmService {
             dto.getHeaderRecordEndCharacter().setPositionEnd( 27 );
             dto.getHeaderRecordEndCharacter().setLine( 1 );
             dto.getHeaderRecordEndCharacter().addFeedback( "Last character should be X" );
+            dto.getHeaderRecordEndCharacter().setValue( "" + line.charAt( 27 ) );
         }
         return dto;
     }

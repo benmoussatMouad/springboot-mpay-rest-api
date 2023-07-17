@@ -9,6 +9,7 @@ import com.springboot.mpaybackend.service.MerchantFileService;
 import com.springboot.mpaybackend.service.MerchantService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -221,8 +222,9 @@ public class MerchantController {
 
     @PutMapping("/{id}/accept")
     @PreAuthorize("hasAuthority('BANK_USER') OR hasAuthority('BANK_ADMIN') OR hasAuthority('ADMIN')")
-    public ResponseEntity<MerchantDto> acceptMerchantDemand(@PathVariable Long id, @RequestBody AcceptMerchantDemandDto dto) {
-        return null;
+    public ResponseEntity<MerchantDto> acceptMerchantDemand(@PathVariable Long id, @RequestBody @Valid AcceptMerchantDemandDto dto, Authentication authentication) {
+
+        return ResponseEntity.ok(merchantService.acceptMerchantByBank(id, dto, authentication.getName()));
     }
 }
 

@@ -34,4 +34,6 @@ public interface MerchantService {
     MerchantDto demandReviewFile(Long id, String feedback);
 
     MerchantDto rejectMerchant(Long id);
+
+    MerchantDto acceptMerchantByBank(Long id, AcceptMerchantDemandDto dto, String username);
 }
