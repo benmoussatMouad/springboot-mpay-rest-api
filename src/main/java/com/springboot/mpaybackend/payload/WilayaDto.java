@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class WilayaDto {
 
-    private Long wilayaId;
+    private Long id;
     @NotEmpty
     private Integer number;
     @NotEmpty
