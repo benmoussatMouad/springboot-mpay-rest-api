@@ -540,6 +540,17 @@ public class MerchantServiceImpl implements MerchantService {
 
         Merchant savedMerchant =  merchantRepository.save(merchant);
 
+        // Save trace
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant Account ", "merchant id", id ) );
+        MerchantStatusTrace trace = new MerchantStatusTrace();
+        trace.setMerchant( merchant );
+        trace.setBank( account.getBank() );
+        trace.setUser( merchant.getUsername() );
+        trace.setCreatedAt( new Date() );
+        trace.setStatus( MerchantStatus.ACCEPTED );
+        merchantStatusTraceRepository.save( trace );
+
         return modelMapper.map(savedMerchant, MerchantDto.class);
     }
 }
