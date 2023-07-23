@@ -31,6 +31,14 @@ public class Merchant {
     @JoinColumn(name = "wilaya_id")
     private Wilaya wilaya;
 
+    @ManyToOne
+    @JoinColumn(name = "bank_id")
+    private Bank bank;
+
+    @ManyToOne
+    @JoinColumn(name = "agency_id")
+    private Agency agency;
+
     private String commune;
     private String postalCode;
 

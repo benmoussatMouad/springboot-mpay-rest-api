@@ -1,7 +1,6 @@
 package com.springboot.mpaybackend.controller;
 
 import com.springboot.mpaybackend.entity.FileType;
-import com.springboot.mpaybackend.entity.Merchant;
 import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.service.MerchantAccountService;
@@ -14,15 +13,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.springboot.mpaybackend.utils.AppConstants.MERCHANT_FILES_NUMBER;
 
@@ -43,9 +44,19 @@ public class MerchantController {
     }
 
     @PostMapping
-    public ResponseEntity<MerchantResponseDto> createMerchant(@RequestBody MerchantDto dto) {
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MERCHANT', 'AGENCY_USER', 'AGENCY_ADMIN', 'BANK_USER', 'BANK_ADMIN')")
+    public ResponseEntity<MerchantResponseDto> createMerchant(@RequestBody MerchantDto dto, Authentication authentication) {
+        if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"))
+        || authentication.getAuthorities().contains(new SimpleGrantedAuthority("MERCHANT"))) {
+            return ResponseEntity.ok(merchantService.addMerchant(dto, false, authentication.getName()));
+        } else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_USER"))
+                || authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_ADMIN"))
+                || authentication.getAuthorities().contains(new SimpleGrantedAuthority("AGENCY_USER"))
+                || authentication.getAuthorities().contains(new SimpleGrantedAuthority("AGENCY_ADMIN"))) {
 
-        return ResponseEntity.ok( merchantService.addMerchant( dto, false ) );
+            return ResponseEntity.ok(merchantService.addMerchant(dto, true, authentication.getName()));
+        }
+        return ResponseEntity.ok(merchantService.addMerchant(dto, false, authentication.getName()));
     }
 
     @GetMapping
@@ -60,9 +71,9 @@ public class MerchantController {
         return ResponseEntity.ok( merchantAccountService.getAllMerchantStatusTraces( id ) );
     }
 
-    // TODO: Actions for changing the merchant status, when to create an account if the merchant is not directly created by a bank user
 
     @GetMapping("page")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'BANK_USER', 'BANK_ADMIN', 'AGENCY_USER', 'AGENCY_ADMIN')")
     public ResponseEntity<MerchantPageDto> getMerchantsByPageByFilter(
             @RequestParam(name = "page")
             @Parameter(description = "The number of the desired page, start from 0") Integer page,
@@ -79,12 +90,18 @@ public class MerchantController {
             @RequestParam(name = "nif", required = false)
             @Parameter(description = "Filter the results by name containing") String nif,
             @RequestParam(name = "id", required = false)
-            @Parameter(description = "The id of merchant within the table") Long id
+            @Parameter(description = "The id of merchant within the table") Long id,
+            Authentication authentication
     ) {
-        System.out.println( name );
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         try {
-            System.out.println( phone );
-            return ResponseEntity.ok( merchantService.getAllMerchantsByFilter( page, size, id, name, name, phone, regCommerce, nif, status ) );
+            if (authorities.contains(new SimpleGrantedAuthority("ADMIN"))) {
+                return ResponseEntity.ok(merchantService.getAllMerchantsByFilter(page, size, id, name, name, phone, regCommerce, nif, status));
+            } else { // Calling user is either a bank user or agency user, get only related merchants
+                return ResponseEntity.ok(merchantService.getAllMerchantsByFilterForSpecificBank(page, size, id, name, name, phone, regCommerce, nif, status, authentication.getName()));
+
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

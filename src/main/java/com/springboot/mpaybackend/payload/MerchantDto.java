@@ -34,7 +34,7 @@ public class MerchantDto {
     private String fiscalNumber;
     private String registreCommerceNumber;
     private String articleImpotsNumber;
-    private String numberCheckoutRequested;
+    private Integer numberCheckoutRequested;
 
     @EnumValidator(enumClass = MerchantStatus.class, message = "Must")
     private String status;

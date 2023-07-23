@@ -1,5 +1,6 @@
 package com.springboot.mpaybackend.controller;
 
+import com.springboot.mpaybackend.entity.Bank;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.service.BankService;
 import com.springboot.mpaybackend.service.MerchantAccountService;
@@ -11,9 +12,11 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,12 +45,22 @@ public class BankController {
         return new ResponseEntity<>(savedBank, HttpStatus.CREATED);
     }
 
+    @GetMapping("me")
+    @PreAuthorize("hasAnyAuthority('BANK_USER', 'BANK_ADMIN', 'AGENCY_USER', 'AGENCY_ADMIN')")
+    public ResponseEntity<BankDto> getBankForCurrentUser(Authentication authentication) {
+        if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_USER"))
+                || authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_ADMIN"))) {
+            return ResponseEntity.ok(bankService.getBankForBankUser(authentication.getName()));
+        } else {
+            return ResponseEntity.ok(bankService.getBankForAgencyUser(authentication.getName()));
+        }
+    }
+
     @PostMapping("merchant")
     //@PreAuthorize("hasRole('ADMIN')")
     @Transactional(rollbackOn = Exception.class)
-    public ResponseEntity<String> addMerchantThroughBank(@RequestBody MerchantByBankUserDto dto) {
+    public ResponseEntity<String> addMerchantThroughBank(@RequestBody MerchantByBankUserDto dto, Authentication authentication) {
 
-        try {
             // Check if files exists
             if( dto.getDocuments() == null ) {
                 return ResponseEntity.badRequest().body( "Documents not sent" );
@@ -64,7 +77,7 @@ public class BankController {
             }
 
             //Create Merchant
-            MerchantResponseDto merchantResponseDto = merchantService.addMerchant( modelMapper.map( dto, MerchantDto.class ), true );
+            MerchantResponseDto merchantResponseDto = merchantService.addMerchant( modelMapper.map( dto, MerchantDto.class ), true, authentication.getName());
 
             //Save Merchant files
             for (MerchantFileDto document :
@@ -78,10 +91,8 @@ public class BankController {
             merchantAccountService.createAccountForMerchantByBankCode( merchantResponseDto.getId(), dto.getRib() );
 
             return ResponseEntity.ok( "Merchant saved" );
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body( "Error saving file" );
         }
-    }
+
 
     @GetMapping()
     public ResponseEntity<List<BankDto>> getBanks(

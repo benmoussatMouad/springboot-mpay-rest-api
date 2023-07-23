@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MerchantService {
 
-    MerchantResponseDto addMerchant(MerchantDto dto, Boolean byBankUser);
+    MerchantResponseDto addMerchant(MerchantDto dto, Boolean byBankUser, String useraname);
 
     MerchantResponseDto getMerchant(Long id);
 
@@ -36,4 +36,6 @@ public interface MerchantService {
     MerchantDto rejectMerchant(Long id);
 
     MerchantDto acceptMerchantByBank(Long id, AcceptMerchantDemandDto dto, String username);
+
+    MerchantPageDto getAllMerchantsByFilterForSpecificBank(Integer page, Integer size, Long id, String name, String name1, String phone, String regCommerce, String nif, String status, String callingUsername);
 }

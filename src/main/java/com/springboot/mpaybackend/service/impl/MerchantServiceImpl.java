@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,8 +41,10 @@ public class MerchantServiceImpl implements MerchantService {
     TmService tmService;
     BmRepository bmRepository;
     TmRepository tmRepository;
+    UserBankRepository userBankRepository;
+    UserAgencyRepository userAgencyRepository;
 
-    public MerchantServiceImpl(TmRepository tmRepository, MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository, MerchantLicenseRepository merchantLicenseRepository, MerchantAccountBlockTraceRepository merchantAccountBlockTraceRepository, AgencyRepository agencyRepository, BmService bmService, TmService tmService,BmRepository bmRepository) {
+    public MerchantServiceImpl(TmRepository tmRepository, MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository, MerchantLicenseRepository merchantLicenseRepository, MerchantAccountBlockTraceRepository merchantAccountBlockTraceRepository, AgencyRepository agencyRepository, BmService bmService, TmService tmService,BmRepository bmRepository, UserBankRepository userBankRepository, UserAgencyRepository userAgencyRepository) {
         this.merchantRepository = merchantRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -57,6 +60,8 @@ public class MerchantServiceImpl implements MerchantService {
         this.tmService = tmService;
         this.bmRepository = bmRepository;
         this.tmRepository = tmRepository;
+        this.userBankRepository = userBankRepository;
+        this.agencyRepository = agencyRepository;
 
         this.modelMapper.getConfiguration().setSkipNullEnabled(true);
 
@@ -80,7 +85,7 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     @Transactional(rollbackOn = Exception.class)
-    public MerchantResponseDto addMerchant(MerchantDto dto, Boolean byBankUser) {
+    public MerchantResponseDto addMerchant(MerchantDto dto, Boolean byBankUser, String username) {
 
         // check if Merchant exists by phone
         if(merchantRepository.existsByPhone( dto.getPhone() ) ) {
@@ -95,6 +100,28 @@ public class MerchantServiceImpl implements MerchantService {
         // 1- Creating Merchant, User object is created by model Mapper
         Merchant merchant = modelMapper.map( dto, Merchant.class );
         if( byBankUser ) { // If the merchant is created by bank user, make status to In Progress + Create an account directly
+
+            User callingUser = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new ResourceNotFoundException("Calling user", "username", username));
+
+            if (callingUser.getUserType().equals(UserType.AGENCY_USER)
+                    || callingUser.getUserType().equals(UserType.AGENCY_ADMIN)) {
+
+                UserAgency userAgency = userAgencyRepository.findByUsernameUsername(username)
+                        .orElseThrow(() -> new ResourceNotFoundException("Calling user", "username", username));
+
+                merchant.setBank(userAgency.getAgency().getBank());
+                merchant.setAgency(userAgency.getAgency());
+            }
+            if (callingUser.getUserType().equals(UserType.BANK_USER)
+                    || callingUser.getUserType().equals(UserType.BANK_ADMIN)) {
+
+                UserBank userBank = userBankRepository.findByUsernameUsername(username)
+                        .orElseThrow(() -> new ResourceNotFoundException("Calling user", "username", username));
+
+                merchant.setBank(userBank.getBank());
+            }
+
             merchant.setStatus( MerchantStatus.IN_PROGRESS );
         }
 
@@ -107,14 +134,14 @@ public class MerchantServiceImpl implements MerchantService {
 
         //TODO: Move it elsewhere
         // 3 Creating the trace
-        if( !byBankUser ) {
+        if (!byBankUser) {
             MerchantStatusTrace trace = new MerchantStatusTrace();
-            trace.setMerchant( merchant );
-            trace.setCreatedAt( new Date() );
-            trace.setUser( user );
-            trace.setStatus( MerchantStatus.NON_VERIFIED );
+            trace.setMerchant(merchant);
+            trace.setCreatedAt(new Date());
+            trace.setUser(user);
+            trace.setStatus(MerchantStatus.NON_VERIFIED);
 
-            merchantStatusTraceRepository.save( trace );
+            merchantStatusTraceRepository.save(trace);
         }
 
         Merchant savedMerchant = merchantRepository.save( merchant );
@@ -260,6 +287,8 @@ public class MerchantServiceImpl implements MerchantService {
 
         //Set Status and save trace
         merchant.setStatus( MerchantStatus.FILLED_INFO );
+        merchant.setBank(account.getBank());
+        merchant.setAgency(RibProcessor.extractAgencyFrom(dto.getRib()));
 
         MerchantStatusTrace trace = new MerchantStatusTrace();
         trace.setBank( RibProcessor.extractBankFrom( dto.getRib() ) );
@@ -552,5 +581,51 @@ public class MerchantServiceImpl implements MerchantService {
         merchantStatusTraceRepository.save( trace );
 
         return modelMapper.map(savedMerchant, MerchantDto.class);
+    }
+
+    @Override
+    public MerchantPageDto getAllMerchantsByFilterForSpecificBank(Integer page, Integer size, Long id, String firstName, String lastName, String phone, String registreCommerce, String numeroFiscal, String status, String callingUsername) {
+
+        List<Merchant> merchants = merchantRepository.findByFilter( id, firstName, lastName, phone, registreCommerce, numeroFiscal, (status!=null ? MerchantStatus.valueOf( status ) : null) );
+        // Check type of calling user
+        User callingUser = userRepository.findByUsername(callingUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", callingUsername));
+
+        Bank bankOfCallingUser;
+
+        if (callingUser.getUserType().equals(UserType.BANK_USER)
+                || callingUser.getUserType().equals(UserType.BANK_ADMIN)) {
+
+            UserBank user = userBankRepository.findByUsernameUsername(callingUsername)
+                    .orElseThrow(() -> new ResourceNotFoundException("User Bank", "username", callingUsername));
+
+            bankOfCallingUser = user.getBank();
+
+            // Filter merchants by bank or agency
+            List<Merchant> list = merchants.stream().filter(merchant -> {
+                        if (merchant.getBank() != null) {
+                            return (merchant.getBank().getId() == bankOfCallingUser.getId());
+                        } else {
+                            return false;
+                        }
+            }
+            ).collect(Collectors.toList());
+
+            return makePageDto(new PageImpl<>(list, PageRequest.of( page, size ), list.size()));
+
+        } else if (callingUser.getUserType().equals(UserType.AGENCY_USER)
+                || callingUser.getUserType().equals(UserType.AGENCY_ADMIN)) {
+
+            UserAgency user = userAgencyRepository.findByUsernameUsername(callingUsername)
+                    .orElseThrow(() -> new ResourceNotFoundException("User agency", "username", callingUsername));
+
+            bankOfCallingUser = user.getAgency().getBank();
+            // Filter merchants by bank or agency
+            List<Merchant> list = merchants.stream().filter(merchant -> (merchant.getBank() != null) && merchant.getBank().equals(bankOfCallingUser)).toList();
+
+            return makePageDto(new PageImpl<Merchant>(list,PageRequest.of( page, size ), list.size()));
+        } else {
+            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Calling user's type not authorized for this action");
+        }
     }
 }

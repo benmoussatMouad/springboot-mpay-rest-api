@@ -46,6 +46,17 @@ public interface MerchantRepository extends JpaRepository<Merchant, Long> {
             @Param("status") MerchantStatus status
     );
 
+    @Query("SELECT m FROM Merchant m WHERE (:id is null or m.id = :id) AND ((:firstName is null OR CONCAT('%', m.firstName, '%') LIKE CONCAT('%', :firstName, '%')) OR (:lastName is null OR CONCAT('%', m.lastName, '%') LIKE CONCAT('%', :lastName, '%'))) AND (:phone is null OR m.phone LIKE CONCAT('%', :phone, '%')) AND (:registreCommerce is null OR m.registreCommerceNumber LIKE CONCAT('%', :registreCommerce, '%')) AND (:fiscalNumber is null OR m.fiscalNumber LIKE CONCAT('%', :fiscalNumber, '%')) AND (:status is null OR m.status = :status)")
+    List<Merchant> findByFilter(
+            @Param("id") Long id,
+            @Param("firstName") String firstName,
+            @Param("lastName") String lastName,
+            @Param("phone") String phone,
+            @Param("registreCommerce") String registreCommerce,
+            @Param("fiscalNumber") String fiscalNumber,
+            @Param("status") MerchantStatus status
+    );
+
 
     Boolean existsByPhone(String phone);
 

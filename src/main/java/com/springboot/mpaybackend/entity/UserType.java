@@ -6,5 +6,7 @@ public enum UserType {
     ADMIN,
     BANK_USER,
     BANK_ADMIN,
-    AGENCY_USER;
+    AGENCY_USER,
+
+    AGENCY_ADMIN;
 }

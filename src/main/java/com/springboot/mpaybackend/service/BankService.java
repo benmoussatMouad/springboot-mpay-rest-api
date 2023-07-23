@@ -3,6 +3,7 @@ package com.springboot.mpaybackend.service;
 import com.springboot.mpaybackend.payload.BankDto;
 import com.springboot.mpaybackend.payload.BankLightDto;
 import com.springboot.mpaybackend.payload.BankPageDto;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -35,4 +36,8 @@ public interface BankService {
     List<BankDto> getBanksByAddressContaining(String address);
 
     List<BankDto> getBanksByPhoneContaining(String phone);
+
+    BankDto getBankForBankUser(String username);
+
+    BankDto getBankForAgencyUser(String username);
 }

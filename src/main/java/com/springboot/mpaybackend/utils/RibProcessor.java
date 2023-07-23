@@ -24,12 +24,23 @@ public class RibProcessor {
         String agencyCode = rib.substring( 3, 3 + SIZE_OF_AGENCY_CODE );
         List<Agency> agencies = agencyRepository.findByAgencyCode( agencyCode );
 
-        if( !agencies.stream().map( a -> a.getBank().getBankCode() ).toList().contains( bankCode ) ) {
-            throw new MPayAPIException( HttpStatus.CONFLICT, "RIB is faulty, Agency is not part of bank" );
-        }
 
         return bankRepository.findByBankCode( bankCode )
                 .orElseThrow( () -> new ResourceNotFoundException( "Bank", "Bank Code", bankCode ) );
+    }
+
+    public static Agency extractAgencyFrom(String rib) {
+        String bankCode = rib.substring( 0, SIZE_OF_BANK_CODE );
+
+        // Check if agency is part of bank
+        String agencyCode = rib.substring( 3, 3 + SIZE_OF_AGENCY_CODE );
+        List<Agency> agencies = agencyRepository.findByAgencyCode( agencyCode );
+
+        Bank bank = bankRepository.findByBankCode(bankCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Bank", "Bank Code", bankCode));
+
+        return agencies.stream().filter(agency -> agency.getBank().equals(bank)).findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Agency", "Agency Code", agencyCode));
     }
 
     public static void setAgencyRepository(AgencyRepository agencyRepository) {

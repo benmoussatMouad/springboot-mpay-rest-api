@@ -1,13 +1,14 @@
 package com.springboot.mpaybackend.service.impl;
 
 import com.springboot.mpaybackend.entity.Bank;
+import com.springboot.mpaybackend.entity.UserAgency;
+import com.springboot.mpaybackend.entity.UserBank;
 import com.springboot.mpaybackend.entity.Wilaya;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.BankDto;
 import com.springboot.mpaybackend.payload.BankLightDto;
 import com.springboot.mpaybackend.payload.BankPageDto;
-import com.springboot.mpaybackend.repository.BankRepository;
-import com.springboot.mpaybackend.repository.WilayaRepository;
+import com.springboot.mpaybackend.repository.*;
 import com.springboot.mpaybackend.service.BankService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -23,11 +24,15 @@ public class BankServiceImpl implements BankService {
     private ModelMapper modelMapper;
     private BankRepository bankRepository;
     private WilayaRepository wilayaRepository;
+    private UserBankRepository userBankRepository;
+    private UserAgencyRepository userAgencyRepository;
 
-    public BankServiceImpl(ModelMapper modelMapper, BankRepository bankRepository, WilayaRepository wilayaRepository) {
+    public BankServiceImpl(ModelMapper modelMapper, BankRepository bankRepository, WilayaRepository wilayaRepository, UserBankRepository userBankRepository, UserAgencyRepository userAgencyRepository) {
         this.modelMapper = modelMapper;
         this.bankRepository = bankRepository;
         this.wilayaRepository = wilayaRepository;
+        this.userBankRepository = userBankRepository;
+        this.userAgencyRepository = userAgencyRepository;
     }
 
     @Override
@@ -170,6 +175,22 @@ public class BankServiceImpl implements BankService {
 
         return banks.stream().map( (bank -> modelMapper.map( bank, BankDto.class )) )
                 .collect( Collectors.toList() );
+    }
+
+    @Override
+    public BankDto getBankForBankUser(String username) {
+        UserBank userBank = userBankRepository.findByUsernameUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Bank user", "username", username));
+
+        return modelMapper.map(userBank.getBank(), BankDto.class);
+    }
+
+    @Override
+    public BankDto getBankForAgencyUser(String username) {
+        UserAgency user = userAgencyRepository.findByUsernameUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Agency user", "username", username));
+
+        return modelMapper.map(user.getAgency().getBank(), BankDto.class);
     }
 
 }
