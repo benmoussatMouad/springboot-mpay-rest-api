@@ -62,7 +62,7 @@ public class DeviceHistoryServiceImpl implements DeviceHistoryService {
 
     @Override
     public void deleteDeviceHistory(String username, Long id) {
-        DeviceHistory deviceHistory = deviceHistoryRepository.findById( id )
+        DeviceHistory deviceHistory = deviceHistoryRepository.findByIdAndDeletedFalse( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "Device History", "id", id ) );
 
         if( !deviceHistory.getUsername().getUsername().equals( username ) ) {

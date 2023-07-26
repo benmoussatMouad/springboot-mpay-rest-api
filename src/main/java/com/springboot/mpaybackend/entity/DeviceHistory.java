@@ -17,7 +17,7 @@ public class DeviceHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "device_history_id")
-    private Integer id;
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "username", referencedColumnName = "username")
