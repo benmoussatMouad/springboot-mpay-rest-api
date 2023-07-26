@@ -216,10 +216,10 @@ public class AuthServiceImpl implements AuthService {
             throw new ResourceNotFoundException( "Merchant", "username", dto.getUsernameOrEmail() );
         }
 
-        if( !deviceHistoryRepository.existsByDevice( dto.getDevice() ) ) {
+        if( !deviceHistoryRepository.existsByDeviceAndDeletedFalse( dto.getDevice() ) ) {
             return false;
         } else {
-            List<DeviceHistory> deviceHistories = deviceHistoryRepository.findByDevice( dto.getDevice() );
+            List<DeviceHistory> deviceHistories = deviceHistoryRepository.findByDeviceAndDeletedFalse( dto.getDevice() );
 
             // TODO: Do checks for when to ask for a new OTP
 
@@ -236,10 +236,10 @@ public class AuthServiceImpl implements AuthService {
             throw new ResourceNotFoundException( "Client", "username", dto.getUsernameOrEmail() );
         }
 
-        if( !deviceHistoryRepository.existsByDevice( dto.getDevice() ) ) {
+        if( !deviceHistoryRepository.existsByDeviceAndDeletedFalse( dto.getDevice() ) ) {
             return false;
         } else {
-            List<DeviceHistory> deviceHistory = deviceHistoryRepository.findByDevice( dto.getDevice() );
+            List<DeviceHistory> deviceHistory = deviceHistoryRepository.findByDeviceAndDeletedFalse( dto.getDevice() );
 
             // TODO: Do checks for when to ask for a new OTP
             // Check if the device is for the corresponding user

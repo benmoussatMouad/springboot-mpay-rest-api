@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface DeviceHistoryRepository extends JpaRepository<DeviceHistory, Long> {
-    Boolean existsByDevice(String device);
+    Boolean existsByDeviceAndDeletedFalse(String device);
 
-    List<DeviceHistory> findByDevice(String device);
+    List<DeviceHistory> findByDeviceAndDeletedFalse(String device);
 
     List<DeviceHistory> findByUsernameUsernameAndDeletedFalse(String name);
 }
