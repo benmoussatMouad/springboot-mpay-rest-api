@@ -12,7 +12,7 @@ public class ClientDto {
 
     private Long id;
 
-    private String username;
+    private String userUsername;
 
     private String firstName;
     private String lastName;
