@@ -1,13 +1,10 @@
 package com.springboot.mpaybackend.service.impl;
 
 import com.springboot.mpaybackend.entity.Client;
-import com.springboot.mpaybackend.entity.UserAdmin;
 import com.springboot.mpaybackend.entity.Wilaya;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
-import com.springboot.mpaybackend.payload.BankDto;
 import com.springboot.mpaybackend.payload.ClientDto;
 import com.springboot.mpaybackend.payload.ClientPageDto;
-import com.springboot.mpaybackend.payload.UserAdminDto;
 import com.springboot.mpaybackend.repository.ClientRepository;
 import com.springboot.mpaybackend.repository.UserRepository;
 import com.springboot.mpaybackend.repository.WilayaRepository;
@@ -17,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +41,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ClientDto getClientByUsername(String username) {
-        Client client = clientRepository.findByUsernameUsername( username )
+        Client client = clientRepository.findByUserUsernameAndDeletedFalse( username )
                 .orElseThrow( () -> new ResourceNotFoundException( "Client", "username", username ) );
         return modelMapper.map( client, ClientDto.class );
     }
@@ -67,7 +63,7 @@ public class ClientServiceImpl implements ClientService {
 
             ClientDto dto = modelMapper.map( user, ClientDto.class );
             dto.setWilayaId( user.getWilaya().getId() );
-            dto.setUsername( user.getUsername().getUsername() );
+            dto.setUsername( user.getUser().getUsername() );
             return dto;
 
         } ).collect( Collectors.toList());
@@ -98,7 +94,7 @@ public class ClientServiceImpl implements ClientService {
 
         Client savedClient = clientRepository.save( client );
         ClientDto newDto = modelMapper.map( savedClient, ClientDto.class );
-        newDto.setUsername( savedClient.getUsername().getUsername() );
+        newDto.setUsername( savedClient.getUser().getUsername() );
         newDto.setWilayaId( savedClient.getWilaya().getId() );
 
         return newDto;

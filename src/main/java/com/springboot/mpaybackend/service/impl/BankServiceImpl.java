@@ -173,8 +173,8 @@ public class BankServiceImpl implements BankService {
     public List<BankDto> getBanksByPhoneContaining(String phone) {
         List<Bank> banks = bankRepository.findByPhoneContaining(phone);
 
-        return banks.stream().map( (bank -> modelMapper.map( bank, BankDto.class )) )
-                .collect( Collectors.toList() );
+        return banks.stream().map((bank -> modelMapper.map(bank, BankDto.class)))
+                .collect(Collectors.toList());
     }
 
     @Override

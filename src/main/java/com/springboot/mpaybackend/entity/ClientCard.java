@@ -14,22 +14,28 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class ClientAccount {
+public class ClientCard {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "account_id")
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;
 
-    private String cardNumber;
-    private Date cardExpiryDate;
+    private String cardFirst4Numbers;
+    private String cardLast4Numbers;
+    private Integer cardExpiryDateMonth;
+    private Integer cardExpiryDateYear;
 
     private double minCredit;
 
     // TODO: Make Client status
-    private String status;
+    private boolean enabled;
+
+    @Column(columnDefinition = "boolean DEFAULT false")
+    private boolean deleted;
+
 }

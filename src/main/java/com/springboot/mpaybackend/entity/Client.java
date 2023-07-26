@@ -15,12 +15,12 @@ public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Column(name = "client_id")
     private Long id;
 
     @OneToOne
     @JoinColumn(name = "username",referencedColumnName = "username")
-    private User username;
+    private User user;
 
     private String firstName;
     private String lastName;
@@ -34,5 +34,8 @@ public class Client {
     private String postalCode;
     @Column(unique = true)
     private String phone;
+
+    @Column(columnDefinition = "boolean DEFAULT false")
+    private boolean deleted;
 
 }

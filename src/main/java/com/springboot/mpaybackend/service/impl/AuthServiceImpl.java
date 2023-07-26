@@ -101,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
     public String registerClient(RegisterDto registerDto) {
 
         // check if Client exists by phone
-        if(clientRepository.existsByPhone( registerDto.getPhone() ) ) {
+        if(clientRepository.existsByPhoneAndDeletedFalse( registerDto.getPhone() ) ) {
             throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Phone already exists!.");
         }
 
@@ -122,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
 
         // 2-Create a client
         Client client = new Client();
-        client.setUsername( user );
+        client.setUser( user );
         client.setFirstName( registerDto.getFirstName() );
         client.setLastName( registerDto.getLastName() );
         client.setAddress( registerDto.getAddress() );
@@ -201,7 +201,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Boolean checkClientPhone(String phone) {
-        return clientRepository.existsByPhone( phone );
+        return clientRepository.existsByPhoneAndDeletedFalse( phone );
     }
 
     @Override
@@ -232,7 +232,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Boolean verifyClientLogin(ActorLoginDto dto) {
-        if( !clientRepository.existsByUsernameUsername( dto.getUsernameOrEmail() ) ) {
+        if( !clientRepository.existsByUserUsernameAndDeletedFalse( dto.getUsernameOrEmail() ) ) {
             throw new ResourceNotFoundException( "Client", "username", dto.getUsernameOrEmail() );
         }
 
