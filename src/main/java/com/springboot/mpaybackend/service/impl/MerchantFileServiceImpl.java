@@ -42,6 +42,7 @@ public class MerchantFileServiceImpl implements MerchantFileService {
 
         } else {
             merchantFile = new MerchantFile();
+            merchantFile.setPiece(FileType.valueOf(dto.getPiece()));
         }
 
         Merchant merchant = merchantRepository.findByIdAndDeletedFalse( dto.getMerchantId() )
