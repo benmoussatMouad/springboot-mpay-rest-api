@@ -66,10 +66,9 @@ public class TmServiceImpl implements TmService {
             dto.getLastRecordEndCharacter().setPositionStart( 11 );
             dto.getLastRecordEndCharacter().setPositionEnd( 11 );
             dto.getLastRecordEndCharacter().setFeedback( "End character must be X" );
-            dto.getLastRecordEndCharacter().setValue( "" + line.charAt( 10 ) );
             dto.setAllCorrect( false );
         }
-
+        dto.getLastRecordEndCharacter().setValue( "" + line.charAt( 10 ) );
         return dto;
     }
 
@@ -87,8 +86,8 @@ public class TmServiceImpl implements TmService {
             dto.getTerminalUpdateCode().setPositionEnd( 11 );
             dto.getTerminalUpdateCode().setLine( 2 );
             dto.getTerminalUpdateCode().addFeedback( "Terminal update code must be A or C or D" );
-            dto.getTerminalUpdateCode().setValue( String.valueOf( line.charAt( 10 ) ) );
         }
+            dto.getTerminalUpdateCode().setValue( "" + line.charAt( 10 ) );
 
         if(checkIsNumeric( line, dto.getMerchantContractNumber(), 11, 26, "Merchant contract number must be an numeric value with 15 positions" ) ) {
             dto.setAllCorrect( false );
@@ -182,13 +181,15 @@ public class TmServiceImpl implements TmService {
 
         if( line.charAt( 288 ) != 'A' && line.charAt( 288 ) != 'D' ) {
             dto.getTerminalCardTypeUpdate().setCorrect(false);
-            dto.getTerminalCardTypeUpdate().setValue(String.valueOf(line.charAt( 288 )));
+            dto.getTerminalCardTypeUpdate().setValue( "" + line.charAt( 288 ));
             dto.getTerminalCardTypeUpdate().setLine(2);
             dto.getTerminalCardTypeUpdate().setPositionStart(288);
             dto.getTerminalCardTypeUpdate().setPositionEnd(288);
             dto.getTerminalCardTypeUpdate().setFeedback("Terminal card type should be A or D");
             dto.setAllCorrect( false );
         }
+        dto.getTerminalCardTypeUpdate().setFeedback("Terminal card type should be A or D");
+            
 
         if( checkCardType( line, dto.getCardType0(), 289, 291, 0, "Card type 0 must be of value 'C0'", false ) ) {
             dto.setAllCorrect( false );
@@ -249,9 +250,10 @@ public class TmServiceImpl implements TmService {
             dto.getSecondRecordEndCharacter().setPositionStart( 368 );
             dto.getSecondRecordEndCharacter().setPositionEnd( 368 );
             dto.getSecondRecordEndCharacter().setFeedback( "End character must be X" );
-            dto.getSecondRecordEndCharacter().setValue( String.valueOf( line.charAt( 368 ) ) );
+            
             dto.setAllCorrect( false );
         }
+        dto.getSecondRecordEndCharacter().setValue( "" + line.charAt( 368 )  );
 
         return dto;
     }
@@ -288,10 +290,10 @@ public class TmServiceImpl implements TmService {
             trxField.setLine( Arrays.asList( this.lines ).indexOf( line ) + 1 );
             trxField.setPositionStart( position );
             trxField.setPositionEnd( position );
-            trxField.setValue( "" + ( line.charAt( position ) ) );
             trxField.addFeedback( feedback );
             return true;
         }
+        trxField.setValue( "" + ( line.charAt( position ) ) );
         return false;
     }
 
@@ -311,8 +313,9 @@ public class TmServiceImpl implements TmService {
             dto.getHeaderRecordEndCharacter().setPositionEnd( 27 );
             dto.getHeaderRecordEndCharacter().setLine( 1 );
             dto.getHeaderRecordEndCharacter().addFeedback( "Last character should be X" );
-            dto.getHeaderRecordEndCharacter().setValue( "" + line.charAt( 27 ) );
+            
         }
+        dto.getHeaderRecordEndCharacter().setValue( "" + line.charAt( 27 ) );
         return dto;
     }
 

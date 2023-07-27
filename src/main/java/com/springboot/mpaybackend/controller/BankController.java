@@ -9,6 +9,8 @@ import com.springboot.mpaybackend.service.MerchantService;
 import com.springboot.mpaybackend.utils.Base64Checker;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +61,7 @@ public class BankController {
     @PostMapping("merchant")
     //@PreAuthorize("hasRole('ADMIN')")
     @Transactional(rollbackOn = Exception.class)
-    public ResponseEntity<String> addMerchantThroughBank(@RequestBody MerchantByBankUserDto dto, Authentication authentication) {
+    public ResponseEntity<String> addMerchantThroughBank(@RequestBody @Valid MerchantByBankUserDto dto, Authentication authentication) {
 
             // Check if files exists
             if( dto.getDocuments() == null ) {

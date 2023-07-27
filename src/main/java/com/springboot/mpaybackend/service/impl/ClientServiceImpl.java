@@ -63,7 +63,7 @@ public class ClientServiceImpl implements ClientService {
 
             ClientDto dto = modelMapper.map( user, ClientDto.class );
             dto.setWilayaId( user.getWilaya().getId() );
-            dto.setUsername( user.getUser().getUsername() );
+            dto.setUserUsername( user.getUser().getUsername() );
             return dto;
 
         } ).collect( Collectors.toList());
@@ -94,7 +94,7 @@ public class ClientServiceImpl implements ClientService {
 
         Client savedClient = clientRepository.save( client );
         ClientDto newDto = modelMapper.map( savedClient, ClientDto.class );
-        newDto.setUsername( savedClient.getUser().getUsername() );
+        newDto.setUserUsername( savedClient.getUser().getUsername() );
         newDto.setWilayaId( savedClient.getWilaya().getId() );
 
         return newDto;

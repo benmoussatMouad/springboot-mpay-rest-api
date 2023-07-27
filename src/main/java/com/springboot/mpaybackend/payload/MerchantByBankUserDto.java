@@ -17,7 +17,7 @@ public class MerchantByBankUserDto {
     private String lastName;
     @NotEmpty
     private String address;
-    @NotEmpty
+    @NotNull
     private Long wilayaId;
     @NotEmpty
     private String commune;

@@ -62,7 +62,7 @@ public class BmServiceImpl implements BmService {
             dto.getLastRecordEndCharacter().setPositionStart( 9 );
             dto.getLastRecordEndCharacter().setPositionEnd( 9 );
             dto.getLastRecordEndCharacter().setFeedback( "End character must be X" );
-            dto.getLastRecordEndCharacter().setValue( String.valueOf( line.charAt( 10 ) ) );
+            dto.getLastRecordEndCharacter().setValue( "" + line.charAt( 10 ) );
             dto.setAllCorrect( false );
         }
         return dto;
@@ -85,7 +85,7 @@ public class BmServiceImpl implements BmService {
             dto.getMerchantUpdateCode().setPositionStart( 9 );
             dto.getMerchantUpdateCode().setPositionEnd( 9 );
             dto.getMerchantUpdateCode().addFeedback( "update code should be C or D or A" );
-            dto.getMerchantUpdateCode().setValue( String.valueOf( line.charAt( 10 ) ) );
+            dto.getMerchantUpdateCode().setValue( "" + line.charAt( 10 ) );
             dto.setAllCorrect( false );
         }
 
@@ -237,7 +237,7 @@ public class BmServiceImpl implements BmService {
             dto.getSecondRecordEndCharacter().setPositionStart( 564 );
             dto.getSecondRecordEndCharacter().setPositionEnd( 564 );
             dto.getSecondRecordEndCharacter().setFeedback( "End character must be X" );
-            dto.getSecondRecordEndCharacter().setValue( String.valueOf( line.charAt( 565 ) ) );
+            dto.getSecondRecordEndCharacter().setValue( "" + line.charAt( 565 ) );
             dto.setAllCorrect( false );
         }
 
@@ -359,7 +359,7 @@ public class BmServiceImpl implements BmService {
             dto.getHeaderRecordEndCharacter().setPositionEnd( 27 );
             dto.getHeaderRecordEndCharacter().setLine( 1 );
             dto.getHeaderRecordEndCharacter().addFeedback( "Header record should end with X" );
-            dto.getHeaderRecordEndCharacter().setValue( String.valueOf( line.charAt( 27 ) ) );
+            dto.getHeaderRecordEndCharacter().setValue( "" +  line.charAt( 27 ) );
             dto.setAllCorrect( false );
         }
 
