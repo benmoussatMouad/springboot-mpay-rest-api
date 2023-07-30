@@ -234,7 +234,7 @@ public class MerchantServiceImpl implements MerchantService {
         Merchant updatedMerchant = modelMapper.map( dto, Merchant.class );
         updatedMerchant.setId( null );
 
-        //FIXME
+        //FIXME:
         System.out.println(updatedMerchant);
 
         modelMapper.map(updatedMerchant, merchant );

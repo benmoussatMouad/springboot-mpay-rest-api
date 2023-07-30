@@ -18,13 +18,14 @@ public class UserSatim {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userSatimId;
+    @Column(name = "user_satim_id")
+    private Long id;
     private String firstName;
     private String lastName;
     private String phone;
     private String user_type;
     @OneToOne
-    @JoinColumn(referencedColumnName = "username")
+    @JoinColumn(referencedColumnName = "username", name = "username")
     private User username;
     @OneToOne
     @JoinColumn(referencedColumnName = "username")
@@ -34,7 +35,10 @@ public class UserSatim {
     private User updatedBy;
     private Date createdAt;
     private Date updatedAt;
+
+    @Column(columnDefinition = "boolean DEFAULT false")
     private boolean deleted;
+
     private Date deletedAt;
 
 }

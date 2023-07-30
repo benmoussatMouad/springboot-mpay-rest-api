@@ -8,5 +8,5 @@ public enum UserType {
     BANK_ADMIN,
     AGENCY_USER,
 
-    AGENCY_ADMIN;
+    AGENCY_ADMIN, SATIM;
 }
