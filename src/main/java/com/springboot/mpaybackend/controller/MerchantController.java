@@ -44,7 +44,7 @@ public class MerchantController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'MERCHANT', 'AGENCY_USER', 'AGENCY_ADMIN', 'BANK_USER', 'BANK_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MERCHANT', 'AGENCY_USER', 'AGENCY_ADMIN', 'BANK_USER', 'BANK_ADMIN', 'SATIM')")
     public ResponseEntity<MerchantResponseDto> createMerchant(@RequestBody MerchantDto dto, Authentication authentication) {
         if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"))
         || authentication.getAuthorities().contains(new SimpleGrantedAuthority("MERCHANT"))) {
@@ -73,7 +73,7 @@ public class MerchantController {
 
 
     @GetMapping("page")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'BANK_USER', 'BANK_ADMIN', 'AGENCY_USER', 'AGENCY_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'BANK_USER', 'BANK_ADMIN', 'AGENCY_USER', 'AGENCY_ADMIN','SATIM')")
     public ResponseEntity<MerchantPageDto> getMerchantsByPageByFilter(
             @RequestParam(name = "page")
             @Parameter(description = "The number of the desired page, start from 0") Integer page,
@@ -95,7 +95,7 @@ public class MerchantController {
     ) {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         try {
-            if (authorities.contains(new SimpleGrantedAuthority("ADMIN"))) {
+            if (authorities.contains(new SimpleGrantedAuthority("ADMIN")) || authorities.contains(new SimpleGrantedAuthority("SATIM"))) {
                 return ResponseEntity.ok(merchantService.getAllMerchantsByFilter(page, size, id, name, name, phone, regCommerce, nif, status));
             } else { // Calling user is either a bank user or agency user, get only related merchants
                 return ResponseEntity.ok(merchantService.getAllMerchantsByFilterForSpecificBank(page, size, id, name, name, phone, regCommerce, nif, status, authentication.getName()));
