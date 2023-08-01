@@ -458,9 +458,10 @@ public class MerchantServiceImpl implements MerchantService {
         Merchant merchant = merchantRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Merchant", "id", id));
 
-        // Check if merchant is IN_PROGRESS
-        if (!merchant.getStatus().equals(MerchantStatus.IN_PROGRESS)) {
-            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Merchant status should be IN_PROGRESS");
+        // Check if merchant is IN_PROGRESS or SATIM_REVIEW
+        if (!merchant.getStatus().equals(MerchantStatus.IN_PROGRESS)
+ && !merchant.getStatus().equals(MerchantStatus.SATIM_REVIEW)) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Merchant status should be IN_PROGRESS or SATIM_REVIEW");
         }
 
         // Check if BM and TM are correct

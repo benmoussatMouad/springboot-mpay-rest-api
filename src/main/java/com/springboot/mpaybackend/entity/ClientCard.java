@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,7 +23,7 @@ public class ClientCard {
     @JoinColumn(name = "client_id")
     private Client client;
 
-    private String cardFirst4Numbers;
+    private String cardFirst6Numbers;
     private String cardLast4Numbers;
     private Integer cardExpiryDateMonth;
     private Integer cardExpiryDateYear;
