@@ -6,6 +6,7 @@ import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.repository.*;
 import com.springboot.mpaybackend.service.BmService;
+import com.springboot.mpaybackend.service.LicenseService;
 import com.springboot.mpaybackend.service.MerchantService;
 import com.springboot.mpaybackend.service.TmService;
 import com.springboot.mpaybackend.utils.RibProcessor;
@@ -43,8 +44,9 @@ public class MerchantServiceImpl implements MerchantService {
     TmRepository tmRepository;
     UserBankRepository userBankRepository;
     UserAgencyRepository userAgencyRepository;
+    LicenseService licenseService;
 
-    public MerchantServiceImpl(TmRepository tmRepository, MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository, MerchantLicenseRepository merchantLicenseRepository, MerchantAccountBlockTraceRepository merchantAccountBlockTraceRepository, AgencyRepository agencyRepository, BmService bmService, TmService tmService,BmRepository bmRepository, UserBankRepository userBankRepository, UserAgencyRepository userAgencyRepository) {
+    public MerchantServiceImpl(TmRepository tmRepository, MerchantRepository merchantRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, WilayaRepository wilayaRepository, MerchantAccountRepository merchantAccountRepository, BankRepository bankRepository, MerchantStatusTraceRepository merchantStatusTraceRepository, MerchantLicenseRepository merchantLicenseRepository, MerchantAccountBlockTraceRepository merchantAccountBlockTraceRepository, AgencyRepository agencyRepository, BmService bmService, TmService tmService,BmRepository bmRepository, UserBankRepository userBankRepository, UserAgencyRepository userAgencyRepository, LicenseService licenseService) {
         this.merchantRepository = merchantRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -62,6 +64,8 @@ public class MerchantServiceImpl implements MerchantService {
         this.tmRepository = tmRepository;
         this.userBankRepository = userBankRepository;
         this.agencyRepository = agencyRepository;
+        this.licenseService = licenseService;
+
 
         this.modelMapper.getConfiguration().setSkipNullEnabled(true);
 
@@ -424,9 +428,9 @@ public class MerchantServiceImpl implements MerchantService {
         Merchant merchant = merchantRepository.findByIdAndDeletedFalse( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "Merchant", "id", id ) );
 
-        // Check if merchant is in IN PROGRESS
-        if( !merchant.getStatus().equals( MerchantStatus.IN_PROGRESS ) ) {
-            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Merchant status should be IN_PROGRESS" );
+        // Check if merchant is in IN PROGRESS or SATIM_ACCEPTED
+        if( !merchant.getStatus().equals( MerchantStatus.IN_PROGRESS ) && !merchant.getStatus().equals( MerchantStatus.SATIM_ACCEPTED ) ) {
+            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Merchant status should be IN_PROGRESS or SATIM_ACCEPTED" );
         }
 
 
@@ -627,5 +631,127 @@ public class MerchantServiceImpl implements MerchantService {
         } else {
             throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Calling user's type not authorized for this action");
         }
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public MerchantDto putToSatimReview(Long id, SatimReviewDto dto, String name) {
+
+        Merchant merchant = merchantRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Merchant", "id", id));
+
+        // Check if merchant is ACCEPTED
+        if (!merchant.getStatus().equals(MerchantStatus.ACCEPTED)) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Merchant status should be ACCEPTED");
+        }
+
+        // Set status to ACCEPTED
+        merchant.setStatus(MerchantStatus.SATIM_REVIEW);
+
+        Merchant savedMerchant =  merchantRepository.save(merchant);
+
+        // Save trace
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant Account ", "merchant id", id ) );
+        MerchantStatusTrace trace = new MerchantStatusTrace();
+        trace.setMerchant( merchant );
+        trace.setBank( account.getBank() );
+        trace.setUser( merchant.getUsername() );
+        trace.setFeedback(dto.getFeedback());
+        trace.setCreatedAt( new Date() );
+        trace.setStatus( MerchantStatus.SATIM_REVIEW );
+        merchantStatusTraceRepository.save( trace );
+
+        return modelMapper.map(savedMerchant, MerchantDto.class);
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public MerchantDto putToSatimAccepted(Long id, SatimAcceptDto dto, String name) {
+
+        Merchant merchant = merchantRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Merchant", "id", id));
+
+        // Check if merchant is ACCEPTED
+        if (!merchant.getStatus().equals(MerchantStatus.ACCEPTED)) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Merchant status should be ACCEPTED");
+        }
+
+        licenseService.createLicense(merchant, dto);
+
+        merchant.setStatus(MerchantStatus.SATIM_ACCEPTED);
+
+        // Save trace
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant Account ", "merchant id", id ) );
+        MerchantStatusTrace trace = new MerchantStatusTrace();
+        trace.setMerchant( merchant );
+        trace.setBank( account.getBank() );
+        trace.setUser( merchant.getUsername() );
+        trace.setCreatedAt( new Date() );
+        trace.setStatus( MerchantStatus.SATIM_ACCEPTED );
+        merchantStatusTraceRepository.save( trace );
+
+        Merchant savedMerchant = merchantRepository.save(merchant);
+
+        return modelMapper.map(savedMerchant, MerchantDto.class);
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public MerchantDto putToSatimrejected(Long id, SatimAcceptDto dto, String name) {
+        Merchant merchant = merchantRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Merchant", "id", id));
+
+        // Check if merchant is ACCEPTED
+        if (!merchant.getStatus().equals(MerchantStatus.ACCEPTED)) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Merchant status should be ACCEPTED");
+        }
+
+        merchant.setStatus(MerchantStatus.SATIM_REJECTED);
+
+        // Save trace
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant Account ", "merchant id", id ) );
+        MerchantStatusTrace trace = new MerchantStatusTrace();
+        trace.setMerchant( merchant );
+        trace.setBank( account.getBank() );
+        trace.setUser( merchant.getUsername() );
+        trace.setCreatedAt( new Date() );
+        trace.setStatus( MerchantStatus.SATIM_REJECTED );
+        merchantStatusTraceRepository.save( trace );
+
+        Merchant savedMerchant = merchantRepository.save(merchant);
+
+        return modelMapper.map(savedMerchant, MerchantDto.class);
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public MerchantDto verifyMerchant(Long id, String name) {
+        Merchant merchant = merchantRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Merchant", "id", id));
+
+        // Check if merchant is SATIM_ACCEPTED
+        if (!merchant.getStatus().equals(MerchantStatus.SATIM_ACCEPTED)) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Merchant status should be SATIM_ACCEPTED");
+        }
+
+        merchant.setStatus(MerchantStatus.VERIFIED);
+        // Save trace
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant Account ", "merchant id", id ) );
+        MerchantStatusTrace trace = new MerchantStatusTrace();
+        trace.setMerchant( merchant );
+        trace.setBank( account.getBank() );
+        trace.setUser( merchant.getUsername() );
+        trace.setCreatedAt( new Date() );
+        trace.setStatus( MerchantStatus.VERIFIED );
+        merchantStatusTraceRepository.save( trace );
+
+        Merchant savedMerchant = merchantRepository.save(merchant);
+
+        return modelMapper.map(savedMerchant, MerchantDto.class);
+
     }
 }

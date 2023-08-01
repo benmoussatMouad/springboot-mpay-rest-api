@@ -27,4 +27,10 @@ public class MerchantLicense {
     private String postNumber;
 
     private Date expiryDate;
+
+    private String username;
+    private String password;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean deleted;
 }

@@ -38,4 +38,12 @@ public interface MerchantService {
     MerchantDto acceptMerchantByBank(Long id, AcceptMerchantDemandDto dto, String username);
 
     MerchantPageDto getAllMerchantsByFilterForSpecificBank(Integer page, Integer size, Long id, String name, String name1, String phone, String regCommerce, String nif, String status, String callingUsername);
+
+    MerchantDto putToSatimReview(Long id, SatimReviewDto dto, String name);
+
+    MerchantDto putToSatimAccepted(Long id, SatimAcceptDto dto, String name);
+
+    MerchantDto putToSatimrejected(Long id, SatimAcceptDto dto, String name);
+
+    MerchantDto verifyMerchant(Long id, String name);
 }

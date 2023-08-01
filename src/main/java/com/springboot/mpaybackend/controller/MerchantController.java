@@ -243,5 +243,34 @@ public class MerchantController {
 
         return ResponseEntity.ok(merchantService.acceptMerchantByBank(id, dto, authentication.getName()));
     }
+
+    @PutMapping("/{id}/review-satim")
+    @PreAuthorize("hasAuthority('SATIM') OR hasAuthority('ADMIN')")
+    public ResponseEntity<MerchantDto> setBackTo(@PathVariable Long id, @RequestBody @Valid SatimReviewDto dto, Authentication authentication) {
+
+        return ResponseEntity.ok(merchantService.putToSatimReview(id, dto, authentication.getName()));
+    }
+
+    @PutMapping("/{id}/accepted-satim")
+    @PreAuthorize("hasAuthority('SATIM') OR hasAuthority('ADMIN')")
+    public ResponseEntity<MerchantDto> acceptBySatin(@PathVariable Long id, @RequestBody @Valid SatimAcceptDto dto, Authentication authentication) {
+
+        return ResponseEntity.ok(merchantService.putToSatimAccepted(id, dto, authentication.getName()));
+    }
+    @PutMapping("/{id}/rejected-satim")
+    @PreAuthorize("hasAuthority('SATIM') OR hasAuthority('ADMIN')")
+    public ResponseEntity<MerchantDto> rejectBySatim(@PathVariable Long id, @RequestBody @Valid SatimAcceptDto dto, Authentication authentication) {
+
+        return ResponseEntity.ok(merchantService.putToSatimrejected(id, dto, authentication.getName()));
+    }
+
+    @PutMapping("/{id}/verify")
+    @PreAuthorize("hasAnyAuthority('BANK_ADMIN', 'BANK_USER', 'AGENCY_USER', 'AGENCY_ADMIN') OR hasAuthority('ADMIN')")
+    public ResponseEntity<MerchantDto> verifyMerchant(@PathVariable Long id, Authentication authentication) {
+
+        return ResponseEntity.ok(merchantService.verifyMerchant(id, authentication.getName()));
+    }
+
+
 }
 

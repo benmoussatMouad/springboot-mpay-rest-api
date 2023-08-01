@@ -29,6 +29,7 @@ public class MerchantAccount {
     @JoinColumn(name = "bank_id")
     private Bank bank;
 
+    @Column(columnDefinition = "boolean default true")
     private boolean accountStatus;
 
 
