@@ -1,10 +1,14 @@
 package com.springboot.mpaybackend.service.impl;
 
+import com.springboot.mpaybackend.entity.Bm;
 import com.springboot.mpaybackend.exception.MPayAPIException;
+import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.BmFileCheckDto;
+import com.springboot.mpaybackend.payload.BmTmFileDto;
 import com.springboot.mpaybackend.payload.FieldCheckDto;
 import com.springboot.mpaybackend.repository.AgencyRepository;
 import com.springboot.mpaybackend.repository.BankRepository;
+import com.springboot.mpaybackend.repository.BmRepository;
 import com.springboot.mpaybackend.service.BmService;
 import com.springboot.mpaybackend.utils.StringProcessor;
 import org.springframework.http.HttpStatus;
@@ -19,14 +23,17 @@ public class BmServiceImpl implements BmService {
     BankRepository bankRepository;
     AgencyRepository agencyRepository;
     String[] lines;
+    BmRepository bmRepository;
 
-    public BmServiceImpl(BankRepository bankRepository, AgencyRepository agencyRepository) {
+    public BmServiceImpl(BankRepository bankRepository, AgencyRepository agencyRepository,BmRepository bmRepository) {
         this.bankRepository = bankRepository;
         this.agencyRepository = agencyRepository;
+        this.bmRepository = bmRepository;
     }
 
     @Override
     public BmFileCheckDto verifyFileContent(String content) {
+
         this.lines = content.split( System.lineSeparator() );
         if( lines.length < 3 ) {
             throw new MPayAPIException( HttpStatus.BAD_REQUEST, "The file should have 3 lines or more" );
@@ -47,6 +54,20 @@ public class BmServiceImpl implements BmService {
         return dto;
     }
 
+    @Override
+    public BmTmFileDto findByMerchantId(Long id) {
+        Bm bm = bmRepository.findByMerchantIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("BM", "merchant id", id));
+        BmTmFileDto dto = new BmTmFileDto();
+        dto.setContent(
+                bm.getEnteteBm() + "\n"
+                + bm.getDebutInfoBm() + "\n"
+                + bm.getFinBm()
+        );
+
+        return dto;
+    }
+
     private BmFileCheckDto checkLastRecord(String line, BmFileCheckDto dto) {
         if( checkIsNumeric( line, dto.getRecordType3(), 0, 3, "Last record type should be 999" ) ) {
             dto.setAllCorrect( false );
@@ -56,13 +77,23 @@ public class BmServiceImpl implements BmService {
             dto.setAllCorrect( false );
         }
 
-        if( line.charAt( 10 ) != 'X' ) {
+        try {
+            if( line.charAt( 10 ) != 'X' ) {
+                dto.getLastRecordEndCharacter().setCorrect( false );
+                dto.getLastRecordEndCharacter().setLine( 2 );
+                dto.getLastRecordEndCharacter().setPositionStart( 9 );
+                dto.getLastRecordEndCharacter().setPositionEnd( 9 );
+                dto.getLastRecordEndCharacter().setFeedback( "End character must be X" );
+                dto.getLastRecordEndCharacter().setValue( "" + line.charAt( 10 ) );
+                dto.setAllCorrect( false );
+            }
+        } catch (Exception e) {
             dto.getLastRecordEndCharacter().setCorrect( false );
             dto.getLastRecordEndCharacter().setLine( 2 );
             dto.getLastRecordEndCharacter().setPositionStart( 9 );
             dto.getLastRecordEndCharacter().setPositionEnd( 9 );
             dto.getLastRecordEndCharacter().setFeedback( "End character must be X" );
-            dto.getLastRecordEndCharacter().setValue( "" + line.charAt( 10 ) );
+            dto.getLastRecordEndCharacter().setValue( "EMPTY" );
             dto.setAllCorrect( false );
         }
         return dto;
@@ -79,13 +110,23 @@ public class BmServiceImpl implements BmService {
             dto.setAllCorrect( false );
         }
 
-        if( line.charAt( 10 ) != 'A' && line.charAt( 10 ) != 'C' && line.charAt( 10 ) != 'D' ) {
+        try {
+            if( line.charAt( 10 ) != 'A' && line.charAt( 10 ) != 'C' && line.charAt( 10 ) != 'D' ) {
+                dto.getMerchantUpdateCode().setCorrect( false );
+                dto.getMerchantUpdateCode().setLine( 2 );
+                dto.getMerchantUpdateCode().setPositionStart( 9 );
+                dto.getMerchantUpdateCode().setPositionEnd( 9 );
+                dto.getMerchantUpdateCode().addFeedback( "update code should be C or D or A" );
+                dto.getMerchantUpdateCode().setValue( "" + line.charAt( 10 ) );
+                dto.setAllCorrect( false );
+            }
+        } catch (Exception e) {
             dto.getMerchantUpdateCode().setCorrect( false );
             dto.getMerchantUpdateCode().setLine( 2 );
             dto.getMerchantUpdateCode().setPositionStart( 9 );
             dto.getMerchantUpdateCode().setPositionEnd( 9 );
             dto.getMerchantUpdateCode().addFeedback( "update code should be C or D or A" );
-            dto.getMerchantUpdateCode().setValue( "" + line.charAt( 10 ) );
+            dto.getMerchantUpdateCode().setValue( "EMPTY" );
             dto.setAllCorrect( false );
         }
 
@@ -93,8 +134,14 @@ public class BmServiceImpl implements BmService {
             dto.setAllCorrect( false );
         }
 
-        String bankCode = line.substring( 11, 14 );
-        String agencyCode = line.substring( 14, 19 );
+        String bankCode = null;
+        String agencyCode = null;
+        try {
+            bankCode = line.substring( 11, 14 );
+            agencyCode = line.substring( 14, 19 );
+        } catch (Exception ignored) {
+
+        }
         if( !bankRepository.existsByBankCode( bankCode ) ) {
             dto.getMerchantContractNumber().setCorrect( false );
             dto.getMerchantContractNumber().setLine( 2 );
@@ -231,13 +278,23 @@ public class BmServiceImpl implements BmService {
             dto.setAllCorrect( false );
         }
 
-        if( line.charAt( 565 ) != 'X' ) {
+        try {
+            if( line.charAt( 565 ) != 'X' ) {
+                dto.getSecondRecordEndCharacter().setCorrect( false );
+                dto.getSecondRecordEndCharacter().setLine( 2 );
+                dto.getSecondRecordEndCharacter().setPositionStart( 564 );
+                dto.getSecondRecordEndCharacter().setPositionEnd( 564 );
+                dto.getSecondRecordEndCharacter().setFeedback( "End character must be X" );
+                dto.getSecondRecordEndCharacter().setValue( "" + line.charAt( 565 ) );
+                dto.setAllCorrect( false );
+            }
+        } catch (Exception e) {
             dto.getSecondRecordEndCharacter().setCorrect( false );
             dto.getSecondRecordEndCharacter().setLine( 2 );
             dto.getSecondRecordEndCharacter().setPositionStart( 564 );
             dto.getSecondRecordEndCharacter().setPositionEnd( 564 );
             dto.getSecondRecordEndCharacter().setFeedback( "End character must be X" );
-            dto.getSecondRecordEndCharacter().setValue( "" + line.charAt( 565 ) );
+            dto.getSecondRecordEndCharacter().setValue( "EMPTY");
             dto.setAllCorrect( false );
         }
 
@@ -248,15 +305,25 @@ public class BmServiceImpl implements BmService {
 
         boolean returnValue = false;
 
-        if( !StringProcessor.isAlphaNumericWithSpecialChars( line.substring( positionStart, positionEnd ) ) ) {
+        try {
+            if( !StringProcessor.isAlphaNumericWithSpecialChars( line.substring( positionStart, positionEnd ) ) ) {
+                field.setCorrect( false );
+                field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
+                field.setPositionStart( positionStart );
+                field.setPositionEnd( positionEnd -1 );
+                field.addFeedback( feedback );
+                returnValue = true;
+            }
+            field.setValue( line.substring( positionStart, positionEnd ) );
+        } catch (Exception e) {
             field.setCorrect( false );
             field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
             field.setPositionStart( positionStart );
             field.setPositionEnd( positionEnd -1 );
             field.addFeedback( feedback );
+            field.setValue( "EMPTY" );
             returnValue = true;
         }
-        field.setValue( line.substring( positionStart, positionEnd ) );
         return returnValue;
     }
 
@@ -264,15 +331,25 @@ public class BmServiceImpl implements BmService {
 
         boolean returnValue = false;
 
-        if( !StringProcessor.isNumeric( line.substring( positionStart, positionEnd ) ) ) {
+        try {
+            if( !StringProcessor.isNumeric( line.substring( positionStart, positionEnd ) ) ) {
+                field.setCorrect( false );
+                field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
+                field.setPositionStart( positionStart );
+                field.setPositionEnd( positionEnd -1 );
+                field.addFeedback( feedback );
+                returnValue = true;
+            }
+            field.setValue( line.substring( positionStart, positionEnd ) );
+        } catch (Exception e) {
             field.setCorrect( false );
             field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
             field.setPositionStart( positionStart );
             field.setPositionEnd( positionEnd -1 );
             field.addFeedback( feedback );
+            field.setValue( "EMPTY" );
             returnValue = true;
         }
-        field.setValue( line.substring( positionStart, positionEnd ) );
         return returnValue;
     }
 
@@ -280,15 +357,25 @@ public class BmServiceImpl implements BmService {
 
         boolean returnValue = false;
 
-        if( !StringProcessor.isAlphaNumeric( line.substring( positionStart, positionEnd ) ) && !line.substring( positionEnd, positionEnd ).isBlank()) {
+        try {
+            if( !StringProcessor.isAlphaNumeric( line.substring( positionStart, positionEnd ) ) && !line.substring( positionEnd, positionEnd ).isBlank()) {
+                field.setCorrect( false );
+                field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
+                field.setPositionStart( positionStart );
+                field.setPositionEnd( positionEnd - 1 );
+                field.addFeedback( feedback );
+                returnValue = true;
+            }
+            field.setValue( line.substring( positionStart, positionEnd ) );
+        } catch (Exception e) {
             field.setCorrect( false );
             field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
             field.setPositionStart( positionStart );
             field.setPositionEnd( positionEnd - 1 );
             field.addFeedback( feedback );
             returnValue = true;
+            field.setValue( "EMPTY" );
         }
-        field.setValue( line.substring( positionStart, positionEnd ) );
 
         return returnValue;
     }
@@ -297,15 +384,25 @@ public class BmServiceImpl implements BmService {
 
         boolean checkIsWrong = false;
 
-        if( !StringProcessor.isNumeric( line.substring( positionStart, positionEnd ) ) && !line.substring( 244,246 ).isBlank() ) {
+        try {
+            if( !StringProcessor.isNumeric( line.substring( positionStart, positionEnd ) ) && !line.substring( 244,246 ).isBlank() ) {
+                field.setCorrect( false );
+                field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
+                field.setPositionStart( positionStart );
+                field.setPositionEnd( positionEnd -1 );
+                field.addFeedback( feedback );
+                checkIsWrong = true;
+            }
+            field.setValue( line.substring( positionStart, positionEnd ) );
+        } catch (Exception e) {
             field.setCorrect( false );
             field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
             field.setPositionStart( positionStart );
             field.setPositionEnd( positionEnd -1 );
             field.addFeedback( feedback );
+            field.setValue( "EMPTY" );
             checkIsWrong = true;
         }
-        field.setValue( line.substring( positionStart, positionEnd ) );
 
         return checkIsWrong;
     }
@@ -314,16 +411,26 @@ public class BmServiceImpl implements BmService {
 
         boolean returnValue = false;
 
-        if( !StringProcessor.isAlphaNumeric( line.substring( positionStart, positionEnd ) ) ) {
+        try {
+            if( !StringProcessor.isAlphaNumeric( line.substring( positionStart, positionEnd ) ) ) {
+                field.setCorrect( false );
+                field.setLine( Arrays.asList( this.lines ).indexOf( line ) + 1 );
+                field.setPositionStart( positionStart );
+                field.setPositionEnd( positionEnd - 1 );
+                field.addFeedback( feedback );
+                returnValue =true;
+
+            }
+            field.setValue( line.substring( positionStart, positionEnd ) );
+        } catch (Exception e) {
             field.setCorrect( false );
             field.setLine( Arrays.asList( this.lines ).indexOf( line ) + 1 );
             field.setPositionStart( positionStart );
             field.setPositionEnd( positionEnd - 1 );
             field.addFeedback( feedback );
             returnValue =true;
-
+            field.setValue( "EMPTY" );
         }
-        field.setValue( line.substring( positionStart, positionEnd ) );
 
         return returnValue;
     }
@@ -337,29 +444,55 @@ public class BmServiceImpl implements BmService {
             dto.getRecordType().setLine( 1 );
             dto.setAllCorrect( false );
         }
-        if( !StringProcessor.isAlphaNumeric( line.substring( 3, 21 ) ) ) {
+        try {
+            if( !StringProcessor.isAlphaNumeric( line.substring( 3, 21 ) ) ) {
+                dto.getFileName().setCorrect( false );
+                dto.getFileName().setPositionStart( 3 );
+                dto.getFileName().setPositionEnd( 20 );
+                dto.getFileName().setLine( 1 );
+                dto.setAllCorrect( false );
+
+            }
+        } catch (Exception e) {
             dto.getFileName().setCorrect( false );
             dto.getFileName().setPositionStart( 3 );
             dto.getFileName().setPositionEnd( 20 );
             dto.getFileName().setLine( 1 );
             dto.setAllCorrect( false );
-
         }
-        if( !StringProcessor.isNumeric( line.substring( 21, 27 ) ) ) {
+        try {
+            if( !StringProcessor.isNumeric( line.substring( 21, 27 ) ) ) {
+                dto.getBankCode().setCorrect( false );
+                dto.getBankCode().setPositionStart( 21 );
+                dto.getBankCode().setPositionEnd( 26 );
+                dto.getBankCode().setLine( 1 );
+                dto.setAllCorrect( false );
+
+            }
+        } catch (Exception e) {
             dto.getBankCode().setCorrect( false );
             dto.getBankCode().setPositionStart( 21 );
             dto.getBankCode().setPositionEnd( 26 );
             dto.getBankCode().setLine( 1 );
             dto.setAllCorrect( false );
-
         }
-        if( line.charAt( 27 ) != 'X') {
+        try {
+            if( line.charAt( 27 ) != 'X') {
+                dto.getHeaderRecordEndCharacter().setCorrect( false );
+                dto.getHeaderRecordEndCharacter().setPositionStart( 27 );
+                dto.getHeaderRecordEndCharacter().setPositionEnd( 27 );
+                dto.getHeaderRecordEndCharacter().setLine( 1 );
+                dto.getHeaderRecordEndCharacter().addFeedback( "Header record should end with X" );
+                dto.getHeaderRecordEndCharacter().setValue( "EMPTY");
+                dto.setAllCorrect( false );
+            }
+        } catch (Exception e) {
             dto.getHeaderRecordEndCharacter().setCorrect( false );
             dto.getHeaderRecordEndCharacter().setPositionStart( 27 );
             dto.getHeaderRecordEndCharacter().setPositionEnd( 27 );
             dto.getHeaderRecordEndCharacter().setLine( 1 );
             dto.getHeaderRecordEndCharacter().addFeedback( "Header record should end with X" );
-            dto.getHeaderRecordEndCharacter().setValue( "" +  line.charAt( 27 ) );
+            dto.getHeaderRecordEndCharacter().setValue( "EMPTY" );
             dto.setAllCorrect( false );
         }
 

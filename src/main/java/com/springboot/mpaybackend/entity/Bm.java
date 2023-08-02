@@ -53,6 +53,7 @@ public class Bm {
     private Integer automatic;
 
 
+    @Column(columnDefinition = "boolean default false")
     private Boolean deleted;
 
     private Date CreatedOn;

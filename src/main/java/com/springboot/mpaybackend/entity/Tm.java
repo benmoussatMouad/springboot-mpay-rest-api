@@ -66,6 +66,9 @@ public class Tm {
     private String finTm;
     private Integer flag;
 
+    @Column(columnDefinition = "boolean default false")
+    private boolean deleted;
+
     @OneToOne
     @JoinColumn(name = "bm_id")
     private Bm bm;

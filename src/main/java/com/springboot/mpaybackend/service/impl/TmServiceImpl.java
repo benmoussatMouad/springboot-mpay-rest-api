@@ -1,12 +1,19 @@
 package com.springboot.mpaybackend.service.impl;
 
+import com.springboot.mpaybackend.entity.Bm;
+import com.springboot.mpaybackend.entity.Tm;
 import com.springboot.mpaybackend.exception.MPayAPIException;
+import com.springboot.mpaybackend.exception.ResourceNotFoundException;
+import com.springboot.mpaybackend.payload.BmTmFileDto;
 import com.springboot.mpaybackend.payload.FieldCheckDto;
 import com.springboot.mpaybackend.payload.TmFileCheckDto;
 import com.springboot.mpaybackend.repository.AgencyRepository;
 import com.springboot.mpaybackend.repository.BankRepository;
+import com.springboot.mpaybackend.repository.BmRepository;
+import com.springboot.mpaybackend.repository.TmRepository;
 import com.springboot.mpaybackend.service.TmService;
 import com.springboot.mpaybackend.utils.StringProcessor;
+import jakarta.persistence.Index;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +26,15 @@ public class TmServiceImpl implements TmService {
     BankRepository bankRepository;
     AgencyRepository agencyRepository;
     String[] lines;
+    TmRepository tmRepository;
+    BmRepository bmRepository;
 
-    public TmServiceImpl(BankRepository bankRepository, AgencyRepository agencyRepository) {
+    public TmServiceImpl(BankRepository bankRepository, AgencyRepository agencyRepository, String[] lines, TmRepository tmRepository, BmRepository bmRepository) {
         this.bankRepository = bankRepository;
         this.agencyRepository = agencyRepository;
+        this.lines = lines;
+        this.tmRepository = tmRepository;
+        this.bmRepository = bmRepository;
     }
 
     @Override
@@ -50,6 +62,22 @@ public class TmServiceImpl implements TmService {
         return dto;
     }
 
+    @Override
+    public BmTmFileDto findByMerchantId(Long id) {
+        Bm bm = bmRepository.findByMerchantIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("BM", "merchant id", id));
+        Tm tm = tmRepository.findByBmIdAndDeletedFalse(bm.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("TM", "bm id", bm.getId()));
+        BmTmFileDto dto = new BmTmFileDto();
+        dto.setContent(
+                tm.getEnteteTm() + "\n"
+                        + tm.getDebutInfoTm() + "\n"
+                        + tm.getFinTm()
+        );
+
+        return dto;
+    }
+
     private TmFileCheckDto checkLastRecord(String line, TmFileCheckDto dto) {
 
         if( checkIsNumeric( line, dto.getRecordType3(), 0, 3, "Record type must be of value 999" ) ) {
@@ -60,15 +88,25 @@ public class TmServiceImpl implements TmService {
             dto.setAllCorrect( false );
         }
 
-        if( line.charAt( 10 ) != 'X' ) {
+        try {
+            if( line.charAt( 10 ) != 'X' ) {
+                dto.getLastRecordEndCharacter().setCorrect( false );
+                dto.getLastRecordEndCharacter().setLine( 2 );
+                dto.getLastRecordEndCharacter().setPositionStart( 11 );
+                dto.getLastRecordEndCharacter().setPositionEnd( 11 );
+                dto.getLastRecordEndCharacter().setFeedback( "End character must be X" );
+                dto.setAllCorrect( false );
+            }
+            dto.getLastRecordEndCharacter().setValue( "" + line.charAt( 10 ) );
+        } catch (IndexOutOfBoundsException e) {
             dto.getLastRecordEndCharacter().setCorrect( false );
             dto.getLastRecordEndCharacter().setLine( 2 );
             dto.getLastRecordEndCharacter().setPositionStart( 11 );
             dto.getLastRecordEndCharacter().setPositionEnd( 11 );
             dto.getLastRecordEndCharacter().setFeedback( "End character must be X" );
+            dto.getLastRecordEndCharacter().setValue( "EMPTY" );
             dto.setAllCorrect( false );
         }
-        dto.getLastRecordEndCharacter().setValue( "" + line.charAt( 10 ) );
         return dto;
     }
 
@@ -244,16 +282,26 @@ public class TmServiceImpl implements TmService {
             dto.setAllCorrect( false );
         }
 
-        if( line.charAt( 368 ) != 'X' ) {
+        try {
+            if( line.charAt( 368 ) != 'X' ) {
+                dto.getSecondRecordEndCharacter().setCorrect( false );
+                dto.getSecondRecordEndCharacter().setLine( 2 );
+                dto.getSecondRecordEndCharacter().setPositionStart( 368 );
+                dto.getSecondRecordEndCharacter().setPositionEnd( 368 );
+                dto.getSecondRecordEndCharacter().setFeedback( "End character must be X" );
+
+                dto.setAllCorrect( false );
+            }
+            dto.getSecondRecordEndCharacter().setValue( "" + line.charAt( 368 )  );
+        } catch (IndexOutOfBoundsException e) {
             dto.getSecondRecordEndCharacter().setCorrect( false );
             dto.getSecondRecordEndCharacter().setLine( 2 );
             dto.getSecondRecordEndCharacter().setPositionStart( 368 );
             dto.getSecondRecordEndCharacter().setPositionEnd( 368 );
             dto.getSecondRecordEndCharacter().setFeedback( "End character must be X" );
-            
+            dto.getSecondRecordEndCharacter().setValue( "EMPTY" );
             dto.setAllCorrect( false );
         }
-        dto.getSecondRecordEndCharacter().setValue( "" + line.charAt( 368 )  );
 
         return dto;
     }
@@ -324,15 +372,25 @@ public class TmServiceImpl implements TmService {
 
         boolean returnValue = false;
 
-        if( !StringProcessor.isAlphaNumericWithSpecialChars( line.substring( positionStart, positionEnd ) ) ) {
+        try {
+            if( !StringProcessor.isAlphaNumericWithSpecialChars( line.substring( positionStart, positionEnd ) ) ) {
+                field.setCorrect( false );
+                field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
+                field.setPositionStart( positionStart );
+                field.setPositionEnd( positionEnd -1 );
+                field.addFeedback( feedback );
+                returnValue = true;
+            }
+            field.setValue( line.substring( positionStart, positionEnd ) );
+        } catch (IndexOutOfBoundsException e) {
             field.setCorrect( false );
             field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
             field.setPositionStart( positionStart );
             field.setPositionEnd( positionEnd -1 );
             field.addFeedback( feedback );
             returnValue = true;
+            field.setValue( "EMPTY" );
         }
-        field.setValue( line.substring( positionStart, positionEnd ) );
         return returnValue;
     }
 
@@ -340,15 +398,25 @@ public class TmServiceImpl implements TmService {
 
         boolean returnValue = false;
 
-        if( !StringProcessor.isNumeric( line.substring( positionStart, positionEnd ) ) ) {
+        try {
+            if( !StringProcessor.isNumeric( line.substring( positionStart, positionEnd ) ) ) {
+                field.setCorrect( false );
+                field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
+                field.setPositionStart( positionStart );
+                field.setPositionEnd( positionEnd -1 );
+                field.addFeedback( feedback );
+                returnValue = true;
+            }
+            field.setValue( line.substring( positionStart, positionEnd ) );
+        } catch (IndexOutOfBoundsException e) {
             field.setCorrect( false );
             field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
             field.setPositionStart( positionStart );
             field.setPositionEnd( positionEnd -1 );
             field.addFeedback( feedback );
             returnValue = true;
+            field.setValue( "EMPTY" );
         }
-        field.setValue( line.substring( positionStart, positionEnd ) );
         return returnValue;
     }
 
@@ -356,15 +424,25 @@ public class TmServiceImpl implements TmService {
 
         boolean returnValue = false;
 
-        if( !StringProcessor.isAlphaNumeric( line.substring( positionStart, positionEnd ) ) && !line.substring( positionEnd, positionEnd ).isBlank()) {
+        try {
+            if( !StringProcessor.isAlphaNumeric( line.substring( positionStart, positionEnd ) ) && !line.substring( positionEnd, positionEnd ).isBlank()) {
+                field.setCorrect( false );
+                field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
+                field.setPositionStart( positionStart );
+                field.setPositionEnd( positionEnd - 1 );
+                field.addFeedback( feedback );
+                returnValue = true;
+            }
+            field.setValue( line.substring( positionStart, positionEnd ) );
+        } catch (IndexOutOfBoundsException e) {
             field.setCorrect( false );
             field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
             field.setPositionStart( positionStart );
             field.setPositionEnd( positionEnd - 1 );
             field.addFeedback( feedback );
             returnValue = true;
+            field.setValue( "EMPTY" );
         }
-        field.setValue( line.substring( positionStart, positionEnd ) );
 
         return returnValue;
     }
@@ -373,15 +451,25 @@ public class TmServiceImpl implements TmService {
 
         boolean checkIsWrong = false;
 
-        if( !StringProcessor.isNumeric( line.substring( positionStart, positionEnd ) ) && !line.substring( 244,246 ).isBlank() ) {
+        try {
+            if( !StringProcessor.isNumeric( line.substring( positionStart, positionEnd ) ) && !line.substring( 244,246 ).isBlank() ) {
+                field.setCorrect( false );
+                field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
+                field.setPositionStart( positionStart );
+                field.setPositionEnd( positionEnd -1 );
+                field.addFeedback( feedback );
+                checkIsWrong = true;
+            }
+            field.setValue( line.substring( positionStart, positionEnd ) );
+        } catch (IndexOutOfBoundsException e) {
             field.setCorrect( false );
             field.setLine( Arrays.asList( this.lines ).indexOf( line ) +1 );
             field.setPositionStart( positionStart );
             field.setPositionEnd( positionEnd -1 );
             field.addFeedback( feedback );
             checkIsWrong = true;
+            field.setValue( "EMPTY" );
         }
-        field.setValue( line.substring( positionStart, positionEnd ) );
 
         return checkIsWrong;
     }
@@ -390,16 +478,27 @@ public class TmServiceImpl implements TmService {
 
         boolean returnValue = false;
 
-        if( !StringProcessor.isAlphaNumeric( line.substring( positionStart, positionEnd ) ) ) {
+        try {
+            if( !StringProcessor.isAlphaNumeric( line.substring( positionStart, positionEnd ) ) ) {
+                field.setCorrect( false );
+                field.setLine( Arrays.asList( this.lines ).indexOf( line ) + 1 );
+                field.setPositionStart( positionStart );
+                field.setPositionEnd( positionEnd - 1 );
+                field.addFeedback( feedback );
+                returnValue =true;
+
+            }
+            field.setValue( line.substring( positionStart, positionEnd ) );
+        } catch (IndexOutOfBoundsException e) {
             field.setCorrect( false );
             field.setLine( Arrays.asList( this.lines ).indexOf( line ) + 1 );
             field.setPositionStart( positionStart );
             field.setPositionEnd( positionEnd - 1 );
             field.addFeedback( feedback );
             returnValue =true;
+            field.setValue( "EMPTY" );
 
         }
-        field.setValue( line.substring( positionStart, positionEnd ) );
 
         return returnValue;
     }

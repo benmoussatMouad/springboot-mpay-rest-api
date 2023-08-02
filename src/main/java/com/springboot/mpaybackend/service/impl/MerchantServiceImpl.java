@@ -63,6 +63,7 @@ public class MerchantServiceImpl implements MerchantService {
         this.bmRepository = bmRepository;
         this.tmRepository = tmRepository;
         this.userBankRepository = userBankRepository;
+	this.userAgencyRepository = userAgencyRepository;
         this.agencyRepository = agencyRepository;
         this.licenseService = licenseService;
 
@@ -460,7 +461,8 @@ public class MerchantServiceImpl implements MerchantService {
 
         // Check if merchant is IN_PROGRESS or SATIM_REVIEW
         if (!merchant.getStatus().equals(MerchantStatus.IN_PROGRESS)
- && !merchant.getStatus().equals(MerchantStatus.SATIM_REVIEW)) {
+                && !merchant.getStatus().equals(MerchantStatus.SATIM_REVIEW)) {
+
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Merchant status should be IN_PROGRESS or SATIM_REVIEW");
         }
 
@@ -478,6 +480,18 @@ public class MerchantServiceImpl implements MerchantService {
         // Finding creating bank user
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+
+
+        // Check if BM or TM exists before
+        Bm existingBm = bmRepository.findByMerchantIdAndDeletedFalse(merchant.getId())
+                .orElse(null);
+        // If one BM exists then the TM exists as well, so we set them to deleted
+        if (existingBm != null) {
+            Tm existingTm = tmRepository.findByBmIdAndDeletedFalse(existingBm.getId())
+                    .orElse(null);
+            if (existingTm != null) existingTm.setDeleted(true);
+            existingBm.setDeleted(true);
+        }
 
         // Create a BM entity
         //
