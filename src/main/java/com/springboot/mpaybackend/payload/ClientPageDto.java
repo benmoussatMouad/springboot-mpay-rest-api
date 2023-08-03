@@ -11,7 +11,7 @@ public class ClientPageDto {
     @Schema(name = "count", description = "how many elements in the whole database")
     private Long count;
 
-    @Schema(name = "Clients Page",
+    @Schema(name = "page",
             description = "Contains as many as specified in size parameter")
     private List<ClientDto> clients;
 

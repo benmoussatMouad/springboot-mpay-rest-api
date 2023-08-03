@@ -35,7 +35,7 @@ public interface MerchantRepository extends JpaRepository<Merchant, Long> {
     Page<Merchant> findAllByDeletedFalseAndIdAndFirstNameContainingOrLastNameContainingAndPhoneContainingAndRegistreCommerceNumberContainingAndFiscalNumberContaining(Long id, String firstName, String lastName, String phone, String registreCommerce, String fiscalNumber, Pageable pageable);
 
     //TODO: Add deleted false and check
-    @Query("SELECT m FROM Merchant m WHERE (:id is null or m.id = :id) AND ((:firstName is null OR CONCAT('%', m.firstName, '%') LIKE CONCAT('%', :firstName, '%')) OR (:lastName is null OR CONCAT('%', m.lastName, '%') LIKE CONCAT('%', :lastName, '%'))) AND (:phone is null OR m.phone LIKE CONCAT('%', :phone, '%')) AND (:registreCommerce is null OR m.registreCommerceNumber LIKE CONCAT('%', :registreCommerce, '%')) AND (:fiscalNumber is null OR m.fiscalNumber LIKE CONCAT('%', :fiscalNumber, '%')) AND (:status is null OR m.status = :status)")
+    @Query("SELECT m FROM Merchant m WHERE (:id is null or m.id = :id) AND ((:firstName is null OR CONCAT('%', m.firstName, '%') LIKE CONCAT('%', :firstName, '%')) OR (:lastName is null OR CONCAT('%', m.lastName, '%') LIKE CONCAT('%', :lastName, '%'))) AND (:phone is null OR m.phone LIKE CONCAT('%', :phone, '%')) AND (:registreCommerce is null OR m.registreCommerceNumber LIKE CONCAT('%', :registreCommerce, '%')) AND (:fiscalNumber is null OR m.fiscalNumber LIKE CONCAT('%', :fiscalNumber, '%')) AND (:status is null OR m.status = :status) AND (m.deleted = FALSE)")
     Page<Merchant> findByFilter(
             Pageable pageable,
             @Param("id") Long id,

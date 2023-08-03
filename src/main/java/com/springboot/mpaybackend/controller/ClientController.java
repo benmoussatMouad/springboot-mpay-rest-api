@@ -37,9 +37,18 @@ public class ClientController {
             @RequestParam(name = "page")
             @Parameter(description = "The number of the desired page, start from 0") Integer page,
             @RequestParam(name= "size")
-            @Parameter(description = "The size of the page") Integer size
+            @Parameter(description = "The size of the page") Integer size,
+            @RequestParam(name= "name", required = false)
+            @Parameter(description = "The size of the page") String name,
+            @RequestParam(name= "id", required = false)
+            @Parameter(description = "The size of the page") Long id,
+            @RequestParam(name= "phone", required = false)
+            @Parameter(description = "The size of the page") String phone,
+            @RequestParam(name= "pan", required = false)
+            @Parameter(description = "The size of the page") String pan
+
     ) {
-        return ResponseEntity.ok( clientService.getAllClients( page, size ) );
+        return ResponseEntity.ok( clientService.getAllClients( page, size, name, phone, pan, id ) );
     }
 
     @GetMapping("{key}")

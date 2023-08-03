@@ -12,7 +12,7 @@ public interface ClientService {
 
     List<ClientDto> getAllClients();
 
-    ClientPageDto getAllClients(int page, int size);
+    ClientPageDto getAllClients(int page, int size, String name, String phone, String pan, Long id);
 
     ClientDto updateClient(ClientDto dto, Long id);
 

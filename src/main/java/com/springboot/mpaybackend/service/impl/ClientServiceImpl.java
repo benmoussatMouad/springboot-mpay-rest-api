@@ -55,9 +55,9 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public ClientPageDto getAllClients(int page, int size) {
+    public ClientPageDto getAllClients(int page, int size, String name, String phone, String pan, Long id) {
 
-        Page<Client> clients = clientRepository.findAll( PageRequest.of( page, size ) );
+        Page<Client> clients = clientRepository.findAllByFilter( PageRequest.of( page, size ), name, phone, pan, id );
 
         List<ClientDto> clientDtos = clients.stream().map( user -> {
 
