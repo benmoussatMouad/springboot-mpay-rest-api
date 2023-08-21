@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 @Entity
 @Getter
 @Setter
@@ -28,9 +30,17 @@ public class Transaction {
     private Merchant merchant;
 
     private double amount;
+    private double amountRefund;
+
     private String type;
 
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
+    private Date transactionDate;
+    private String orderId;
+
+    private String satimId;
+    @Column(columnDefinition = "boolean DEFAULT false")
+    private boolean deleted;
 }
