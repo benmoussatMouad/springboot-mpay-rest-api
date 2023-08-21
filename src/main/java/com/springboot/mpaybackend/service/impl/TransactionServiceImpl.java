@@ -5,10 +5,7 @@ import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.OrderDto;
 import com.springboot.mpaybackend.payload.TransactionDto;
-import com.springboot.mpaybackend.repository.DeviceHistoryRepository;
-import com.springboot.mpaybackend.repository.MerchantRepository;
-import com.springboot.mpaybackend.repository.TransactionRepository;
-import com.springboot.mpaybackend.repository.TransactionTraceRepository;
+import com.springboot.mpaybackend.repository.*;
 import com.springboot.mpaybackend.service.TransactionService;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -26,13 +23,17 @@ public class TransactionServiceImpl implements TransactionService {
     private DeviceHistoryRepository deviceHistoryRepository;
     private TransactionTraceRepository transactionTraceRepository;
     private ModelMapper modelMapper;
+    private UserRepository userRepository;
+    private ClientRepository clientRepository;
 
-    public TransactionServiceImpl(MerchantRepository merchantRepository, TransactionRepository transactionRepository, DeviceHistoryRepository deviceHistoryRepository, TransactionTraceRepository transactionTraceRepository, ModelMapper modelMapper) {
+    public TransactionServiceImpl(MerchantRepository merchantRepository, TransactionRepository transactionRepository, DeviceHistoryRepository deviceHistoryRepository, TransactionTraceRepository transactionTraceRepository, ModelMapper modelMapper, UserRepository userRepository, ClientRepository clientRepository) {
         this.merchantRepository = merchantRepository;
         this.transactionRepository = transactionRepository;
         this.deviceHistoryRepository = deviceHistoryRepository;
         this.transactionTraceRepository = transactionTraceRepository;
         this.modelMapper = modelMapper;
+        this.userRepository = userRepository;
+        this.clientRepository = clientRepository;
     }
 
     @Override
@@ -60,6 +61,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setClient(null);
         transaction.setMerchant(merchant);
         transaction.setOrderId(orderId);
+        transaction.setTransactionDate(new Date());
 
         Transaction savedTransaction = transactionRepository.save(transaction);
         //create new trace
@@ -82,5 +84,116 @@ public class TransactionServiceImpl implements TransactionService {
         transactionTraceRepository.save(trace);
 
         return modelMapper.map(savedTransaction, TransactionDto.class);
+    }
+
+    @Override
+    public boolean confirmCardData(String pan, String cvv, Integer month, Integer year, String name) {
+        return true;
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public TransactionDto putToFormFilled(Long id, String name, String device) {
+        Transaction transaction = transactionRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tranasction", "id", id));
+        Client client = clientRepository.findByUserUsernameAndDeletedFalse(name)
+                .orElseThrow(() -> new ResourceNotFoundException("Client", " username", name));
+
+        // Find device history
+        List<DeviceHistory> deviceHistory = deviceHistoryRepository.findByDeviceAndDeletedFalse(device);
+
+        DeviceHistory exists = deviceHistory.stream().filter(
+                d -> d.getUsername().getUsername().equals(client.getUser().getUsername())
+        ).findAny().orElse(null);
+        if (exists == null) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Device does not belong to merchant");
+        }
+
+        // Set Transaction status but confirm previous status
+        if (!transaction.getStatus().equals(TransactionStatus.ACCEPTED)) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be WAITING");
+        }
+        transaction.setStatus(TransactionStatus.FORM_FILLED);
+        transaction.setClient(client);
+        transactionRepository.save(transaction);
+        // Save trace
+        TransactionTrace trace = new TransactionTrace();
+        trace.setTransaction(transaction);
+        trace.setUpdatedAt(new Date());
+        trace.setStatus(TransactionStatus.FORM_FILLED);
+        trace.setClientDeviceHistory(exists);
+        transactionTraceRepository.save(trace);
+
+        return modelMapper.map(transaction, TransactionDto.class);
+    }
+
+    @Override
+    public TransactionDto putToAuthenticated(Long id, String name, String device) {
+        Transaction transaction = transactionRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tranasction", "id", id));
+        Client client = clientRepository.findByUserUsernameAndDeletedFalse(name)
+                .orElseThrow(() -> new ResourceNotFoundException("Client", " username", name));
+
+        // Find device history
+        List<DeviceHistory> deviceHistory = deviceHistoryRepository.findByDeviceAndDeletedFalse(device);
+
+        DeviceHistory exists = deviceHistory.stream().filter(
+                d -> d.getUsername().getUsername().equals(client.getUser().getUsername())
+        ).findAny().orElse(null);
+        if (exists == null) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Device does not belong to merchant");
+        }
+
+        // Set Transaction status but confirm previous status
+        if (!transaction.getStatus().equals(TransactionStatus.FORM_FILLED)) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be WAITING");
+        }
+        transaction.setStatus(TransactionStatus.AUTHENTICATED);
+        transaction.setClient(client);
+        transactionRepository.save(transaction);
+        // Save trace
+        TransactionTrace trace = new TransactionTrace();
+        trace.setTransaction(transaction);
+        trace.setUpdatedAt(new Date());
+        trace.setStatus(TransactionStatus.AUTHENTICATED);
+        trace.setClientDeviceHistory(exists);
+        transactionTraceRepository.save(trace);
+
+        return modelMapper.map(transaction, TransactionDto.class);
+    }
+
+    @Override
+    public TransactionDto putToAccepted(Long id, String name, String device) {
+        Transaction transaction = transactionRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tranasction", "id", id));
+        Client client = clientRepository.findByUserUsernameAndDeletedFalse(name)
+                .orElseThrow(() -> new ResourceNotFoundException("Client", " username", name));
+
+        // Find device history
+        List<DeviceHistory> deviceHistory = deviceHistoryRepository.findByDeviceAndDeletedFalse(device);
+
+        DeviceHistory exists = deviceHistory.stream().filter(
+                d -> d.getUsername().getUsername().equals(client.getUser().getUsername())
+        ).findAny().orElse(null);
+        if (exists == null) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Device does not belong to merchant");
+        }
+
+        // Set Transaction status but confirm previous status
+        if (!transaction.getStatus().equals(TransactionStatus.WAITING)) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be WAITING");
+        }
+        transaction.setStatus(TransactionStatus.ACCEPTED);
+        transaction.setClient(client);
+        transactionRepository.save(transaction);
+        // Save trace
+        TransactionTrace trace = new TransactionTrace();
+        trace.setTransaction(transaction);
+        trace.setUpdatedAt(new Date());
+        trace.setStatus(TransactionStatus.ACCEPTED);
+        trace.setClientDeviceHistory(exists);
+        transactionTraceRepository.save(trace);
+
+        return modelMapper.map(transaction, TransactionDto.class);
     }
 }

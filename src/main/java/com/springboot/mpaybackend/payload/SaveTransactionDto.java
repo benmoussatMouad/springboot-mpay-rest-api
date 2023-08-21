@@ -6,11 +6,8 @@ import lombok.Data;
 
 @Data
 public class SaveTransactionDto {
-    @NotNull
     private Double amount;
-    @NotNull
     private Long merchantId;
-    @NotNull
     private String orderId;
     @NotEmpty
     private String device;

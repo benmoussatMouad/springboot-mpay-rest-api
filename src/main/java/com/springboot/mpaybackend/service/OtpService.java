@@ -9,11 +9,12 @@ public interface OtpService {
 
     void sendOtpToUser(Long id);
 
-    void createOtp();
+    void sendOtpToUser(String username);
 
     Boolean checkOtp(CheckOtpDto dto);
 
     Boolean checkOtp(ForgetPasswordCheckOtpDto dto, String username);
 
     Otp createOtp(User user);
+    Otp createOtp(String username);
 }

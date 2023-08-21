@@ -13,4 +13,6 @@ public interface OtpRepository extends JpaRepository<Otp, Long> {
     Boolean existsByUser(User user);
 
     Optional<Otp> findByUserId(Long id);
+
+    Optional<Otp> findByUserUsername(String username);
 }

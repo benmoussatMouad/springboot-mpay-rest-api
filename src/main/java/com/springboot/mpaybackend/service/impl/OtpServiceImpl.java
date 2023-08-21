@@ -59,6 +59,7 @@ public class OtpServiceImpl implements OtpService {
         return otp;
     }
 
+
     @Override
     public void sendOtpToUser(Long userId) {
         Otp otp = otpRepository.findByUserId( userId )
@@ -68,7 +69,18 @@ public class OtpServiceImpl implements OtpService {
     }
 
     @Override
-    public void createOtp() {
+    public void sendOtpToUser(String username) {
+        Otp otp = otpRepository.findByUserUsername( username )
+                .orElseThrow( () -> new ResourceNotFoundException( "Otp", "username", username ) );
+
+        System.out.println( otp.getCode() );
+    }
+
+    @Override
+    public Otp createOtp(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+        return this.createOtp(user);
 
     }
 
