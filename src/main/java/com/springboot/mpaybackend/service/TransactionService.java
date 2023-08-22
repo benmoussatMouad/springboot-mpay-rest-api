@@ -15,4 +15,6 @@ public interface TransactionService {
     TransactionDto putToAuthenticated(Long id, String name, String device);
 
     TransactionDto putToAccepted(Long id, String name, String device);
+
+    TransactionDto putToConfirmed(Long id, String name, String device);
 }

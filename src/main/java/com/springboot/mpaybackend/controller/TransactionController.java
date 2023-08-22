@@ -74,5 +74,18 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.putToAuthenticated(id, authentication.getName(), dto.getDevice()));
     }
 
+    @PostMapping("confirm-payment")
+    @PreAuthorize("hasAnyAuthority('MERCHANT')")
+    public ResponseEntity<String> satimConfirmPayment() {
+        return ResponseEntity.ok("Payment confrimed");
+    }
+
+    @PutMapping("/{id}/confirmed")
+    @PreAuthorize("hasAnyAuthority('MERCHANT')")
+    public ResponseEntity<TransactionDto> confirmTransaction(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
+
+        return ResponseEntity.ok(transactionService.putToConfirmed(id, authentication.getName(), dto.getDevice()));
+    }
+
 
 }

@@ -196,4 +196,39 @@ public class TransactionServiceImpl implements TransactionService {
 
         return modelMapper.map(transaction, TransactionDto.class);
     }
+
+    @Override
+    public TransactionDto putToConfirmed(Long id, String name, String device) {
+        Transaction transaction = transactionRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tranasction", "id", id));
+        Merchant merchant = merchantRepository.findByUsernameUsernameAndDeletedFalse(name)
+                .orElseThrow(() -> new ResourceNotFoundException("Merchant", " username", name));
+
+        // Find device history
+        List<DeviceHistory> deviceHistory = deviceHistoryRepository.findByDeviceAndDeletedFalse(device);
+
+        DeviceHistory exists = deviceHistory.stream().filter(
+                d -> d.getUsername().getUsername().equals(merchant.getUsername().getUsername())
+        ).findAny().orElse(null);
+        if (exists == null) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Device does not belong to merchant");
+        }
+
+        // Set Transaction status but confirm previous status
+        if (!transaction.getStatus().equals(TransactionStatus.AUTHENTICATED)) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be WAITING");
+        }
+        transaction.setStatus(TransactionStatus.CONFIRMED);
+        transaction.setMerchant(merchant);
+        transactionRepository.save(transaction);
+        // Save trace
+        TransactionTrace trace = new TransactionTrace();
+        trace.setTransaction(transaction);
+        trace.setUpdatedAt(new Date());
+        trace.setStatus(TransactionStatus.CONFIRMED);
+        trace.setClientDeviceHistory(exists);
+        transactionTraceRepository.save(trace);
+
+        return modelMapper.map(transaction, TransactionDto.class);
+    }
 }
