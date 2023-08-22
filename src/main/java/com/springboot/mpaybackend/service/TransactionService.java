@@ -17,4 +17,8 @@ public interface TransactionService {
     TransactionDto putToAccepted(Long id, String name, String device);
 
     TransactionDto putToConfirmed(Long id, String name, String device);
+
+    TransactionDto putToRefund(Long id, String name, String device, Double amount);
+
+    TransactionDto putToCanceled(Long id, String name, String device);
 }

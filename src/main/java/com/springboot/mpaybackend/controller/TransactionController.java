@@ -87,5 +87,19 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.putToConfirmed(id, authentication.getName(), dto.getDevice()));
     }
 
+    @PutMapping("/{id}/refund")
+    @PreAuthorize("hasAnyAuthority('MERCHANT')")
+    public ResponseEntity<TransactionDto> refundTransaction(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
+
+        return ResponseEntity.ok(transactionService.putToRefund(id, authentication.getName(), dto.getDevice(), dto.getAmount()));
+    }
+
+    @PutMapping("/{id}/canceled")
+    @PreAuthorize("hasAnyAuthority('MERCHANT')")
+    public ResponseEntity<TransactionDto> cancelTransaction(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
+
+        return ResponseEntity.ok(transactionService.putToCanceled(id, authentication.getName(), dto.getDevice()));
+    }
+
 
 }

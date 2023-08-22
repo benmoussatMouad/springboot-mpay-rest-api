@@ -10,7 +10,7 @@ public enum TransactionStatus {
     REDIRECTION_CONFIRMED,
     CONFIRMED,
     CANCELED,
-    REIMBURSED,
+    REFUND,
     FAILED,
     CANCELED_BY_CLIENT,
     ABANDONED
