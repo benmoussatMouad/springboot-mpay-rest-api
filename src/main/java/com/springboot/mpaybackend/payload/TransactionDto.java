@@ -9,7 +9,9 @@ public class TransactionDto {
     private Long id;
     private String status;
     private double amount;
+    private double amountRefund;
     private Long clientId;
     private Long merchantId;
     private String orderId;
+
 }

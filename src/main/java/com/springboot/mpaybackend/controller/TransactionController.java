@@ -4,12 +4,17 @@ import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.service.OtpService;
 import com.springboot.mpaybackend.service.TransactionService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 @RestController
 @RequestMapping("api/v1/transaction")
@@ -101,5 +106,47 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.putToCanceled(id, authentication.getName(), dto.getDevice()));
     }
 
+    @PutMapping("/{id}/abandoned")
+    @PreAuthorize("hasAnyAuthority('MERCHANT')")
+    public ResponseEntity<TransactionDto> abandonTransaction(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
 
+        return ResponseEntity.ok(transactionService.putToAbandoned(id, authentication.getName(), dto.getDevice()));
+    }
+
+    @GetMapping()
+    @PreAuthorize("hasAnyAuthority('ADMIN','MERCHANT','CLIENT','BANK_USER','BANK_ADMIN','AGENCY_USER','AGENCY_ADMIN')")
+    public ResponseEntity<TransactionPage> getTransactionsByPage(
+            Authentication authentication,
+            @RequestParam Integer page,
+            @RequestParam Integer size,
+            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) String orderId,
+            @RequestParam(required = false) String terminalId,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false)
+            @Parameter(description = "Value should be a string like 'YYYY/MM/DD'") String startDate,
+            @RequestParam(required = false)
+            @Parameter(description = "Value should be a string like 'YYYY/MM/DD'") String endDate
+    ) {
+        if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"))) {
+            return ResponseEntity.ok(transactionService.getTransactions(page, size,
+                    id, orderId, terminalId, phone, status, startDate, endDate));
+        } else if (
+                authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_ADMIN"))
+                        || authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_USER"))
+                        || authentication.getAuthorities().contains(new SimpleGrantedAuthority("AGENCY_ADMIN"))
+                        || authentication.getAuthorities().contains(new SimpleGrantedAuthority("AGENCY_USER"))) {
+            return ResponseEntity.ok(transactionService.getTransactions(page, size,
+                    id, orderId, terminalId, phone, status, startDate, endDate));
+//            transactionService.getTransactionsForBankUser(authentication.getName(), page, size,
+//                    id, orderId, terminalId,phone,status, startDate, endDate);
+        } else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("MERCHANT"))) {
+            return ResponseEntity.ok(transactionService.getTransactionsForMerchant(authentication.getName(), page, size,
+                    id, orderId, terminalId, phone, status, startDate, endDate));
+        } else {
+            return ResponseEntity.ok(transactionService.getTransactionsForClient(authentication.getName(), page, size,
+                    id, orderId, terminalId, phone, status, startDate, endDate));
+        }
+    }
 }

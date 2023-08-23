@@ -43,4 +43,6 @@ public class Transaction {
     private String satimId;
     @Column(columnDefinition = "boolean DEFAULT false")
     private boolean deleted;
+
+    private Long terminalId;
 }

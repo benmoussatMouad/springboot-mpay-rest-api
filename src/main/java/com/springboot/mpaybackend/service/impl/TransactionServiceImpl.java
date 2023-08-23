@@ -5,15 +5,19 @@ import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.OrderDto;
 import com.springboot.mpaybackend.payload.TransactionDto;
+import com.springboot.mpaybackend.payload.TransactionPage;
 import com.springboot.mpaybackend.repository.*;
 import com.springboot.mpaybackend.service.TransactionService;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -300,6 +304,94 @@ public class TransactionServiceImpl implements TransactionService {
         trace.setTransaction(transaction);
         trace.setUpdatedAt(new Date());
         trace.setStatus(TransactionStatus.CANCELED);
+        trace.setClientDeviceHistory(exists);
+        transactionTraceRepository.save(trace);
+
+        return modelMapper.map(transaction, TransactionDto.class);
+    }
+
+    @Override
+    public TransactionPage getTransactions(Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate) {
+        Page<Transaction> transactionPage = transactionRepository.findByFilter(
+                PageRequest.of(page, size),
+                id, orderId, terminalId, phone, status, startDate, endDate
+        );
+
+        TransactionPage dto = new TransactionPage();
+
+        dto.setCount(transactionPage.getTotalElements());
+        dto.setPage(transactionPage.getContent().stream().map(
+                t -> modelMapper.map(t, TransactionDto.class)
+        ).collect(Collectors.toList()));
+
+        return dto;
+    }
+
+    @Override
+    public TransactionPage getTransactionsForMerchant(String username, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate) {
+
+        Page<Transaction> transactionPage = transactionRepository.findByFilterAndMerchant(
+                PageRequest.of(page, size),
+                id, orderId, terminalId, phone, status, startDate, endDate, username
+        );
+
+        TransactionPage dto = new TransactionPage();
+
+        dto.setCount(transactionPage.getTotalElements());
+        dto.setPage(transactionPage.getContent().stream().map(
+                t -> modelMapper.map(t, TransactionDto.class)
+        ).collect(Collectors.toList()));
+
+        return dto;
+    }
+
+    @Override
+    public TransactionPage getTransactionsForClient(String username, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate) {
+        Page<Transaction> transactionPage = transactionRepository.findByFilterAndClient(
+                PageRequest.of(page, size),
+                id, orderId, terminalId, phone, status, startDate, endDate, username
+        );
+
+        TransactionPage dto = new TransactionPage();
+
+        dto.setCount(transactionPage.getTotalElements());
+        dto.setPage(transactionPage.getContent().stream().map(
+                t -> modelMapper.map(t, TransactionDto.class)
+        ).collect(Collectors.toList()));
+
+        return dto;
+    }
+
+    @Override
+    public TransactionDto putToAbandoned(Long id, String name, String device) {
+        Transaction transaction = transactionRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tranasction", "id", id));
+        Merchant merchant = merchantRepository.findByUsernameUsernameAndDeletedFalse(name)
+                .orElseThrow(() -> new ResourceNotFoundException("Merchant", " username", name));
+
+
+        // Find device history
+        List<DeviceHistory> deviceHistory = deviceHistoryRepository.findByDeviceAndDeletedFalse(device);
+
+        DeviceHistory exists = deviceHistory.stream().filter(
+                d -> d.getUsername().getUsername().equals(merchant.getUsername().getUsername())
+        ).findAny().orElse(null);
+        if (exists == null) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Device does not belong to merchant");
+        }
+
+        // Set Transaction status but confirm previous status
+        if (!transaction.getStatus().equals(TransactionStatus.WAITING) && !transaction.getStatus().
+        equals(TransactionStatus.FORM_FILLED)) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be WAITING or FORM_FILLED");
+        }
+        transaction.setStatus(TransactionStatus.ABANDONED);
+        transactionRepository.save(transaction);
+        // Save trace
+        TransactionTrace trace = new TransactionTrace();
+        trace.setTransaction(transaction);
+        trace.setUpdatedAt(new Date());
+        trace.setStatus(TransactionStatus.ABANDONED);
         trace.setClientDeviceHistory(exists);
         transactionTraceRepository.save(trace);
 
