@@ -44,7 +44,7 @@ public class TransactionController {
     @PostMapping("init-payment")
     @PreAuthorize("hasAnyAuthority('CLIENT')")
     public ResponseEntity<String> initiatePayment(@RequestBody CardDataDto dto) {
-        if (transactionService.confirmCardData(dto.getPan(), dto.getCvv(), dto.getMonth(), dto.getYear(), dto.getName())) {
+        if (!transactionService.confirmCardData(dto.getPan(), dto.getCvv(), dto.getMonth(), dto.getYear(), dto.getName())) {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Card data are wrong");
         }
         otpService.createOtp(dto.getUsername());
