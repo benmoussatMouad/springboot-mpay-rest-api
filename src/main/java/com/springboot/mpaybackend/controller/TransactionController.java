@@ -68,7 +68,8 @@ public class TransactionController {
 
     @PostMapping("authenticate-payment")
     @PreAuthorize("hasAnyAuthority('CLIENT')")
-    public ResponseEntity<String> authenticateSatimPayement() {
+    public ResponseEntity<String> authenticateSatimPayement(@RequestBody SatimOtpDto dto) {
+        otpService.satimCheckOtp(dto);
         return ResponseEntity.ok( "Card authenticated" );
     }
 

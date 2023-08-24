@@ -12,6 +12,10 @@ public class TransactionDto {
     private double amountRefund;
     private Long clientId;
     private Long merchantId;
+    private String merchantWilayaName;
+    private Long merchantWilayaId;
+    private String merchantPhone;
+    private String merchantCommune;
     private String orderId;
 
 }

@@ -6,6 +6,7 @@ import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.CheckOtpDto;
 import com.springboot.mpaybackend.payload.ForgetPasswordCheckOtpDto;
+import com.springboot.mpaybackend.payload.SatimOtpDto;
 import com.springboot.mpaybackend.repository.OtpRepository;
 import com.springboot.mpaybackend.repository.UserRepository;
 import com.springboot.mpaybackend.service.OtpService;
@@ -82,6 +83,29 @@ public class OtpServiceImpl implements OtpService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
         return this.createOtp(user);
 
+    }
+
+    @Override
+    public void satimCheckOtp(SatimOtpDto dto) {
+        User user = userRepository.findByUsername( dto.getUsername() )
+                .orElseThrow( () -> new ResourceNotFoundException( "User", "username", dto.getUsername() ) );
+
+        Otp otp = otpRepository.findByUser( user )
+                .orElseThrow( () -> new ResourceNotFoundException( "Otp", "User's username", dto.getUsername() ) );
+        otp.setAttempts( otp.getAttempts() + 1 );
+        if( otp.getAttempts() > 5 ) {
+            // TODO: Fraude management
+        }
+
+        if( otp.isUsed() || otp.isExpired() ) {
+            throw new MPayAPIException( HttpStatus.FORBIDDEN, "OTP is used or expired. Resend new one" );
+        }
+        if( otp.getCode().equals( dto.getOtp() ) ) {
+            otp.setUsed( true );
+            otpRepository.save( otp );
+        } else {
+            otp.increaseAttempt();
+        }
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.springboot.mpaybackend.entity.Otp;
 import com.springboot.mpaybackend.entity.User;
 import com.springboot.mpaybackend.payload.CheckOtpDto;
 import com.springboot.mpaybackend.payload.ForgetPasswordCheckOtpDto;
+import com.springboot.mpaybackend.payload.SatimOtpDto;
 
 public interface OtpService {
 
@@ -17,4 +18,6 @@ public interface OtpService {
 
     Otp createOtp(User user);
     Otp createOtp(String username);
+
+    void satimCheckOtp(SatimOtpDto otp);
 }
