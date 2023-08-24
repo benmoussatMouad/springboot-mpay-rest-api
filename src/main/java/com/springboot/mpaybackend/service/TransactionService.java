@@ -4,8 +4,6 @@ import com.springboot.mpaybackend.payload.OrderDto;
 import com.springboot.mpaybackend.payload.TransactionDto;
 import com.springboot.mpaybackend.payload.TransactionPage;
 
-import java.util.Date;
-
 public interface TransactionService {
     OrderDto initOrder(double amount, Long merchantId);
 
@@ -25,12 +23,12 @@ public interface TransactionService {
 
     TransactionDto putToCanceled(Long id, String name, String device);
 
-    TransactionPage getTransactions(Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate);
+    TransactionPage getTransactions(Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate, String type, String pan, String last4);
 
 
-    TransactionPage getTransactionsForMerchant(String name, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate);
+    TransactionPage getTransactionsForMerchant(String name, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate, String type, String pan, String last4);
 
-    TransactionPage getTransactionsForClient(String name, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate);
+    TransactionPage getTransactionsForClient(String name, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate, String type, String pan, String last4);
 
     TransactionDto putToAbandoned(Long id, String name, String device);
 

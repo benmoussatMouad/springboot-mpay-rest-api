@@ -62,6 +62,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setStatus(TransactionStatus.WAITING);
+        transaction.setType( TransactionType.PAYMENT );
         transaction.setClient(null);
         transaction.setMerchant(merchant);
         transaction.setOrderId(orderId);
@@ -82,6 +83,7 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionTrace trace = new TransactionTrace();
         trace.setTransaction(transaction);
         trace.setStatus(TransactionStatus.WAITING);
+        trace.setType( TransactionType.PAYMENT );
         trace.setUpdatedAt(new Date());
         trace.setClientDeviceHistory(null);
         trace.setMerchantDeviceHistory(exists);
@@ -124,6 +126,7 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionTrace trace = new TransactionTrace();
         trace.setTransaction(transaction);
         trace.setUpdatedAt(new Date());
+        trace.setType( TransactionType.PAYMENT );
         trace.setStatus(TransactionStatus.FORM_FILLED);
         trace.setClientDeviceHistory(exists);
         transactionTraceRepository.save(trace);
@@ -160,6 +163,7 @@ public class TransactionServiceImpl implements TransactionService {
         trace.setTransaction(transaction);
         trace.setUpdatedAt(new Date());
         trace.setStatus(TransactionStatus.AUTHENTICATED);
+        trace.setType( TransactionType.PAYMENT );
         trace.setClientDeviceHistory(exists);
         transactionTraceRepository.save(trace);
 
@@ -195,6 +199,7 @@ public class TransactionServiceImpl implements TransactionService {
         trace.setTransaction(transaction);
         trace.setUpdatedAt(new Date());
         trace.setStatus(TransactionStatus.ACCEPTED);
+        trace.setType( TransactionType.PAYMENT );
         trace.setClientDeviceHistory(exists);
         transactionTraceRepository.save(trace);
 
@@ -223,6 +228,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be WAITING");
         }
         transaction.setStatus(TransactionStatus.CONFIRMED);
+
         transaction.setMerchant(merchant);
         transactionRepository.save(transaction);
         // Save trace
@@ -230,6 +236,7 @@ public class TransactionServiceImpl implements TransactionService {
         trace.setTransaction(transaction);
         trace.setUpdatedAt(new Date());
         trace.setStatus(TransactionStatus.CONFIRMED);
+        trace.setType( TransactionType.PAYMENT );
         trace.setClientDeviceHistory(exists);
         transactionTraceRepository.save(trace);
 
@@ -262,6 +269,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be WAITING");
         }
         transaction.setStatus(TransactionStatus.REFUND);
+        transaction.setType( TransactionType.REFUND );
         transaction.setAmountRefund(refundAmount);
         transactionRepository.save(transaction);
         // Save trace
@@ -269,6 +277,7 @@ public class TransactionServiceImpl implements TransactionService {
         trace.setTransaction(transaction);
         trace.setUpdatedAt(new Date());
         trace.setStatus(TransactionStatus.REFUND);
+        trace.setType( TransactionType.REFUND );
         trace.setClientDeviceHistory(exists);
         transactionTraceRepository.save(trace);
 
@@ -298,12 +307,14 @@ public class TransactionServiceImpl implements TransactionService {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be CONFIRMED");
         }
         transaction.setStatus(TransactionStatus.CANCELED);
+        transaction.setType( TransactionType.CANCELLATION );
         transactionRepository.save(transaction);
         // Save trace
         TransactionTrace trace = new TransactionTrace();
         trace.setTransaction(transaction);
         trace.setUpdatedAt(new Date());
         trace.setStatus(TransactionStatus.CANCELED);
+        trace.setType( TransactionType.CANCELLATION );
         trace.setClientDeviceHistory(exists);
         transactionTraceRepository.save(trace);
 
@@ -311,10 +322,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionPage getTransactions(Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate) {
+    public TransactionPage getTransactions(Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate, String type, String pan, String last4) {
         Page<Transaction> transactionPage = transactionRepository.findByFilter(
                 PageRequest.of(page, size),
-                id, orderId, terminalId, phone, status, startDate, endDate
+                id, orderId, terminalId, phone, status, startDate, endDate,
+                type, pan, last4
         );
 
         TransactionPage dto = new TransactionPage();
@@ -328,11 +340,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionPage getTransactionsForMerchant(String username, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate) {
+    public TransactionPage getTransactionsForMerchant(String username, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate, String type, String pan, String last4) {
 
         Page<Transaction> transactionPage = transactionRepository.findByFilterAndMerchant(
                 PageRequest.of(page, size),
-                id, orderId, terminalId, phone, status, startDate, endDate, username
+                id, orderId, terminalId, phone, status, startDate, endDate, username,
+                type, pan, last4
         );
 
         TransactionPage dto = new TransactionPage();
@@ -346,10 +359,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionPage getTransactionsForClient(String username, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate) {
+    public TransactionPage getTransactionsForClient(String username, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate, String type, String pan, String last4) {
         Page<Transaction> transactionPage = transactionRepository.findByFilterAndClient(
                 PageRequest.of(page, size),
-                id, orderId, terminalId, phone, status, startDate, endDate, username
+                id, orderId, terminalId, phone, status, startDate, endDate, username,
+                type, pan, last4
         );
 
         TransactionPage dto = new TransactionPage();

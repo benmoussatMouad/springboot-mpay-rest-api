@@ -1,5 +1,7 @@
 package com.springboot.mpaybackend.controller;
 
+import com.springboot.mpaybackend.entity.TransactionStatus;
+import com.springboot.mpaybackend.entity.TransactionType;
 import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.service.OtpService;
@@ -136,29 +138,45 @@ public class TransactionController {
             @RequestParam(required = false) String terminalId,
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String pan,
+            @RequestParam(required = false) String last4,
             @RequestParam(required = false)
             @Parameter(description = "Value should be a string like 'YYYY/MM/DD'") String startDate,
             @RequestParam(required = false)
             @Parameter(description = "Value should be a string like 'YYYY/MM/DD'") String endDate
     ) {
+
+        try {
+            TransactionStatus.valueOf( status );
+        } catch (IllegalArgumentException e) {
+            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Status is incorrect" );
+        }
+
+        try {
+            TransactionType.valueOf( type );
+        } catch (IllegalArgumentException e) {
+            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Type is incorrect" );
+        }
+
         if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"))) {
             return ResponseEntity.ok(transactionService.getTransactions(page, size,
-                    id, orderId, terminalId, phone, status, startDate, endDate));
+                    id, orderId, terminalId, phone, status, startDate, endDate, type, pan, last4));
         } else if (
                 authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_ADMIN"))
                         || authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_USER"))
                         || authentication.getAuthorities().contains(new SimpleGrantedAuthority("AGENCY_ADMIN"))
                         || authentication.getAuthorities().contains(new SimpleGrantedAuthority("AGENCY_USER"))) {
             return ResponseEntity.ok(transactionService.getTransactions(page, size,
-                    id, orderId, terminalId, phone, status, startDate, endDate));
+                    id, orderId, terminalId, phone, status, startDate, endDate, type, pan, last4));
 //            transactionService.getTransactionsForBankUser(authentication.getName(), page, size,
 //                    id, orderId, terminalId,phone,status, startDate, endDate);
         } else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("MERCHANT"))) {
             return ResponseEntity.ok(transactionService.getTransactionsForMerchant(authentication.getName(), page, size,
-                    id, orderId, terminalId, phone, status, startDate, endDate));
+                    id, orderId, terminalId, phone, status, startDate, endDate, type, pan, last4));
         } else {
             return ResponseEntity.ok(transactionService.getTransactionsForClient(authentication.getName(), page, size,
-                    id, orderId, terminalId, phone, status, startDate, endDate));
+                    id, orderId, terminalId, phone, status, startDate, endDate, type, pan, last4));
         }
     }
 }

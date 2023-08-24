@@ -25,7 +25,11 @@ public class TransactionTrace {
     @JoinColumn(name = "transaction_id")
     private Transaction transaction;
 
+    @Enumerated(EnumType.STRING)
     private TransactionStatus status;
+    @Enumerated(EnumType.STRING)
+    private TransactionType type;
+
     private Date updatedAt;
 
     @ManyToOne

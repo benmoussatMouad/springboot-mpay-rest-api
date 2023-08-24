@@ -32,7 +32,8 @@ public class Transaction {
     private double amount;
     private double amountRefund;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private TransactionType type;
 
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
