@@ -10,11 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Date;
 
 @RestController
 @RequestMapping("api/v1/transaction")
@@ -22,8 +19,9 @@ public class TransactionController {
     TransactionService transactionService;
     private OtpService otpService;
 
-    public TransactionController(TransactionService transactionService) {
+    public TransactionController(TransactionService transactionService, OtpService otpService) {
         this.transactionService = transactionService;
+        this.otpService = otpService;
     }
 
     @PostMapping("/init")
