@@ -34,4 +34,5 @@ public interface TransactionService {
 
     TransactionDto putToAbandoned(Long id, String name, String device);
 
+    TransactionDto putToCanceledByClient(Long id, String name, String device);
 }

@@ -397,4 +397,41 @@ public class TransactionServiceImpl implements TransactionService {
 
         return modelMapper.map(transaction, TransactionDto.class);
     }
+
+    @Override
+    public TransactionDto putToCanceledByClient(Long id, String name, String device) {
+        Transaction transaction = transactionRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tranasction", "id", id));
+        Client client = clientRepository.findByUserUsernameAndDeletedFalse(name)
+                .orElseThrow(() -> new ResourceNotFoundException("Client", " username", name));
+
+
+        // Find device history
+        List<DeviceHistory> deviceHistory = deviceHistoryRepository.findByDeviceAndDeletedFalse(device);
+
+        DeviceHistory exists = deviceHistory.stream().filter(
+                d -> d.getUsername().getUsername().equals(client.getUser().getUsername())
+        ).findAny().orElse(null);
+        if (exists == null) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Device does not belong to client");
+        }
+
+        // Set Transaction status but confirm previous status
+        if (!transaction.getStatus().equals(TransactionStatus.ACCEPTED) &&
+            !transaction.getStatus().equals( TransactionStatus.FORM_FILLED )&&
+                !transaction.getStatus().equals( TransactionStatus.AUTHENTICATED )) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be AUTHENTICATED or FORM_FILLED or ACCEPTED");
+        }
+        transaction.setStatus(TransactionStatus.CANCELED_BY_CLIENT);
+        transactionRepository.save(transaction);
+        // Save trace
+        TransactionTrace trace = new TransactionTrace();
+        trace.setTransaction(transaction);
+        trace.setUpdatedAt(new Date());
+        trace.setStatus(TransactionStatus.CANCELED_BY_CLIENT);
+        trace.setClientDeviceHistory(exists);
+        transactionTraceRepository.save(trace);
+
+        return modelMapper.map(transaction, TransactionDto.class);
+    }
 }
