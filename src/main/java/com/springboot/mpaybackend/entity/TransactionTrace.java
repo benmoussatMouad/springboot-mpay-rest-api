@@ -27,6 +27,7 @@ public class TransactionTrace {
 
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
+
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 

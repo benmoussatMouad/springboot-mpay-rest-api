@@ -8,6 +8,8 @@ import com.springboot.mpaybackend.payload.TransactionDto;
 import com.springboot.mpaybackend.payload.TransactionPage;
 import com.springboot.mpaybackend.repository.*;
 import com.springboot.mpaybackend.service.TransactionService;
+import com.springboot.mpaybackend.payload.TransactionTraceDto;
+
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -333,7 +335,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         dto.setCount(transactionPage.getTotalElements());
         dto.setPage(transactionPage.getContent().stream().map(
-                t -> modelMapper.map(t, TransactionDto.class)
+                t ->{ return  modelMapper.map(t, TransactionDto.class);}
         ).collect(Collectors.toList()));
 
         return dto;
@@ -447,5 +449,20 @@ public class TransactionServiceImpl implements TransactionService {
         transactionTraceRepository.save(trace);
 
         return modelMapper.map(transaction, TransactionDto.class);
+    }
+
+    @Override
+    public TransactionDto getTransactionById(Long id) {
+        Transaction transaction = transactionRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction", "id", id));
+
+        
+        return modelMapper.map(transaction, TransactionDto.class);        
+    }
+
+    @Override
+    public List<TransactionTraceDto> getTransactionTimelineById(Long id) {
+        List<TransactionTraceDto> list = transactionTraceRepository.findByIdOrderByUpdatedAt(id);
+        return null;
     }
 }

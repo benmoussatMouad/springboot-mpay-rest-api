@@ -11,6 +11,12 @@ public class TransactionDto {
     private double amount;
     private double amountRefund;
     private Long clientId;
+    private String clientFirstName;
+    private String clientLastName;
+    private String type;
+    private String transactionDate;
+    private String merchantFirstName;
+    private String merchantLastName;
     private Long merchantId;
     private String merchantWilayaName;
     private Long merchantWilayaId;

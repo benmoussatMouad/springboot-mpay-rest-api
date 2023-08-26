@@ -1,8 +1,11 @@
 package com.springboot.mpaybackend.service;
 
+import java.util.List;
+
 import com.springboot.mpaybackend.payload.OrderDto;
 import com.springboot.mpaybackend.payload.TransactionDto;
 import com.springboot.mpaybackend.payload.TransactionPage;
+import com.springboot.mpaybackend.payload.TransactionTraceDto;
 
 public interface TransactionService {
     OrderDto initOrder(double amount, Long merchantId);
@@ -33,4 +36,8 @@ public interface TransactionService {
     TransactionDto putToAbandoned(Long id, String name, String device);
 
     TransactionDto putToCanceledByClient(Long id, String name, String device);
+
+    TransactionDto getTransactionById(Long id);
+
+    List<TransactionTraceDto> getTransactionTimelineById(Long id);
 }

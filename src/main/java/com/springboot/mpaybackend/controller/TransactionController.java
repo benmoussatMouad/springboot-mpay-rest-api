@@ -8,6 +8,9 @@ import com.springboot.mpaybackend.service.OtpService;
 import com.springboot.mpaybackend.service.TransactionService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -143,19 +146,21 @@ public class TransactionController {
             @RequestParam(required = false) String pan,
             @RequestParam(required = false) String last4,
             @RequestParam(required = false)
-            @Parameter(description = "Value should be a string like 'YYYY/MM/DD'") String startDate,
+            @Parameter(description = "Value should be a string like 'YYYY-MM-DD'") String startDate,
             @RequestParam(required = false)
-            @Parameter(description = "Value should be a string like 'YYYY/MM/DD'") String endDate
+            @Parameter(description = "Value should be a string like 'YYYY-MM-DD'") String endDate
     ) {
 
         try {
-            TransactionStatus.valueOf( status );
+            if (status != null)
+                TransactionStatus.valueOf( status );
         } catch (IllegalArgumentException e) {
             throw new MPayAPIException( HttpStatus.FORBIDDEN, "Status is incorrect" );
         }
 
         try {
-            TransactionType.valueOf( type );
+            if (type != null)
+                TransactionType.valueOf( type );
         } catch (IllegalArgumentException e) {
             throw new MPayAPIException( HttpStatus.FORBIDDEN, "Type is incorrect" );
         }
@@ -180,4 +185,20 @@ public class TransactionController {
                     id, orderId, terminalId, phone, status, startDate, endDate, type, pan, last4));
         }
     }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','MERCHANT','CLIENT','BANK_USER','BANK_ADMIN','AGENCY_USER','AGENCY_ADMIN')")
+    public ResponseEntity<TransactionDto> getTransaction(@PathVariable Long id) {
+
+        return ResponseEntity.ok(transactionService.getTransactionById(id));
+    }
+
+    @GetMapping("/{id}/timeline")
+    @PreAuthorize("hasAnyAuthority('ADMIN','MERCHANT','CLIENT','BANK_USER','BANK_ADMIN','AGENCY_USER','AGENCY_ADMIN')")
+    public ResponseEntity<List<TransactionTraceDto>> getTransactionTrace(@PathVariable Long id) {
+
+        return ResponseEntity.ok(transactionService.getTransactionTimelineById(id));
+    }
+
+
 }

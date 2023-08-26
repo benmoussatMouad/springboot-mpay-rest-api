@@ -30,7 +30,7 @@ public class Transaction {
     private Merchant merchant;
 
     private double amount;
-    private double amountRefund;
+    private Double amountRefund;
 
     @Enumerated(EnumType.STRING)
     private TransactionType type;
