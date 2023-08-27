@@ -8,5 +8,5 @@ public class TransactionTraceDto {
 
     private Long id;
     private String status;
-    private Date createdAt;
+    private Date updatedAt;
 }

@@ -327,8 +327,8 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionPage getTransactions(Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate, String type, String pan, String last4) {
         Page<Transaction> transactionPage = transactionRepository.findByFilter(
                 PageRequest.of(page, size),
-                id, orderId, terminalId, phone, status, startDate, endDate,
-                type, pan, last4
+                id, orderId, terminalId, phone, (status!=null? TransactionStatus.valueOf(status): null), startDate, endDate,
+                (type!=null? TransactionType.valueOf(type) : null), pan, last4
         );
 
         TransactionPage dto = new TransactionPage();
@@ -346,8 +346,8 @@ public class TransactionServiceImpl implements TransactionService {
 
         Page<Transaction> transactionPage = transactionRepository.findByFilterAndMerchant(
                 PageRequest.of(page, size),
-                id, orderId, terminalId, phone, status, startDate, endDate, username,
-                type, pan, last4
+                id, orderId, terminalId, phone, (status!=null? TransactionStatus.valueOf(status): null), startDate, endDate, username,
+                (type!=null? TransactionType.valueOf(type) : null), pan, last4
         );
 
         TransactionPage dto = new TransactionPage();
@@ -364,8 +364,8 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionPage getTransactionsForClient(String username, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate, String type, String pan, String last4) {
         Page<Transaction> transactionPage = transactionRepository.findByFilterAndClient(
                 PageRequest.of(page, size),
-                id, orderId, terminalId, phone, status, startDate, endDate, username,
-                type, pan, last4
+                id, orderId, terminalId, phone, (status!=null? TransactionStatus.valueOf(status): null), startDate, endDate, username,
+                (type!=null? TransactionType.valueOf(type) : null), pan, last4
         );
 
         TransactionPage dto = new TransactionPage();
@@ -462,7 +462,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<TransactionTraceDto> getTransactionTimelineById(Long id) {
-        List<TransactionTraceDto> list = transactionTraceRepository.findByIdOrderByUpdatedAt(id);
-        return null;
+        List<TransactionTrace> list = transactionTraceRepository.findByIdOrderByUpdatedAt(id);
+        
+        return list.stream().map(trace -> modelMapper.map(trace, TransactionTraceDto.class)).toList();
     }
 }

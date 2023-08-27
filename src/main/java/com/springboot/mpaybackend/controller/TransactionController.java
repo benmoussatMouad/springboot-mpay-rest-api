@@ -154,14 +154,14 @@ public class TransactionController {
         try {
             if (status != null)
                 TransactionStatus.valueOf( status );
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             throw new MPayAPIException( HttpStatus.FORBIDDEN, "Status is incorrect" );
         }
 
         try {
             if (type != null)
                 TransactionType.valueOf( type );
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             throw new MPayAPIException( HttpStatus.FORBIDDEN, "Type is incorrect" );
         }
 
