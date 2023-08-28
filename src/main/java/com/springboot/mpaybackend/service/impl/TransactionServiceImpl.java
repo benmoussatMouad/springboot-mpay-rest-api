@@ -288,10 +288,17 @@ public class TransactionServiceImpl implements TransactionService {
         if (!transaction.getStatus().equals(TransactionStatus.CONFIRMED)) {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be WAITING");
         }
-        transaction.setStatus(TransactionStatus.REFUND);
-        transaction.setType( TransactionType.REFUND );
+        // create new transaction
+        Transaction newTransaction = new Transaction();
+        newTransaction.setAmountRefund(refundAmount);
+        newTransaction.setMerchant(merchant);
+        newTransaction.setTransactionDate(new Date());
+        newTransaction.setType(TransactionType.REFUND);
+        newTransaction.setStatus(TransactionStatus.REFUND);
+
         transaction.setAmountRefund(refundAmount);
         transactionRepository.save(transaction);
+        transactionRepository.save(newTransaction);
         // Save trace
         TransactionTrace trace = new TransactionTrace();
         trace.setTransaction(transaction);
@@ -299,9 +306,18 @@ public class TransactionServiceImpl implements TransactionService {
         trace.setStatus(TransactionStatus.REFUND);
         trace.setType( TransactionType.REFUND );
         trace.setClientDeviceHistory(exists);
-        transactionTraceRepository.save(trace);
 
-        return modelMapper.map(transaction, TransactionDto.class);
+        TransactionTrace newTrace = new TransactionTrace();
+        newTrace.setTransaction(newTransaction);
+        newTrace.setUpdatedAt(new Date());
+        newTrace.setStatus(TransactionStatus.REFUND);
+        newTrace.setType( TransactionType.REFUND );
+        newTrace.setMerchantDeviceHistory(exists);
+
+        transactionTraceRepository.save(trace);
+        transactionTraceRepository.save(newTrace);
+
+        return modelMapper.map(newTransaction, TransactionDto.class);
     }
 
     @Override
@@ -326,9 +342,14 @@ public class TransactionServiceImpl implements TransactionService {
         if (!transaction.getStatus().equals(TransactionStatus.CONFIRMED)) {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be CONFIRMED");
         }
-        transaction.setStatus(TransactionStatus.CANCELED);
-        transaction.setType( TransactionType.CANCELLATION );
-        transactionRepository.save(transaction);
+        // create new transaction
+        Transaction newTransaction = new Transaction();
+        newTransaction.setMerchant(merchant);
+        newTransaction.setTransactionDate(new Date());
+        newTransaction.setType(TransactionType.CANCELLATION);
+        newTransaction.setStatus(TransactionStatus.CANCELED);
+        transactionRepository.save(newTransaction);
+        
         // Save trace
         TransactionTrace trace = new TransactionTrace();
         trace.setTransaction(transaction);
@@ -338,7 +359,7 @@ public class TransactionServiceImpl implements TransactionService {
         trace.setClientDeviceHistory(exists);
         transactionTraceRepository.save(trace);
 
-        return modelMapper.map(transaction, TransactionDto.class);
+        return modelMapper.map(newTransaction, TransactionDto.class);
     }
 
     @Override

@@ -105,6 +105,7 @@ public class OtpServiceImpl implements OtpService {
             otpRepository.save( otp );
         } else {
             otp.increaseAttempt();
+            throw new MPayAPIException( HttpStatus.FORBIDDEN, "OTP is wrong, retry." );
         }
     }
 
