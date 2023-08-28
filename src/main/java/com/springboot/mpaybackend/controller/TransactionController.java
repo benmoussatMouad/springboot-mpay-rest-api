@@ -110,9 +110,9 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.putToCanceled(id, authentication.getName(), dto.getDevice()));
     }
 
-    @PostMapping("client-cancel")
-    @PreAuthorize("hasAnyAuthority('CLIENT')")
-    public ResponseEntity<String> satimClientCancel() {
+    @PostMapping("cancel")
+    @PreAuthorize("hasAnyAuthority('CLIENT', 'MERCHANT')")
+    public ResponseEntity<String> satimCancel() {
         // TODO
         return ResponseEntity.ok( "Transaction cancelled" );
     }
