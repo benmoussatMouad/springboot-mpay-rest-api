@@ -204,7 +204,7 @@ public class TransactionServiceImpl implements TransactionService {
                 d -> d.getUsername().getUsername().equals(client.getUser().getUsername())
         ).findAny().orElse(null);
         if (exists == null) {
-            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Device does not belong to merchant");
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Device does not belong to client");
         }
 
         // Set Transaction status but confirm previous status

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
@@ -39,7 +40,19 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
         "AND (:pan is not null OR :last4 is null OR CONCAT('%', t.pan, '%') LIKE CONCAT('%', :last4)) " +
         "AND (:startDate is null OR :endDate is null OR (t.transactionDate >= TO_TIMESTAMP(:startDate, 'DD-MM-YYYY') AND t.transactionDate <= TO_TIMESTAMP(:endDate, 'DD-MM-YYYY'))) " +
         "AND (t.deleted = FALSE)")
-    Page<Transaction> findByFilterAndMerchant(Pageable pageable, Long id, String orderId, String terminalId, String phone, TransactionStatus status, String startDate, String endDate, String username, TransactionType type, String pan, String last4);
+    Page<Transaction> findByFilterAndMerchant(Pageable pageable, 
+    @Param("id") Long id, 
+    @Param("orderId") String orderId,
+    @Param("terminalId") String terminalId,
+    @Param("phone") String phone,
+    @Param("status")TransactionStatus status,
+    @Param("startDate")String startDate,
+    @Param("endDate")String endDate,
+    @Param("username")String username,
+    @Param("type")TransactionType type,
+    @Param("pan")String pan,
+    @Param("last4")String last4);
+
 
     @Query("SELECT t FROM Transaction t, Client c, Merchant m, ClientCard cc WHERE (:id is null or t.id = :id) " +
         "AND (:username is null OR c.user.username = :username) " +
