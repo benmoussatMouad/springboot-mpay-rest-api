@@ -146,9 +146,9 @@ public class TransactionController {
             @RequestParam(required = false) String pan,
             @RequestParam(required = false) String last4,
             @RequestParam(required = false)
-            @Parameter(description = "Value should be a string like 'YYYY-MM-DD'") String startDate,
+            @Parameter(description = "Value should be a string like 'DD-MM-YYYY'") String startDate,
             @RequestParam(required = false)
-            @Parameter(description = "Value should be a string like 'YYYY-MM-DD'") String endDate
+            @Parameter(description = "Value should be a string like 'DD-MM-YYYY'") String endDate
     ) {
 
         try {

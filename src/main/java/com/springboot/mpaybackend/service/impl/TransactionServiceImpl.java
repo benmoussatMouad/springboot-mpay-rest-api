@@ -339,8 +339,10 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         // Set Transaction status but confirm previous status
-        if (!transaction.getStatus().equals(TransactionStatus.CONFIRMED)) {
-            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be CONFIRMED");
+        if (!transaction.getStatus().equals(TransactionStatus.CONFIRMED) && 
+        !transaction.getStatus().equals(TransactionStatus.WAITING) &&
+        !transaction.getStatus().equals(TransactionStatus.ACCEPTED)) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be CONFIRMED or WAITING or ACCEPTED");
         }
         // create new transaction
         Transaction newTransaction = new Transaction();
