@@ -24,7 +24,7 @@ public interface TransactionService {
 
     TransactionDto putToRefund(Long id, String name, String device, Double amount);
 
-    TransactionDto putToCanceled(Long id, String name, String device);
+    TransactionDto putToCanceledBefore(Long id, String name, String device);
 
     TransactionPage getTransactions(Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate, String type, String pan, String last4);
 
@@ -40,4 +40,8 @@ public interface TransactionService {
     TransactionDto getTransactionById(Long id);
 
     List<TransactionTraceDto> getTransactionTimelineById(Long id);
+
+    TransactionDto putToCanceledBeforeConfirmation(Long id, String name, String device);
+
+    TransactionDto putToCanceledAfterConfirmation(Long id, String name, String device);
 }

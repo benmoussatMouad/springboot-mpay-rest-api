@@ -47,5 +47,5 @@ public class Transaction {
     @Column(columnDefinition = "boolean DEFAULT false")
     private boolean deleted;
 
-    private Long terminalId;
+    private String terminalId;
 }
