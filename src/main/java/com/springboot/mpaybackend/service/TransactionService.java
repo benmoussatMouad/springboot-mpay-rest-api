@@ -14,7 +14,7 @@ public interface TransactionService {
 
     boolean confirmCardData(String pan, String cvv, Integer month, Integer year, String name);
 
-    TransactionDto putToFormFilled(Long id, String name, String device);
+    TransactionDto putToFormFilled(Long id, String name, String device, String pan);
 
     TransactionDto putToAuthenticated(Long id, String name, String device);
 

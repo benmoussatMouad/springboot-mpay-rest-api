@@ -57,9 +57,10 @@ public class TransactionController {
 
     @PutMapping("/{id}/form-filled")
     @PreAuthorize("hasAnyAuthority('CLIENT')")
-    public ResponseEntity<TransactionDto> formFilled(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
+    public ResponseEntity<TransactionDto> formFilled(@PathVariable Long id, @RequestBody @Valid FromFilledTransactionDto dto, Authentication authentication) {
 
-        return ResponseEntity.ok(transactionService.putToFormFilled(id, authentication.getName(), dto.getDevice()));
+        String pan = dto.getFirst6() + "******" + dto.getLast4();
+        return ResponseEntity.ok(transactionService.putToFormFilled(id, authentication.getName(), dto.getDevice(), pan));
     }
 
     @PutMapping("/{id}/accepted")

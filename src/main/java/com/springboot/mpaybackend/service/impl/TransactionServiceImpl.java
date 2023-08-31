@@ -123,7 +123,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional(rollbackOn = Exception.class)
-    public TransactionDto putToFormFilled(Long id, String name, String device) {
+    public TransactionDto putToFormFilled(Long id, String name, String device, String pan) {
         Transaction transaction = transactionRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tranasction", "id", id));
         Client client = clientRepository.findByUserUsernameAndDeletedFalse(name)
@@ -144,6 +144,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be WAITING");
         }
         transaction.setStatus(TransactionStatus.FORM_FILLED);
+        transaction.setPan(pan);
         transaction.setClient(client);
         transactionRepository.save(transaction);
         // Save trace
@@ -445,8 +446,13 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TransactionPage getTransactionsForMerchant(String username, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate, String type, String pan, String last4) {
 
-        Page<Transaction> transactionPage =
-                transactionRepository.findByFilterForMerchant(PageRequest.of(page, size), username, (type != null ? TransactionType.valueOf(type) : null), (status != null ? TransactionStatus.valueOf(status) : null), startDate, endDate);
+        Page<Transaction> transactionPage;
+        if (phone == null) {
+            transactionPage = transactionRepository.findByFilterForMerchant(PageRequest.of(page, size), username, (type != null ? TransactionType.valueOf(type) : null), (status != null ? TransactionStatus.valueOf(status) : null), startDate, endDate);
+        } else {
+            transactionPage = transactionRepository.findByFilterForMerchantAndPhone(PageRequest.of(page, size), username, (type != null ? TransactionType.valueOf(type) : null), (status != null ? TransactionStatus.valueOf(status) : null), startDate, endDate, phone);
+        }
+
 
 
         TransactionPage dto = new TransactionPage();
