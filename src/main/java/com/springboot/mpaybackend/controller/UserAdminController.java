@@ -26,7 +26,6 @@ public class UserAdminController {
 //    @PreAuthorize( "#username == authentication.getName()" )
     public ResponseEntity<UserAdminDto> addUserAdmin(@RequestBody UserAdminDto dto, Authentication authentication) {
 
-        System.out.println( authentication.getName() );
         UserAdminDto savedAdmin = userAdminService.addUserAdmin( dto );
         return new ResponseEntity<>( savedAdmin, HttpStatus.CREATED );
     }
