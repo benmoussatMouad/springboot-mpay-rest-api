@@ -55,6 +55,7 @@ public class SecurityConfig {
                         authorize.requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                                 //.requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                                 .requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/user-admin").permitAll()
                                 .anyRequest().authenticated()
 
                 ).exceptionHandling( exception -> exception
