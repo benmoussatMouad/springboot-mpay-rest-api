@@ -46,9 +46,7 @@ public class ClientServiceImpl implements ClientService {
     public ClientDto getClientByUsername(String username) {
         Client client = clientRepository.findByUserUsernameAndDeletedFalse( username )
                 .orElseThrow( () -> new ResourceNotFoundException( "Client", "username", username ) );
-                
-        System.out.println("GET CLIENT : " + client.toString());
-
+        
         return modelMapper.map( client, ClientDto.class );
     }
 
