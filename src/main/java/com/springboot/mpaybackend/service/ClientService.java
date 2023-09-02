@@ -2,6 +2,9 @@ package com.springboot.mpaybackend.service;
 
 import com.springboot.mpaybackend.payload.ClientDto;
 import com.springboot.mpaybackend.payload.ClientPageDto;
+import com.springboot.mpaybackend.payload.CreateClientDto;
+
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -16,7 +19,7 @@ public interface ClientService {
 
     ClientDto updateClient(ClientDto dto, Long id);
 
-    ClientDto addClient(ClientDto dto);
+    ClientDto addClient(CreateClientDto dto);
 
     void deleteClient(Long id);
 }

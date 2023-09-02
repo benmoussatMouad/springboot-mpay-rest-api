@@ -2,9 +2,11 @@ package com.springboot.mpaybackend.service.impl;
 
 import com.springboot.mpaybackend.entity.Client;
 import com.springboot.mpaybackend.entity.Wilaya;
+import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.ClientDto;
 import com.springboot.mpaybackend.payload.ClientPageDto;
+import com.springboot.mpaybackend.payload.CreateClientDto;
 import com.springboot.mpaybackend.repository.ClientRepository;
 import com.springboot.mpaybackend.repository.UserRepository;
 import com.springboot.mpaybackend.repository.WilayaRepository;
@@ -12,6 +14,7 @@ import com.springboot.mpaybackend.service.ClientService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,6 +46,9 @@ public class ClientServiceImpl implements ClientService {
     public ClientDto getClientByUsername(String username) {
         Client client = clientRepository.findByUserUsernameAndDeletedFalse( username )
                 .orElseThrow( () -> new ResourceNotFoundException( "Client", "username", username ) );
+                
+        System.out.println("GET CLIENT : " + client.toString());
+
         return modelMapper.map( client, ClientDto.class );
     }
 
@@ -101,7 +107,10 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public ClientDto addClient(ClientDto dto) {
+    public ClientDto addClient(CreateClientDto dto) {
+        if(userRepository.existsByPhone(dto.getPhone())) {
+            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Phone exists already ");
+        }
         return null;
     }
 

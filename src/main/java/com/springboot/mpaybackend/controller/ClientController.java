@@ -3,6 +3,8 @@ package com.springboot.mpaybackend.controller;
 import com.springboot.mpaybackend.payload.*;
 import com.springboot.mpaybackend.service.ClientService;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +23,7 @@ public class ClientController {
 
     @PostMapping
 //    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ClientDto> addClient(@RequestBody ClientDto dto){
+    public ResponseEntity<ClientDto> addClient(@RequestBody @Valid CreateClientDto dto){
         ClientDto savedBank = clientService.addClient(dto);
         return new ResponseEntity<>(savedBank, HttpStatus.CREATED);
     }
