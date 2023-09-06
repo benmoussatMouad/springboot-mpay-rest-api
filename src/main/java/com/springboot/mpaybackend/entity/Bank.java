@@ -35,8 +35,10 @@ public class Bank {
     private Integer totalConsumedLicence;
     private Date deleteDate;
     private Integer flag;
-    private Integer bmtmCentralized;
-    private Integer validationCentralized;
+    @Column(columnDefinition = "boolean DEFAULT false")
+    private boolean bmtmCentralized;
+    @Column(columnDefinition = "boolean DEFAULT false")
+    private boolean validationCentralized;
     private String bankBin;
 
     @OneToMany(mappedBy = "bank")

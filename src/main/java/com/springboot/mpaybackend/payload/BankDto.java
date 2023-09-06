@@ -20,7 +20,7 @@ public class BankDto {
     private Integer totalLicence;
     private Integer totalConsumedLicence;
     private Date deleteDate;
-    private Integer bmtmCentralized;
-    private Integer validationCentralized;
+    private Boolean bmtmCentralized;
+    private Boolean validationCentralized;
     private String bankBin;
 }

@@ -35,7 +35,7 @@ public interface MerchantService {
 
     MerchantDto rejectMerchant(Long id);
 
-    MerchantDto acceptMerchantByBank(Long id, AcceptMerchantDemandDto dto, String username);
+    MerchantDto acceptMerchantByBank(Long id);
 
     MerchantPageDto getAllMerchantsByFilterForSpecificBank(Integer page, Integer size, Long id, String name, String name1, String phone, String regCommerce, String nif, String status, String callingUsername);
 
@@ -46,4 +46,6 @@ public interface MerchantService {
     MerchantDto putToSatimrejected(Long id, SatimAcceptDto dto, String name);
 
     MerchantDto verifyMerchant(Long id, String name);
+
+    MerchantDto validateMerchant(Long id, AcceptMerchantDemandDto dto, String username);
 }

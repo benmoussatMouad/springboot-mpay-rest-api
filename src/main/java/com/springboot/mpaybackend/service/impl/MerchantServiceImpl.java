@@ -454,134 +454,16 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     @Transactional(rollbackOn = Exception.class)
-    public MerchantDto acceptMerchantByBank(Long id, AcceptMerchantDemandDto dto, String username) {
+    public MerchantDto acceptMerchantByBank(Long id) {
 
         Merchant merchant = merchantRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Merchant", "id", id));
 
-        // Check if merchant is IN_PROGRESS or SATIM_REVIEW
-        if (!merchant.getStatus().equals(MerchantStatus.IN_PROGRESS)
-                && !merchant.getStatus().equals(MerchantStatus.SATIM_REVIEW)) {
+        // Check if merchant is IN_PROGRESS
+        if (!merchant.getStatus().equals(MerchantStatus.IN_PROGRESS)) {
 
-            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Merchant status should be IN_PROGRESS or SATIM_REVIEW");
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Merchant status should be IN_PROGRESS");
         }
-
-        // Check if BM and TM are correct
-        BmFileCheckDto bmFileCheck = bmService.verifyFileContent(dto.getBmContent());
-        if (!bmFileCheck.isAllCorrect()) {
-            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Bm file content is not correct");
-        }
-
-        TmFileCheckDto tmFileCheck = tmService.verifyFileContent(dto.getTmContent());
-        if (!tmFileCheck.isAllCorrect()) {
-            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Tm file content is not correct");
-        }
-
-        // Finding creating bank user
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
-
-
-        // Check if BM or TM exists before
-        Bm existingBm = bmRepository.findByMerchantIdAndDeletedFalse(merchant.getId())
-                .orElse(null);
-        // If one BM exists then the TM exists as well, so we set them to deleted
-        if (existingBm != null) {
-            Tm existingTm = tmRepository.findByBmIdAndDeletedFalse(existingBm.getId())
-                    .orElse(null);
-            if (existingTm != null) existingTm.setDeleted(true);
-            existingBm.setDeleted(true);
-        }
-
-        // Create a BM entity
-        //
-        Bm bm = new Bm();
-        bm.setCreatedBy(user);
-        bm.setCreatedOn(new Date());
-        bm.setMerchant(merchant);
-        bm.setContractNumberMerchantBM(bmFileCheck.getMerchantContractNumber().getValue());
-        bm.setMerchantName(merchant.getLastName() + " " + merchant.getFirstName());
-        bm.setMerchantSocialReason(bmFileCheck.getMerchantSocialReason().getValue());
-        bm.setAgencyCode(bmFileCheck.getMerchantAgencyCode().getValue());
-        bm.setDocumentTypeForBank(bmFileCheck.getMerchantIdDocumentType().getValue());
-        bm.setExercisingYearNumber(bmFileCheck.getMerchantExperienceYears().getValue());
-        bm.setFaxNumber(bmFileCheck.getMerchantFaxNumber().getValue());
-        bm.setLine1TradeAddress(bmFileCheck.getAddressLine1().getValue());
-        bm.setLine2TradeAddress(bmFileCheck.getAddressLine2().getValue());
-        bm.setLine3Address(bmFileCheck.getAddressLine3().getValue());
-        bm.setLine4Address(bmFileCheck.getAddressLine4().getValue());
-        bm.setLine5Address(bmFileCheck.getAddressLine5().getValue());
-        bm.setLine6Address(bmFileCheck.getAddressLine6().getValue());
-        bm.setLine7Address(bmFileCheck.getAddressLine7().getValue());
-        bm.setLine8Address(bmFileCheck.getAddressLine8().getValue());
-        bm.setMerchantAgencyLabel(bmFileCheck.getMerchantAgencyLabel().getValue());
-        bm.setMerchantMail(bmFileCheck.getMerchantEmailAddress().getValue());
-        bm.setMerchantNif(bmFileCheck.getMerchantNif().getValue());
-        bm.setMerchantMobilePhoneNumber(bmFileCheck.getMerchantMobileNumber().getValue());
-        bm.setMerchantPhoneNumber(bmFileCheck.getMerchantPhoneNumber().getValue());
-        bm.setMerchantSecondNameContact(bmFileCheck.getSecondContactName().getValue());
-        bm.setMerchantTransactionThreshold(bmFileCheck.getMerchantThreshold().getValue());
-        bm.setMerchantRib(bmFileCheck.getMerchantRib().getValue());
-        bm.setPrincipleContactTitle(bmFileCheck.getPrincipalContractTitle().getValue());
-        bm.setRcNumber(bmFileCheck.getRcNumber().getValue());
-        bm.setTradeCategory(bmFileCheck.getTradeCategory().getValue());
-        bm.setTradeLabel(bmFileCheck.getTradeLabel().getValue());
-        bm.setWebSiteAdress(bmFileCheck.getWebsiteAddress().getValue());
-        bm.setEnteteBm(dto.getBmContent().split("\n")[0]);
-        bm.setDebutInfoBm(dto.getBmContent().split("\n")[1]);
-        bm.setFinBm(dto.getBmContent().split("\n")[2]);
-
-        bmRepository.save(bm);
-
-        // Create a TM entity
-        Tm tm = new Tm();
-        tm.setBm(bm);
-        tm.setCardType1(tmFileCheck.getCardType1().getValue());
-        tm.setCardType(tmFileCheck.getCardType0().getValue());
-        tm.setCardType2(tmFileCheck.getCardType2().getValue());
-        tm.setCardType3(tmFileCheck.getCardType3().getValue());
-        tm.setCardType4(tmFileCheck.getCardType4().getValue());
-        tm.setCardType5(tmFileCheck.getCardType5().getValue());
-        tm.setCardType6(tmFileCheck.getCardType6().getValue());
-        tm.setLimit0(tmFileCheck.getLimit0().getValue());
-        tm.setLimit1(tmFileCheck.getLimit1().getValue());
-        tm.setLimit2(tmFileCheck.getLimit2().getValue());
-        tm.setLimit3(tmFileCheck.getLimit3().getValue());
-        tm.setLimit4(tmFileCheck.getLimit4().getValue());
-        tm.setLimit5(tmFileCheck.getLimit5().getValue());
-        tm.setLimit6(tmFileCheck.getLimit6().getValue());
-        tm.setTerminalLine1Address(tmFileCheck.getAddressLine1().getValue());
-        tm.setLine2Address(tmFileCheck.getAddressLine2().getValue());
-        tm.setLine3Address(tmFileCheck.getAddressLine3().getValue());
-        tm.setLine4Address(tmFileCheck.getAddressLine4().getValue());
-        tm.setLine5Address(tmFileCheck.getAddressLine5().getValue());
-        tm.setLine6Address(tmFileCheck.getAddressLine6().getValue());
-        tm.setLine7Address(tmFileCheck.getAddressLine7().getValue());
-        tm.setLine8Address(tmFileCheck.getAddressLine8().getValue());
-        tm.setUpdateCardTypeForTerminal(tmFileCheck.getTerminalCardTypeUpdate().getValue());
-        tm.setTrxWithdraw(tmFileCheck.getTrxRetrait().getValue());
-        tm.setTrxSolde(tmFileCheck.getTrxSolde().getValue());
-        tm.setTrxRemb(tmFileCheck.getTrxRemb().getValue());
-        tm.setTrxPhone(tmFileCheck.getTrxTel().getValue());
-        tm.setTrxPAutor(tmFileCheck.getTrxPAutor().getValue());
-        tm.setTrxCashAdvancing(tmFileCheck.getTrxCashAdvance().getValue());
-        tm.setTrxDebit(tmFileCheck.getTrxDebit().getValue());
-        tm.setTrxBillPayment(tmFileCheck.getTrxPaiementFacture().getValue());
-        tm.setTrxAnnul(tmFileCheck.getTrxAnnul().getValue());
-        tm.setTerminalType(tmFileCheck.getTerminalType().getValue());
-        tm.setTerminalPhoneNumber(tmFileCheck.getTerminalPhoneNumber().getValue());
-        tm.setTerminalMobileNumber(tmFileCheck.getTerminalMobileNumber().getValue());
-        tm.setTerminalMailAddress(tmFileCheck.getTerminalEmailAddress().getValue());
-        tm.setTerminalLabel(tmFileCheck.getTerminalLabel().getValue());
-        tm.setTerminalId(tmFileCheck.getTerminalId().getValue());
-        tm.setTerminalFaxNumber(tmFileCheck.getTerminalFaxNumber().getValue());
-        tm.setStartTime(tmFileCheck.getHourStart().getValue());
-        tm.setEndTime(tmFileCheck.getHourEnd().getValue());
-        tm.setEnteteTm(dto.getTmContent().split("\n")[0]);
-        tm.setDebutInfoTm(dto.getTmContent().split("\n")[1]);
-        tm.setFinTm(dto.getTmContent().split("\n")[2]);
-
-        tmRepository.save(tm);
 
         // Set status to ACCEPTED
         merchant.setStatus(MerchantStatus.ACCEPTED);
@@ -768,5 +650,154 @@ public class MerchantServiceImpl implements MerchantService {
 
         return modelMapper.map(savedMerchant, MerchantDto.class);
 
+    }
+
+    @Override
+    public MerchantDto validateMerchant(Long id, AcceptMerchantDemandDto dto, String username) {
+        Merchant merchant = merchantRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Merchant", "id", id));
+
+        // Check if merchant is IN_PROGRESS
+        if (!merchant.getStatus().equals(MerchantStatus.IN_PROGRESS)
+        && !merchant.getStatus().equals(MerchantStatus.ACCEPTED)
+        && !merchant.getStatus().equals(MerchantStatus.SATIM_REVIEW)) {
+
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Merchant status should be IN_PROGRESS or ACCEPTED or SATIM_REVIEW");
+        }
+
+        // Check if BM and TM are correct
+        BmFileCheckDto bmFileCheck = bmService.verifyFileContent(dto.getBmContent());
+        if (!bmFileCheck.isAllCorrect()) {
+            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Bm file content is not correct");
+        }
+
+        TmFileCheckDto tmFileCheck = tmService.verifyFileContent(dto.getTmContent());
+        if (!tmFileCheck.isAllCorrect()) {
+            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Tm file content is not correct");
+        }
+
+        // Finding creating bank user
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+
+
+        // Check if BM or TM exists before
+        Bm existingBm = bmRepository.findByMerchantIdAndDeletedFalse(merchant.getId())
+                .orElse(null);
+        // If one BM exists then the TM exists as well, so we set them to deleted
+        if (existingBm != null) {
+            Tm existingTm = tmRepository.findByBmIdAndDeletedFalse(existingBm.getId())
+                    .orElse(null);
+            if (existingTm != null) existingTm.setDeleted(true);
+            existingBm.setDeleted(true);
+        }
+
+        // Create a BM entity
+        //
+        Bm bm = new Bm();
+        bm.setCreatedBy(user);
+        bm.setCreatedOn(new Date());
+        bm.setMerchant(merchant);
+        bm.setContractNumberMerchantBM(bmFileCheck.getMerchantContractNumber().getValue());
+        bm.setMerchantName(merchant.getLastName() + " " + merchant.getFirstName());
+        bm.setMerchantSocialReason(bmFileCheck.getMerchantSocialReason().getValue());
+        bm.setAgencyCode(bmFileCheck.getMerchantAgencyCode().getValue());
+        bm.setDocumentTypeForBank(bmFileCheck.getMerchantIdDocumentType().getValue());
+        bm.setExercisingYearNumber(bmFileCheck.getMerchantExperienceYears().getValue());
+        bm.setFaxNumber(bmFileCheck.getMerchantFaxNumber().getValue());
+        bm.setLine1TradeAddress(bmFileCheck.getAddressLine1().getValue());
+        bm.setLine2TradeAddress(bmFileCheck.getAddressLine2().getValue());
+        bm.setLine3Address(bmFileCheck.getAddressLine3().getValue());
+        bm.setLine4Address(bmFileCheck.getAddressLine4().getValue());
+        bm.setLine5Address(bmFileCheck.getAddressLine5().getValue());
+        bm.setLine6Address(bmFileCheck.getAddressLine6().getValue());
+        bm.setLine7Address(bmFileCheck.getAddressLine7().getValue());
+        bm.setLine8Address(bmFileCheck.getAddressLine8().getValue());
+        bm.setMerchantAgencyLabel(bmFileCheck.getMerchantAgencyLabel().getValue());
+        bm.setMerchantMail(bmFileCheck.getMerchantEmailAddress().getValue());
+        bm.setMerchantNif(bmFileCheck.getMerchantNif().getValue());
+        bm.setMerchantMobilePhoneNumber(bmFileCheck.getMerchantMobileNumber().getValue());
+        bm.setMerchantPhoneNumber(bmFileCheck.getMerchantPhoneNumber().getValue());
+        bm.setMerchantSecondNameContact(bmFileCheck.getSecondContactName().getValue());
+        bm.setMerchantTransactionThreshold(bmFileCheck.getMerchantThreshold().getValue());
+        bm.setMerchantRib(bmFileCheck.getMerchantRib().getValue());
+        bm.setPrincipleContactTitle(bmFileCheck.getPrincipalContractTitle().getValue());
+        bm.setRcNumber(bmFileCheck.getRcNumber().getValue());
+        bm.setTradeCategory(bmFileCheck.getTradeCategory().getValue());
+        bm.setTradeLabel(bmFileCheck.getTradeLabel().getValue());
+        bm.setWebSiteAdress(bmFileCheck.getWebsiteAddress().getValue());
+        bm.setEnteteBm(dto.getBmContent().split("\n")[0]);
+        bm.setDebutInfoBm(dto.getBmContent().split("\n")[1]);
+        bm.setFinBm(dto.getBmContent().split("\n")[2]);
+
+        bmRepository.save(bm);
+
+        // Create a TM entity
+        Tm tm = new Tm();
+        tm.setBm(bm);
+        tm.setCardType1(tmFileCheck.getCardType1().getValue());
+        tm.setCardType(tmFileCheck.getCardType0().getValue());
+        tm.setCardType2(tmFileCheck.getCardType2().getValue());
+        tm.setCardType3(tmFileCheck.getCardType3().getValue());
+        tm.setCardType4(tmFileCheck.getCardType4().getValue());
+        tm.setCardType5(tmFileCheck.getCardType5().getValue());
+        tm.setCardType6(tmFileCheck.getCardType6().getValue());
+        tm.setLimit0(tmFileCheck.getLimit0().getValue());
+        tm.setLimit1(tmFileCheck.getLimit1().getValue());
+        tm.setLimit2(tmFileCheck.getLimit2().getValue());
+        tm.setLimit3(tmFileCheck.getLimit3().getValue());
+        tm.setLimit4(tmFileCheck.getLimit4().getValue());
+        tm.setLimit5(tmFileCheck.getLimit5().getValue());
+        tm.setLimit6(tmFileCheck.getLimit6().getValue());
+        tm.setTerminalLine1Address(tmFileCheck.getAddressLine1().getValue());
+        tm.setLine2Address(tmFileCheck.getAddressLine2().getValue());
+        tm.setLine3Address(tmFileCheck.getAddressLine3().getValue());
+        tm.setLine4Address(tmFileCheck.getAddressLine4().getValue());
+        tm.setLine5Address(tmFileCheck.getAddressLine5().getValue());
+        tm.setLine6Address(tmFileCheck.getAddressLine6().getValue());
+        tm.setLine7Address(tmFileCheck.getAddressLine7().getValue());
+        tm.setLine8Address(tmFileCheck.getAddressLine8().getValue());
+        tm.setUpdateCardTypeForTerminal(tmFileCheck.getTerminalCardTypeUpdate().getValue());
+        tm.setTrxWithdraw(tmFileCheck.getTrxRetrait().getValue());
+        tm.setTrxSolde(tmFileCheck.getTrxSolde().getValue());
+        tm.setTrxRemb(tmFileCheck.getTrxRemb().getValue());
+        tm.setTrxPhone(tmFileCheck.getTrxTel().getValue());
+        tm.setTrxPAutor(tmFileCheck.getTrxPAutor().getValue());
+        tm.setTrxCashAdvancing(tmFileCheck.getTrxCashAdvance().getValue());
+        tm.setTrxDebit(tmFileCheck.getTrxDebit().getValue());
+        tm.setTrxBillPayment(tmFileCheck.getTrxPaiementFacture().getValue());
+        tm.setTrxAnnul(tmFileCheck.getTrxAnnul().getValue());
+        tm.setTerminalType(tmFileCheck.getTerminalType().getValue());
+        tm.setTerminalPhoneNumber(tmFileCheck.getTerminalPhoneNumber().getValue());
+        tm.setTerminalMobileNumber(tmFileCheck.getTerminalMobileNumber().getValue());
+        tm.setTerminalMailAddress(tmFileCheck.getTerminalEmailAddress().getValue());
+        tm.setTerminalLabel(tmFileCheck.getTerminalLabel().getValue());
+        tm.setTerminalId(tmFileCheck.getTerminalId().getValue());
+        tm.setTerminalFaxNumber(tmFileCheck.getTerminalFaxNumber().getValue());
+        tm.setStartTime(tmFileCheck.getHourStart().getValue());
+        tm.setEndTime(tmFileCheck.getHourEnd().getValue());
+        tm.setEnteteTm(dto.getTmContent().split("\n")[0]);
+        tm.setDebutInfoTm(dto.getTmContent().split("\n")[1]);
+        tm.setFinTm(dto.getTmContent().split("\n")[2]);
+
+        tmRepository.save(tm);
+
+        // Set status to ACCEPTED
+        merchant.setStatus(MerchantStatus.ACCEPTED);
+
+        Merchant savedMerchant =  merchantRepository.save(merchant);
+
+        // Save trace
+        MerchantAccount account = merchantAccountRepository.findByMerchantId( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Merchant Account ", "merchant id", id ) );
+        MerchantStatusTrace trace = new MerchantStatusTrace();
+        trace.setMerchant( merchant );
+        trace.setBank( account.getBank() );
+        trace.setUser( merchant.getUsername() );
+        trace.setCreatedAt( new Date() );
+        trace.setStatus( MerchantStatus.ACCEPTED );
+        merchantStatusTraceRepository.save( trace );
+
+        return modelMapper.map(savedMerchant, MerchantDto.class);
     }
 }

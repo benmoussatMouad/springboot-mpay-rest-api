@@ -7,6 +7,8 @@ public enum MerchantStatus {
     REVIEW,
     ACCEPTED_CONTRACT_SIGNED,
     ACCEPTED,
+
+    VALIDATED,
     SATIM_ACCEPTED,
     VERIFIED,
     SATIM_REVIEW,

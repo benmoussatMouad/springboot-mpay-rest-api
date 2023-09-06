@@ -237,11 +237,17 @@ public class MerchantController {
         return ResponseEntity.ok( merchantService.rejectMerchant( id ) );
     }
 
+    @PutMapping("/{id}/validate")
+    @PreAuthorize("hasAnyAuthority('BANK_USER', 'BANK_ADMIN', 'ADMIN')")
+    public ResponseEntity<MerchantDto> validateMerchant(@PathVariable Long id, @RequestBody AcceptMerchantDemandDto dto, Authentication authentication) {
+        return ResponseEntity.ok(merchantService.validateMerchant(id, dto, authentication.getName()));
+    }
+
     @PutMapping("/{id}/accept")
     @PreAuthorize("hasAuthority('BANK_USER') OR hasAuthority('BANK_ADMIN') OR hasAuthority('ADMIN')")
-    public ResponseEntity<MerchantDto> acceptMerchantDemand(@PathVariable Long id, @RequestBody @Valid AcceptMerchantDemandDto dto, Authentication authentication) {
+    public ResponseEntity<MerchantDto> acceptMerchantDemand(@PathVariable Long id) {
 
-        return ResponseEntity.ok(merchantService.acceptMerchantByBank(id, dto, authentication.getName()));
+        return ResponseEntity.ok(merchantService.acceptMerchantByBank(id));
     }
 
     @PutMapping("/{id}/review-satim")
