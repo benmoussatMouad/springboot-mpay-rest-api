@@ -448,9 +448,14 @@ public class TransactionServiceImpl implements TransactionService {
 
         Page<Transaction> transactionPage;
         if (phone == null) {
-            transactionPage = transactionRepository.findByFilterForMerchant(PageRequest.of(page, size), username, (type != null ? TransactionType.valueOf(type) : null), (status != null ? TransactionStatus.valueOf(status) : null), startDate, endDate);
+            System.out.println("HERE");
+            transactionPage = transactionRepository.findByFilterForMerchant(PageRequest.of(page, size), username, 
+            (type != null ? TransactionType.valueOf(type) : null), (status != null ? TransactionStatus.valueOf(status) : null), 
+            startDate, endDate, last4);
         } else {
-            transactionPage = transactionRepository.findByFilterForMerchantAndPhone(PageRequest.of(page, size), username, (type != null ? TransactionType.valueOf(type) : null), (status != null ? TransactionStatus.valueOf(status) : null), startDate, endDate, phone);
+            transactionPage = transactionRepository.findByFilterForMerchantAndPhone(PageRequest.of(page, size), username, 
+            (type != null ? TransactionType.valueOf(type) : null), 
+            (status != null ? TransactionStatus.valueOf(status) : null), startDate, endDate, phone, last4);
         }
 
 

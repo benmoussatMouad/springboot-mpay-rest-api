@@ -19,21 +19,23 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'PAYMENT' AND t.status = 'CONFIRMED' AND t.transactionDate >= :lastYear")
     double calculateYearlyTurnOver(@Param("lastYear") Date date);
 
-    @Query("SELECT t from  Transaction t, Client c WHERE (:username is null or t.merchant.username.username = :username) " +
-            "AND (t.client is null OR t.client = c) " +
+    @Query("SELECT t from  Transaction t WHERE (:username is null or t.merchant.username.username = :username) " +
             "AND (:type is null OR t.type = :type) " +
             "AND (:status is null OR t.status = :status) " +
-            "AND (:startDate is null OR :endDate is null OR (t.transactionDate >= TO_TIMESTAMP(:startDate, 'DD-MM-YYYY') AND t.transactionDate <= TO_TIMESTAMP(:endDate, 'DD-MM-YYYY')))")
+            "AND (:startDate is null OR :endDate is null OR (t.transactionDate >= TO_TIMESTAMP(:startDate, 'DD-MM-YYYY') AND t.transactionDate <= TO_TIMESTAMP(:endDate, 'DD-MM-YYYY'))) " +
+            "AND (:last4 is null OR t.pan LIKE CONCAT('%', :last4) )")
     Page<Transaction> findByFilterForMerchant(Pageable pageable, @Param("username") String username,
-                                              @Param("type") TransactionType type, @Param("status") TransactionStatus status, @Param("startDate") String startDate, @Param("endDate") String endDate);
+                                              @Param("type") TransactionType type, @Param("status") TransactionStatus status, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("last4") String last4);
 
     @Query("SELECT t from  Transaction t WHERE (:username is null or t.merchant.username.username = :username) " +
             "AND (t.client is not null) " +
             "AND (:type is null OR t.type = :type) " +
             "AND (:status is null OR t.status = :status) " +
             "AND (:startDate is null OR :endDate is null OR (t.transactionDate >= TO_TIMESTAMP(:startDate, 'DD-MM-YYYY') AND t.transactionDate <= TO_TIMESTAMP(:endDate, 'DD-MM-YYYY')))" +
-            "AND (:phone is null OR t.client.phone = :phone)")
-    Page<Transaction> findByFilterForMerchantAndPhone(Pageable pageable, String username, TransactionType type, TransactionStatus status, String startDate, String endDate, String phone);
+            "AND (:phone is null OR t.client.phone = :phone) " +
+            "AND (:last4 is null OR t.pan LIKE CONCAT('%', :last4) )")
+    Page<Transaction> findByFilterForMerchantAndPhone(Pageable pageable, String username, TransactionType type, TransactionStatus status, String startDate, String endDate, String phone,
+                        String last4);
 
     Page<Transaction> findAllByDeletedFalseAndIdAndMerchantUsernameUsernameAndOrderIdAndTerminalIdAndMerchantPhoneOrClientPhoneAndStatusAndTransactionDateAfterAndTransactionDateBeforeAndTypeAndPan(
             Pageable pageable,
