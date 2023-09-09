@@ -17,6 +17,7 @@ public class TransactionDto {
     private String transactionDate;
     private String merchantFirstName;
     private String merchantLastName;
+    private String pan;
     private Long merchantId;
     private String merchantWilayaName;
     private Long merchantWilayaId;
