@@ -43,5 +43,5 @@ public interface TransactionService {
 
     TransactionDto putToCanceledBeforeConfirmation(Long id, String name, String device);
 
-    TransactionDto putToCanceledAfterConfirmation(Long id, String name, String device);
+    TransactionDto putToCanceledAfterConfirmation(Long id, String name, String device, String password);
 }

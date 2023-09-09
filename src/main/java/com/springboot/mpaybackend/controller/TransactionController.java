@@ -33,7 +33,6 @@ public class TransactionController {
     @PreAuthorize("hasAnyAuthority('MERCHANT')")
     public ResponseEntity<OrderDto> initTransaction(@RequestBody OrderRequestDto dto) {
 
-
         return ResponseEntity.ok(transactionService.initOrder(dto.getAmount(), dto.getMerchantId()));
     }
 
@@ -41,13 +40,15 @@ public class TransactionController {
     @PreAuthorize("hasAnyAuthority('MERCHANT')")
     public ResponseEntity<TransactionDto> putTransactionToInit(@RequestBody @Valid SaveTransactionDto dto) {
 
-        return ResponseEntity.ok(transactionService.setOrderToWaiting(dto.getMerchantId(), dto.getAmount(), dto.getOrderId(), dto.getDevice()));
+        return ResponseEntity.ok(transactionService.setOrderToWaiting(dto.getMerchantId(), dto.getAmount(),
+                dto.getOrderId(), dto.getDevice()));
     }
 
     @PostMapping("init-payment")
     @PreAuthorize("hasAnyAuthority('CLIENT')")
     public ResponseEntity<String> initiatePayment(@RequestBody CardDataDto dto) {
-        if (!transactionService.confirmCardData(dto.getPan(), dto.getCvv(), dto.getMonth(), dto.getYear(), dto.getName())) {
+        if (!transactionService.confirmCardData(dto.getPan(), dto.getCvv(), dto.getMonth(), dto.getYear(),
+                dto.getName())) {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Card data are wrong");
         }
         otpService.createOtp(dto.getUsername());
@@ -57,15 +58,18 @@ public class TransactionController {
 
     @PutMapping("/{id}/form-filled")
     @PreAuthorize("hasAnyAuthority('CLIENT')")
-    public ResponseEntity<TransactionDto> formFilled(@PathVariable Long id, @RequestBody @Valid FromFilledTransactionDto dto, Authentication authentication) {
+    public ResponseEntity<TransactionDto> formFilled(@PathVariable Long id,
+            @RequestBody @Valid FromFilledTransactionDto dto, Authentication authentication) {
 
         String pan = dto.getFirst6() + "******" + dto.getLast4();
-        return ResponseEntity.ok(transactionService.putToFormFilled(id, authentication.getName(), dto.getDevice(), pan));
+        return ResponseEntity
+                .ok(transactionService.putToFormFilled(id, authentication.getName(), dto.getDevice(), pan));
     }
 
     @PutMapping("/{id}/accepted")
     @PreAuthorize("hasAnyAuthority('CLIENT')")
-    public ResponseEntity<TransactionDto> accepted(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
+    public ResponseEntity<TransactionDto> accepted(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto,
+            Authentication authentication) {
 
         return ResponseEntity.ok(transactionService.putToAccepted(id, authentication.getName(), dto.getDevice()));
     }
@@ -74,12 +78,13 @@ public class TransactionController {
     @PreAuthorize("hasAnyAuthority('CLIENT')")
     public ResponseEntity<String> authenticateSatimPayement(@RequestBody SatimOtpDto dto) {
         otpService.satimCheckOtp(dto);
-        return ResponseEntity.ok( "Card authenticated" );
+        return ResponseEntity.ok("Card authenticated");
     }
 
     @PutMapping("/{id}/authenticated")
     @PreAuthorize("hasAnyAuthority('CLIENT')")
-    public ResponseEntity<TransactionDto> authenticated(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
+    public ResponseEntity<TransactionDto> authenticated(@PathVariable Long id,
+            @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
 
         return ResponseEntity.ok(transactionService.putToAuthenticated(id, authentication.getName(), dto.getDevice()));
     }
@@ -92,57 +97,71 @@ public class TransactionController {
 
     @PutMapping("/{id}/confirmed")
     @PreAuthorize("hasAnyAuthority('MERCHANT')")
-    public ResponseEntity<TransactionDto> confirmTransaction(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
+    public ResponseEntity<TransactionDto> confirmTransaction(@PathVariable Long id,
+            @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
 
         return ResponseEntity.ok(transactionService.putToConfirmed(id, authentication.getName(), dto.getDevice()));
     }
 
     @PutMapping("/{id}/refund")
     @PreAuthorize("hasAnyAuthority('MERCHANT')")
-    public ResponseEntity<TransactionDto> refundTransaction(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
+    public ResponseEntity<TransactionDto> refundTransaction(@PathVariable Long id,
+            @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
 
-        return ResponseEntity.ok(transactionService.putToRefund(id, authentication.getName(), dto.getDevice(), dto.getAmount()));
+        return ResponseEntity
+                .ok(transactionService.putToRefund(id, authentication.getName(), dto.getDevice(), dto.getAmount()));
     }
 
     @PutMapping("/{id}/canceled/before")
     @PreAuthorize("hasAnyAuthority('MERCHANT')")
-    public ResponseEntity<TransactionDto> cancelTransaction(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
+    public ResponseEntity<TransactionDto> cancelTransaction(@PathVariable Long id,
+            @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
 
         return ResponseEntity.ok(transactionService.putToCanceledBefore(id, authentication.getName(), dto.getDevice()));
     }
 
     @PutMapping("/{id}/canceled/after-authentication")
     @PreAuthorize("hasAnyAuthority('CLIENT', 'MERCHANT')")
-    public ResponseEntity<TransactionDto> cancelTransactionBeforeConfirmation(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
+    public ResponseEntity<TransactionDto> cancelTransactionBeforeConfirmation(@PathVariable Long id,
+            @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
 
-        return ResponseEntity.ok(transactionService.putToCanceledBeforeConfirmation(id, authentication.getName(), dto.getDevice()));
+        return ResponseEntity
+                .ok(transactionService.putToCanceledBeforeConfirmation(id, authentication.getName(), dto.getDevice()));
     }
 
     @PutMapping("/{id}/canceled/after-confirmation")
     @PreAuthorize("hasAnyAuthority('MERCHANT')")
-    public ResponseEntity<TransactionDto> cancelTransactionAfterConfirmation(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
+    public ResponseEntity<TransactionDto> cancelTransactionAfterConfirmation(@PathVariable Long id,
+            @RequestBody @Valid CancelTransactionDto dto, Authentication authentication) {
 
-        return ResponseEntity.ok(transactionService.putToCanceledAfterConfirmation(id, authentication.getName(), dto.getDevice()));
+        return ResponseEntity
+                .ok(transactionService.putToCanceledAfterConfirmation(id, authentication.getName(), dto.getDevice(), dto.getPassword()));
     }
-
 
     @PostMapping("cancel")
     @PreAuthorize("hasAnyAuthority('CLIENT', 'MERCHANT')")
     public ResponseEntity<String> satimCancel() {
         // TODO
-        return ResponseEntity.ok( "Transaction cancelled" );
+        return ResponseEntity.ok("Transaction cancelled");
     }
 
-    /*@PutMapping("/{id}/canceled-by-client")
-    @PreAuthorize("hasAnyAuthority('CLIENT')")
-    public ResponseEntity<TransactionDto> clientCancelTransaction(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
-
-        return ResponseEntity.ok( transactionService.putToCanceledByClient( id, authentication.getName(), dto.getDevice() ) );
-    }*/
+    /*
+     * @PutMapping("/{id}/canceled-by-client")
+     * 
+     * @PreAuthorize("hasAnyAuthority('CLIENT')")
+     * public ResponseEntity<TransactionDto> clientCancelTransaction(@PathVariable
+     * Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication
+     * authentication) {
+     * 
+     * return ResponseEntity.ok( transactionService.putToCanceledByClient( id,
+     * authentication.getName(), dto.getDevice() ) );
+     * }
+     */
 
     @PutMapping("/{id}/abandoned")
     @PreAuthorize("hasAnyAuthority('CLIENT')")
-    public ResponseEntity<TransactionDto> abandonTransaction(@PathVariable Long id, @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
+    public ResponseEntity<TransactionDto> abandonTransaction(@PathVariable Long id,
+            @RequestBody @Valid SaveTransactionDto dto, Authentication authentication) {
 
         return ResponseEntity.ok(transactionService.putToAbandoned(id, authentication.getName(), dto.getDevice()));
     }
@@ -161,38 +180,35 @@ public class TransactionController {
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String pan,
             @RequestParam(required = false) String last4,
-            @RequestParam(required = false)
-            @Parameter(description = "Value should be a string like 'DD-MM-YYYY'") String startDate,
-            @RequestParam(required = false)
-            @Parameter(description = "Value should be a string like 'DD-MM-YYYY'") String endDate
-    ) {
+            @RequestParam(required = false) @Parameter(description = "Value should be a string like 'DD-MM-YYYY'") String startDate,
+            @RequestParam(required = false) @Parameter(description = "Value should be a string like 'DD-MM-YYYY'") String endDate) {
 
         try {
             if (status != null)
-                TransactionStatus.valueOf( status );
+                TransactionStatus.valueOf(status);
         } catch (Exception e) {
-            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Status is incorrect" );
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Status is incorrect");
         }
 
         try {
             if (type != null)
-                TransactionType.valueOf( type );
+                TransactionType.valueOf(type);
         } catch (Exception e) {
-            throw new MPayAPIException( HttpStatus.FORBIDDEN, "Type is incorrect" );
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Type is incorrect");
         }
 
         if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"))) {
             return ResponseEntity.ok(transactionService.getTransactions(page, size,
                     id, orderId, terminalId, phone, status, startDate, endDate, type, pan, last4));
-        } else if (
-                authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_ADMIN"))
-                        || authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_USER"))
-                        || authentication.getAuthorities().contains(new SimpleGrantedAuthority("AGENCY_ADMIN"))
-                        || authentication.getAuthorities().contains(new SimpleGrantedAuthority("AGENCY_USER"))) {
+        } else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_ADMIN"))
+                || authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_USER"))
+                || authentication.getAuthorities().contains(new SimpleGrantedAuthority("AGENCY_ADMIN"))
+                || authentication.getAuthorities().contains(new SimpleGrantedAuthority("AGENCY_USER"))) {
             return ResponseEntity.ok(transactionService.getTransactions(page, size,
                     id, orderId, terminalId, phone, status, startDate, endDate, type, pan, last4));
-//            transactionService.getTransactionsForBankUser(authentication.getName(), page, size,
-//                    id, orderId, terminalId,phone,status, startDate, endDate);
+            // transactionService.getTransactionsForBankUser(authentication.getName(), page,
+            // size,
+            // id, orderId, terminalId,phone,status, startDate, endDate);
         } else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("MERCHANT"))) {
             return ResponseEntity.ok(transactionService.getTransactionsForMerchant(authentication.getName(), page, size,
                     id, orderId, terminalId, phone, status, startDate, endDate, type, pan, last4));
@@ -215,6 +231,5 @@ public class TransactionController {
 
         return ResponseEntity.ok(transactionService.getTransactionTimelineById(id));
     }
-
 
 }

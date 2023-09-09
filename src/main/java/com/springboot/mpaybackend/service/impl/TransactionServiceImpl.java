@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -36,6 +37,7 @@ public class TransactionServiceImpl implements TransactionService {
     private ModelMapper modelMapper;
     private UserRepository userRepository;
     private ClientRepository clientRepository;
+    private PasswordEncoder passwordEncode;
 
     public TransactionServiceImpl(MerchantRepository merchantRepository, TransactionRepository transactionRepository, DeviceHistoryRepository deviceHistoryRepository, TransactionTraceRepository transactionTraceRepository, ModelMapper modelMapper, UserRepository userRepository, ClientRepository clientRepository) {
         this.merchantRepository = merchantRepository;
@@ -45,6 +47,7 @@ public class TransactionServiceImpl implements TransactionService {
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
         this.clientRepository = clientRepository;
+        this.passwordEncode = passwordEncode;
     }
 
     @Override
@@ -476,11 +479,19 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionDto putToCanceledAfterConfirmation(Long id, String name, String device) {
+    public TransactionDto putToCanceledAfterConfirmation(Long id, String name, String device, String password) {
         Transaction transaction = transactionRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tranasction", "id", id));
         Merchant merchant = merchantRepository.findByUsernameUsernameAndDeletedFalse(name)
                 .orElseThrow(() -> new ResourceNotFoundException("Merchant", " username", name));
+
+        
+        // Check if password is correct
+        User user = userRepository.findByUsername(name)
+                .orElseThrow(() -> new ResourceNotFoundException("User", " username", name));
+        if (!user.getPassword().equals(passwordEncode.encode(password))) {
+            throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Wrong password");
+        }
 
 
         // Find device history
