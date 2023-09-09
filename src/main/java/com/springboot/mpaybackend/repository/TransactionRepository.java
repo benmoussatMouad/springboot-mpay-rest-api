@@ -124,7 +124,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("SELECT t FROM Transaction t WHERE (:id is null or t.id = :id) " +
         "AND (:username is null OR t.client.user.username = :username) " +// Added space after c.id
-        "AND ((:orderId is null OR CONCAT('%', t.orderId, '%') LIKE CONCAT('%', :orderId, '%')) AND (:terminalId is null OR CONCAT('%', t.terminalId, '%') LIKE CONCAT('%', :terminalId, '%'))) " +
+        "AND (:orderId is null OR CONCAT('%', t.orderId, '%') LIKE CONCAT('%', :orderId, '%')) " +
         "AND (:phone is null OR t.client.phone LIKE CONCAT('%', :phone, '%')) " +
         "AND (:status is null OR t.status = :status) " +
         "AND (:type is null OR t.type = :type) " + 
