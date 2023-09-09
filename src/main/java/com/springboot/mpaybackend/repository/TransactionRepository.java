@@ -23,7 +23,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "AND (:type is null OR t.type = :type) " +
             "AND (:status is null OR t.status = :status) " +
             "AND (:startDate is null OR :endDate is null OR (t.transactionDate >= TO_TIMESTAMP(:startDate, 'DD-MM-YYYY') AND t.transactionDate <= TO_TIMESTAMP(:endDate, 'DD-MM-YYYY'))) " +
-            "AND (:last4 is null OR t.pan LIKE CONCAT('%', :last4) )")
+            "AND (:last4 is null OR t.pan LIKE CONCAT('%', :last4) )" +
+            "ORDER BY t.transactionDate")
     Page<Transaction> findByFilterForMerchant(Pageable pageable, @Param("username") String username,
                                               @Param("type") TransactionType type, @Param("status") TransactionStatus status, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("last4") String last4);
 
@@ -33,7 +34,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "AND (:status is null OR t.status = :status) " +
             "AND (:startDate is null OR :endDate is null OR (t.transactionDate >= TO_TIMESTAMP(:startDate, 'DD-MM-YYYY') AND t.transactionDate <= TO_TIMESTAMP(:endDate, 'DD-MM-YYYY')))" +
             "AND (:phone is null OR t.client.phone = :phone) " +
-            "AND (:last4 is null OR t.pan LIKE CONCAT('%', :last4) )")
+            "AND (:last4 is null OR t.pan LIKE CONCAT('%', :last4) )" +
+            "ORDER BY t.transactionDate")
     Page<Transaction> findByFilterForMerchantAndPhone(Pageable pageable, String username, TransactionType type, TransactionStatus status, String startDate, String endDate, String phone,
                         String last4);
 
@@ -123,7 +125,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
         "AND (:type is null OR t.type = :type) " + 
         "AND (:last4 is null OR t.pan LIKE CONCAT('%', :last4)) " +
         "AND (:startDate is null OR :endDate is null OR (t.transactionDate >= TO_TIMESTAMP(:startDate, 'DD-MM-YYYY') AND t.transactionDate <= TO_TIMESTAMP(:endDate, 'DD-MM-YYYY'))) " +
-        "AND (t.deleted = FALSE)")
+        "AND (t.deleted = FALSE) " +
+        "ORDER BY t.transactionDate")
     Page<Transaction> findByFilterAndClient(Pageable pageable, 
     Long id, 
     String orderId, 
