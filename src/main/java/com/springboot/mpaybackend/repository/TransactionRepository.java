@@ -1,6 +1,8 @@
 package com.springboot.mpaybackend.repository;
 
 import com.springboot.mpaybackend.entity.Bank;
+import com.springboot.mpaybackend.entity.Client;
+import com.springboot.mpaybackend.entity.Merchant;
 import com.springboot.mpaybackend.entity.Transaction;
 import com.springboot.mpaybackend.entity.TransactionStatus;
 import com.springboot.mpaybackend.entity.TransactionType;
@@ -18,6 +20,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'PAYMENT' AND t.status = 'CONFIRMED' AND t.transactionDate >= :lastYear")
     double calculateYearlyTurnOver(@Param("lastYear") Date date);
+
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'PAYMENT' AND t.status = 'CONFIRMED' AND t.transactionDate >= :lastWeek AND t.client.user.username = :username")
+    double calculateWeeklyTurnOverAndClient(@Param("lastWeek") Date date, String username);
 
     @Query("SELECT t from  Transaction t WHERE (:username is null or t.merchant.username.username = :username) " +
             "AND (:type is null OR t.type = :type) " +
@@ -171,5 +176,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     double calculateYearlyTurnOverForBank(@Param("lastYear") Date prevYearTime, Bank bank);
 
     long countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchantBank(TransactionStatus transactionStatus, TransactionType transactionType, Date endRange, Date beginRange, Bank bank);
+
+    long countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndClient(
+            TransactionStatus confirmed, TransactionType payment, Date endRange, Date beginRange, Client client);
+
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'PAYMENT' AND t.status = 'CONFIRMED' AND t.transactionDate >= :lastWeek AND t.merchant.username = :username")
+    double calculateWeeklyTurnOverAndMerchant(Date lastWeek, String username);
+
+    long countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(
+            TransactionStatus confirmed, TransactionType payment, Date endRange, Date beginRange, Merchant merchant);
 
 }

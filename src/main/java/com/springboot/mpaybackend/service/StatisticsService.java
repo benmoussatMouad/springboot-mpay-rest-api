@@ -7,4 +7,6 @@ public interface StatisticsService {
     StatisticsDto getAllStats();
 
     StatisticsDto getStatsByBank(String username);
+
+    StatisticsDto getStatsForMerchantsAndClient(String username);
 }

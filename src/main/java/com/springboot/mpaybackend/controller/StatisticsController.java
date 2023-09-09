@@ -22,12 +22,16 @@ public class StatisticsController {
     }
 
     @GetMapping()
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'BANK_USER', 'BANK_ADMIN', 'AGENCY_USER', 'AGENCY_ADMIN', 'SATIM')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'BANK_USER', 'BANK_ADMIN', 'AGENCY_USER', 'AGENCY_ADMIN', 'SATIM', 'CLIENT', 'MERCHANT')")
     public ResponseEntity<StatisticsDto> getStats(Authentication authentication) {
 
         if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN")) || authentication.getAuthorities().contains(new SimpleGrantedAuthority("SATIM"))) {
             return ResponseEntity.ok(statisticsService.getAllStats());
-        } else {
+        } else if(authentication.getAuthorities().contains(new SimpleGrantedAuthority("CLIENT")) || 
+        authentication.getAuthorities().contains(new SimpleGrantedAuthority("MERCHANT"))) {
+            return ResponseEntity.ok(statisticsService.getStatsForMerchantsAndClient(authentication.getName()));
+        } 
+        else {
             return ResponseEntity.ok(statisticsService.getStatsByBank(authentication.getName()));
         }
 

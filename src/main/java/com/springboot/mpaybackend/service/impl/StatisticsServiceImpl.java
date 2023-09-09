@@ -22,13 +22,15 @@ public class StatisticsServiceImpl implements StatisticsService {
     private UserRepository userRepository;
     private UserBankRepository userBankRepository;
     private UserAgencyRepository userAgencyRepository;
+    private ClientRepository clientRepository;
 
-    public StatisticsServiceImpl(TransactionRepository transactionRepository, MerchantRepository merchantRepository, UserRepository userRepository, UserBankRepository userBankRepository, UserAgencyRepository userAgencyRepository) {
+    public StatisticsServiceImpl(TransactionRepository transactionRepository, MerchantRepository merchantRepository, UserRepository userRepository, UserBankRepository userBankRepository, UserAgencyRepository userAgencyRepository, ClientRepository clientRepository) {
         this.transactionRepository = transactionRepository;
         this.merchantRepository = merchantRepository;
         this.userRepository = userRepository;
         this.userBankRepository = userBankRepository;
         this.userAgencyRepository = userAgencyRepository;
+        this.clientRepository = clientRepository;
     }
 
     @Override
@@ -140,11 +142,11 @@ public class StatisticsServiceImpl implements StatisticsService {
         for (int i = 0; i < 12; i++) {
             Date todayDate = today.getTime();
 
-            // Creating month range
             Calendar beginRanegCal = (Calendar) today.clone();
             beginRanegCal.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), 1, 0, 0, 0);
             Date beginRange = beginRanegCal.getTime();
-
+            
+            // Creating month range
             Calendar endRanegCal = (Calendar) today.clone();
             endRanegCal.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), 31, 23, 59, 59);
             Date endRange = endRanegCal.getTime();
@@ -161,5 +163,87 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         return dto;
     }
+
+    @Override
+    public StatisticsDto getStatsForMerchantsAndClient(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("user", "username", username));
+
+        Client client= null;
+        Merchant merchant = null;
+        StatisticsDto dto = new StatisticsDto(); 
+
+        if(user.getUserType().equals(UserType.CLIENT)) {
+            client = clientRepository.findByUserUsernameAndDeletedFalse(username)
+            .orElseThrow(() -> new ResourceNotFoundException("user", "username", username));
+            Calendar prevYear = Calendar.getInstance();
+            prevYear.add(Calendar.DATE, -7);
+            Date lastWeek = prevYear.getTime();
+            dto.setTurnOver(transactionRepository.calculateWeeklyTurnOverAndClient(lastWeek, username));
+
+            List<GraphCouples> graph = new ArrayList<>();
+            // Looping through all the days since last week
+            Calendar today = Calendar.getInstance();
+            for (int i = 0; i < 7; i++) {
+                Date todayDate = today.getTime();
+
+                Calendar beginRanegCal = (Calendar) today.clone();
+                beginRanegCal.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+                Date beginRange = beginRanegCal.getTime();
+                
+                // Creating month range
+                Calendar endRanegCal = (Calendar) today.clone();
+                endRanegCal.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
+                Date endRange = endRanegCal.getTime();
+
+                System.out.println(beginRange);
+                System.out.println(endRange);
+
+                graph.add(new GraphCouples(todayDate, transactionRepository.countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndClient(TransactionStatus.CONFIRMED, TransactionType.PAYMENT, endRange, beginRange, client)));
+                today.add(Calendar.DATE, -1);
+        }   
+
+        dto.setGraph(graph);
+        } else {
+            merchant = merchantRepository.findByUsernameUsernameAndDeletedFalse(username)
+            .orElseThrow(() -> new ResourceNotFoundException("user", "username", username));
+
+
+            Calendar prevYear = Calendar.getInstance();
+            prevYear.add(Calendar.DATE, -7);
+            Date lastWeek = prevYear.getTime();
+            dto.setTurnOver(transactionRepository.calculateWeeklyTurnOverAndMerchant(lastWeek, username));
+
+            List<GraphCouples> graph = new ArrayList<>();
+            // Looping through all the days since last week
+            Calendar today = Calendar.getInstance();
+            for (int i = 0; i < 7; i++) {
+                Date todayDate = today.getTime();
+
+                Calendar beginRanegCal = (Calendar) today.clone();
+                beginRanegCal.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+                Date beginRange = beginRanegCal.getTime();
+                
+                // Creating month range
+                Calendar endRanegCal = (Calendar) today.clone();
+                endRanegCal.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
+                Date endRange = endRanegCal.getTime();
+
+                System.out.println(beginRange);
+                System.out.println(endRange);
+
+                graph.add(new GraphCouples(todayDate, transactionRepository.countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(TransactionStatus.CONFIRMED, TransactionType.PAYMENT, endRange, beginRange, merchant)));
+                today.add(Calendar.DATE, -1);
+        }   
+
+        dto.setGraph(graph);
+        }
+
+
+        
+        return dto;
+    }
+
+    
 
 }
