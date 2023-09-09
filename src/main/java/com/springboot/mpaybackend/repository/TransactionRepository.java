@@ -115,18 +115,24 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                                               @Param("last4")String last4);
 
 
-    @Query("SELECT t FROM Transaction t, Client c, Merchant m, ClientCard cc WHERE (:id is null or t.id = :id) " +
-        "AND (:username is null OR c.user.username = :username) " +
-        "AND (t.merchant.id = m.id) AND (t.client is null OR t.client.id = c.id) AND (t.client is null OR cc.client.id = c.id) " + // Added space after c.id
+    @Query("SELECT t FROM Transaction t WHERE (:id is null or t.id = :id) " +
+        "AND (:username is null OR t.client.user.username = :username) " +// Added space after c.id
         "AND ((:orderId is null OR CONCAT('%', t.orderId, '%') LIKE CONCAT('%', :orderId, '%')) AND (:terminalId is null OR CONCAT('%', t.terminalId, '%') LIKE CONCAT('%', :terminalId, '%'))) " +
-        "AND (:phone is null OR c.phone LIKE CONCAT('%', :phone, '%') OR m.phone LIKE CONCAT('%', :phone, '%') ) " +
+        "AND (:phone is null OR t.client.phone LIKE CONCAT('%', :phone, '%')) " +
         "AND (:status is null OR t.status = :status) " +
-        "AND (:type is null OR t.type = :type) " + // Added space after t.type
-        "AND (:pan is null OR CONCAT('%', cc.cardFirst6Numbers, '%') LIKE CONCAT('%', :pan, '%') OR CONCAT('%', cc.cardLast4Numbers, '%') LIKE CONCAT('%', :pan, '%')) " +
-        "AND (:pan is not null OR :last4 is null OR :last4 = cc.cardLast4Numbers) " +
+        "AND (:type is null OR t.type = :type) " + 
+        "AND (:last4 is null OR t.pan LIKE CONCAT('%', :last4)) " +
         "AND (:startDate is null OR :endDate is null OR (t.transactionDate >= TO_TIMESTAMP(:startDate, 'DD-MM-YYYY') AND t.transactionDate <= TO_TIMESTAMP(:endDate, 'DD-MM-YYYY'))) " +
         "AND (t.deleted = FALSE)")
-    Page<Transaction> findByFilterAndClient(Pageable pageable, Long id, String orderId, String terminalId, String phone, TransactionStatus status, String startDate, String endDate, String username, TransactionType type, String pan, String last4);
+    Page<Transaction> findByFilterAndClient(Pageable pageable, 
+    Long id, 
+    String orderId, 
+    String phone, 
+    TransactionStatus status, 
+    String startDate, String endDate, 
+    String username, 
+    TransactionType type, 
+    String last4);
 
     Long countByDeletedFalse();
 

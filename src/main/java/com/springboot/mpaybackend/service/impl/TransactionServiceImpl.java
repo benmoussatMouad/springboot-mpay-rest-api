@@ -529,8 +529,8 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionPage getTransactionsForClient(String username, Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate, String type, String pan, String last4) {
         Page<Transaction> transactionPage = transactionRepository.findByFilterAndClient(
                 PageRequest.of(page, size),
-                id, orderId, terminalId, phone, (status!=null? TransactionStatus.valueOf(status): null), startDate, endDate, username,
-                (type!=null? TransactionType.valueOf(type) : null), pan, last4
+                id, orderId, phone, (status!=null? TransactionStatus.valueOf(status): null), startDate, endDate, username,
+                (type!=null? TransactionType.valueOf(type) : null), last4
         );
 
         TransactionPage dto = new TransactionPage();
