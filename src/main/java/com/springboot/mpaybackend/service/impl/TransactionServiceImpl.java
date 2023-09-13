@@ -257,7 +257,7 @@ public class TransactionServiceImpl implements TransactionService {
             && !transaction.getStatus().equals(TransactionStatus.WAITING)
         ) {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction of this type must have a previous status as WAITING");
-        } else if (!transaction.getStatus().equals(TransactionStatus.AUTHENTICATED)) {
+        } else if (transaction.getType().equals(TransactionType.PAYMENT)  && !transaction.getStatus().equals(TransactionStatus.AUTHENTICATED)) {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction previous status must be AUTHENTICATED");
 
         }
