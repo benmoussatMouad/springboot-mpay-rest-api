@@ -219,6 +219,13 @@ public class TransactionController {
         }
     }
 
+    @PostMapping("{id}/check-cancel-refund")
+    @PreAuthorize("hasAnyAuthority('ADMIN','MERCHANT','CLIENT','BANK_USER','BANK_ADMIN','AGENCY_USER','AGENCY_ADMIN')")
+    public ResponseEntity<ExistanceDto> checkIsRefundable(@PathVariable("id") Long id) {
+
+        return ResponseEntity.ok(transactionService.checkIsRefundableByOrderId(id));
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN','MERCHANT','CLIENT','BANK_USER','BANK_ADMIN','AGENCY_USER','AGENCY_ADMIN')")
     public ResponseEntity<TransactionDto> getTransaction(@PathVariable Long id) {

@@ -2,6 +2,7 @@ package com.springboot.mpaybackend.service;
 
 import java.util.List;
 
+import com.springboot.mpaybackend.payload.ExistanceDto;
 import com.springboot.mpaybackend.payload.OrderDto;
 import com.springboot.mpaybackend.payload.TransactionDto;
 import com.springboot.mpaybackend.payload.TransactionPage;
@@ -44,4 +45,6 @@ public interface TransactionService {
     TransactionDto putToCanceledBeforeConfirmation(Long id, String name, String device);
 
     TransactionDto putToCanceledAfterConfirmation(Long id, String name, String device, String password);
+
+    ExistanceDto checkIsRefundableByOrderId(Long id);
 }

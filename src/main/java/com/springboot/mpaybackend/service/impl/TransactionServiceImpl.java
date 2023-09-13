@@ -3,6 +3,7 @@ package com.springboot.mpaybackend.service.impl;
 import com.springboot.mpaybackend.entity.*;
 import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
+import com.springboot.mpaybackend.payload.ExistanceDto;
 import com.springboot.mpaybackend.payload.OrderDto;
 import com.springboot.mpaybackend.payload.TransactionDto;
 import com.springboot.mpaybackend.payload.TransactionPage;
@@ -648,5 +649,23 @@ public class TransactionServiceImpl implements TransactionService {
         List<TransactionTrace> list = transactionTraceRepository.findByIdOrderByUpdatedAt(id);
         
         return list.stream().map(trace -> modelMapper.map(trace, TransactionTraceDto.class)).toList();
+    }
+
+    @Override
+    public ExistanceDto checkIsRefundableByOrderId(Long id) {
+        ExistanceDto dto = new ExistanceDto(false);
+
+        Transaction transaction = transactionRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction", "id", id));
+
+        List<Transaction> transactions = transactionRepository.findAllByOrderId(transaction.getOrderId());
+
+        if (transactions.stream().anyMatch(t -> (t.getType().equals(TransactionType.CANCELLATION)
+        || t.getType().equals(TransactionType.REFUND)) && t.getStatus().equals(TransactionStatus.CONFIRMED)) )
+        {
+            dto.setIs(true);
+        }
+
+        return dto;
     }
 }

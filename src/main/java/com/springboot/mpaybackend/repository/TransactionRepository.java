@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
@@ -185,5 +186,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     long countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(
             TransactionStatus confirmed, TransactionType payment, Date endRange, Date beginRange, Merchant merchant);
+
+List<Transaction> findAllByOrderId(String orderId);
 
 }
