@@ -378,7 +378,8 @@ public class UserAgencyServiceImpl implements UserAgencyService {
 
 
     private UserAgencyPageDto pageDtoOf(Page<UserAgency> userBankPage) {
-        List<UserAgencyResponseDto> userDtos = userBankPage.stream().map( (userBank -> modelMapper.map( userBank, UserAgencyResponseDto.class )) ).toList();
+        List<UserAgencyResponseDto> userDtos = userBankPage.stream().map( 
+            (userBank -> modelMapper.map( userBank, UserAgencyResponseDto.class )) ).toList();
 
         UserAgencyPageDto userBankPageDto = new UserAgencyPageDto();
 

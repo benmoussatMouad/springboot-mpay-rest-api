@@ -35,6 +35,12 @@ public class AgencyServiceImpl implements AgencyService {
     @Override
     public AgencyDto addAgency(AgencyDto agencyDto) {
         Agency agency = modelMapper.map( agencyDto, Agency.class );
+
+        Bank bank = bankRepository.findById(agencyDto.getBankId())
+        .orElseThrow(() -> new ResourceNotFoundException( "Bank", "id", agencyDto.getBankId()));
+
+        agency.setBank(bank);
+
         Agency savedAgency = agencyRepository.save( agency );
 
         return modelMapper.map( savedAgency, AgencyDto.class );

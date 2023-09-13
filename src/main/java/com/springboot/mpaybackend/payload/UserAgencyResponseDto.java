@@ -15,7 +15,7 @@ public class UserAgencyResponseDto {
     private String username;
     private String password;
     private Long agencyId;
-    private String agencyName;
+    private String agencyAgencyName;
     private Long agencyBankId;
     private String agencyBankName;
     private String agencyBankAcronymName;

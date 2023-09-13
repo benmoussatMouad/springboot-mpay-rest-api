@@ -167,7 +167,7 @@ public class TransactionController {
     }
 
     @GetMapping()
-    @PreAuthorize("hasAnyAuthority('ADMIN','MERCHANT','CLIENT','BANK_USER','BANK_ADMIN','AGENCY_USER','AGENCY_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','MERCHANT','CLIENT','BANK_USER','BANK_ADMIN','AGENCY_USER','AGENCY_ADMIN', 'SATIM')")
     public ResponseEntity<TransactionPage> getTransactionsByPage(
             Authentication authentication,
             @RequestParam Integer page,
@@ -197,7 +197,8 @@ public class TransactionController {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Type is incorrect");
         }
 
-        if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"))) {
+        if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"))
+        || authentication.getAuthorities().contains(new SimpleGrantedAuthority("SATIM"))) {
             return ResponseEntity.ok(transactionService.getTransactions(page, size,
                     id, orderId, terminalId, phone, status, startDate, endDate, type, pan, last4));
         } else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("BANK_ADMIN"))

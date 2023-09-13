@@ -39,8 +39,6 @@ public class BankServiceImpl implements BankService {
     public BankDto addBank(BankDto bankDto) {
         Bank bank = modelMapper.map( bankDto, Bank.class );
 
-        bank.setBmtmCentralized( false );
-        bank.setTotalLicence( 0 );
         bank.setTotalConsumedLicence( 0 );
 
         Bank savedBank = bankRepository.save( bank );
