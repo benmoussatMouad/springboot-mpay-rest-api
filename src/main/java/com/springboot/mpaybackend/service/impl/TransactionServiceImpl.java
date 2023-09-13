@@ -540,7 +540,7 @@ public class TransactionServiceImpl implements TransactionService {
         trace.setClientDeviceHistory(exists);
         transactionTraceRepository.save(trace);
 
-        return modelMapper.map(transaction, TransactionDto.class);
+        return modelMapper.map(newTransaction, TransactionDto.class);
     }
 
     @Override
