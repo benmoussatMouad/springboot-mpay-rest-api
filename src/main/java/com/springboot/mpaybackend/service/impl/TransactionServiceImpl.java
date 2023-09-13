@@ -489,7 +489,8 @@ public class TransactionServiceImpl implements TransactionService {
         // Check if password is correct
         User user = userRepository.findByUsername(name)
                 .orElseThrow(() -> new ResourceNotFoundException("User", " username", name));
-        if (!user.getPassword().equals(passwordEncoder.encode(password))) {
+                
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Wrong password");
         }
 
