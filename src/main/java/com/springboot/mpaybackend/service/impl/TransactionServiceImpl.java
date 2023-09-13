@@ -37,9 +37,9 @@ public class TransactionServiceImpl implements TransactionService {
     private ModelMapper modelMapper;
     private UserRepository userRepository;
     private ClientRepository clientRepository;
-    private PasswordEncoder passwordEncode;
+    private PasswordEncoder passwordEncoder;
 
-    public TransactionServiceImpl(MerchantRepository merchantRepository, TransactionRepository transactionRepository, DeviceHistoryRepository deviceHistoryRepository, TransactionTraceRepository transactionTraceRepository, ModelMapper modelMapper, UserRepository userRepository, ClientRepository clientRepository) {
+    public TransactionServiceImpl(MerchantRepository merchantRepository, TransactionRepository transactionRepository, DeviceHistoryRepository deviceHistoryRepository, TransactionTraceRepository transactionTraceRepository, ModelMapper modelMapper, UserRepository userRepository, ClientRepository clientRepository, PasswordEncoder passwordEncoder) {
         this.merchantRepository = merchantRepository;
         this.transactionRepository = transactionRepository;
         this.deviceHistoryRepository = deviceHistoryRepository;
@@ -47,7 +47,7 @@ public class TransactionServiceImpl implements TransactionService {
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
         this.clientRepository = clientRepository;
-        this.passwordEncode = passwordEncode;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -489,7 +489,7 @@ public class TransactionServiceImpl implements TransactionService {
         // Check if password is correct
         User user = userRepository.findByUsername(name)
                 .orElseThrow(() -> new ResourceNotFoundException("User", " username", name));
-        if (!user.getPassword().equals(passwordEncode.encode(password))) {
+        if (!user.getPassword().equals(passwordEncoder.encode(password))) {
             throw new MPayAPIException(HttpStatus.BAD_REQUEST, "Wrong password");
         }
 
