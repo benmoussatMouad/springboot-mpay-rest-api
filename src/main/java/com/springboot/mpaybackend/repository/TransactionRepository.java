@@ -205,7 +205,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
         "t.transactionDate >= :beginRange AND "+
         "t.transactionDate <= :endRange")
         double sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(
-                        TransactionStatus staus, TransactionType type, Date endRange, Date beginRange,
+                        TransactionStatus status, TransactionType type, Date endRange, Date beginRange,
                         Merchant merchant);
 
 }
