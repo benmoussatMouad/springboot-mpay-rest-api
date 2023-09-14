@@ -254,7 +254,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Set Transaction status but confirm previous status
         if (
-            transaction.getType().equals(TransactionType.REFUND) || transaction.getType().equals(TransactionType.CANCELLATION)
+            (transaction.getType().equals(TransactionType.REFUND) || transaction.getType().equals(TransactionType.CANCELLATION))
             && !transaction.getStatus().equals(TransactionStatus.WAITING)
         ) {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Transaction of this type must have a previous status as WAITING");
