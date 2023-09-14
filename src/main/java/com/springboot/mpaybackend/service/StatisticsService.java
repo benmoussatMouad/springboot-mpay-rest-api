@@ -1,5 +1,6 @@
 package com.springboot.mpaybackend.service;
 
+import com.springboot.mpaybackend.payload.ClientMerchantStatisticsDto;
 import com.springboot.mpaybackend.payload.StatisticsDto;
 
 public interface StatisticsService {
@@ -8,5 +9,5 @@ public interface StatisticsService {
 
     StatisticsDto getStatsByBank(String username);
 
-    StatisticsDto getStatsForMerchantsAndClient(String username);
+    ClientMerchantStatisticsDto getStatsForMerchantsAndClient(String username);
 }

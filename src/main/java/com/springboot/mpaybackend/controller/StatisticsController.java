@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.springboot.mpaybackend.payload.ClientMerchantStatisticsDto;
 import com.springboot.mpaybackend.payload.StatisticsDto;
 import com.springboot.mpaybackend.service.StatisticsService;
 
@@ -27,13 +28,19 @@ public class StatisticsController {
 
         if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN")) || authentication.getAuthorities().contains(new SimpleGrantedAuthority("SATIM"))) {
             return ResponseEntity.ok(statisticsService.getAllStats());
-        } else if(authentication.getAuthorities().contains(new SimpleGrantedAuthority("CLIENT")) || 
-        authentication.getAuthorities().contains(new SimpleGrantedAuthority("MERCHANT"))) {
-            return ResponseEntity.ok(statisticsService.getStatsForMerchantsAndClient(authentication.getName()));
         } 
         else {
             return ResponseEntity.ok(statisticsService.getStatsByBank(authentication.getName()));
         }
+
+    }
+
+    @GetMapping("client-merchant")
+    @PreAuthorize("hasAnyAuthority('CLIENT', 'MERCHANT')")
+    public ResponseEntity<ClientMerchantStatisticsDto> getStatsForClientAndMerchant(Authentication authentication) {
+
+        return ResponseEntity.ok(statisticsService.getStatsForMerchantsAndClient(authentication.getName()));
+        
 
     }
 

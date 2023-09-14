@@ -2,7 +2,9 @@ package com.springboot.mpaybackend.service.impl;
 
 import com.springboot.mpaybackend.entity.*;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
+import com.springboot.mpaybackend.payload.ClientMerchantStatisticsDto;
 import com.springboot.mpaybackend.payload.GraphCouples;
+import com.springboot.mpaybackend.payload.GraphCouplesAmount;
 import com.springboot.mpaybackend.repository.*;
 import org.springframework.stereotype.Service;
 
@@ -165,13 +167,13 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public StatisticsDto getStatsForMerchantsAndClient(String username) {
+    public ClientMerchantStatisticsDto getStatsForMerchantsAndClient(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("user", "username", username));
 
         Client client= null;
         Merchant merchant = null;
-        StatisticsDto dto = new StatisticsDto(); 
+        ClientMerchantStatisticsDto dto = new ClientMerchantStatisticsDto(); 
 
         if(user.getUserType().equals(UserType.CLIENT)) {
             client = clientRepository.findByUserUsernameAndDeletedFalse(username)
@@ -181,7 +183,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             Date lastWeek = prevYear.getTime();
             dto.setTurnOver(transactionRepository.calculateWeeklyTurnOverAndClient(lastWeek, username));
 
-            List<GraphCouples> graph = new ArrayList<>();
+            List<GraphCouplesAmount> graph = new ArrayList<>();
             // Looping through all the days since last week
             Calendar today = Calendar.getInstance();
             for (int i = 0; i < 7; i++) {
@@ -199,7 +201,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 System.out.println(beginRange);
                 System.out.println(endRange);
 
-                graph.add(new GraphCouples(todayDate, transactionRepository.countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndClient(TransactionStatus.CONFIRMED, TransactionType.PAYMENT, endRange, beginRange, client)));
+                graph.add(new GraphCouplesAmount(todayDate, transactionRepository.sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndClient(TransactionStatus.CONFIRMED, TransactionType.PAYMENT, endRange, beginRange, client)));
                 today.add(Calendar.DATE, -1);
         }   
 
@@ -214,7 +216,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             Date lastWeek = prevYear.getTime();
             dto.setTurnOver(transactionRepository.calculateWeeklyTurnOverAndMerchant(lastWeek, username));
 
-            List<GraphCouples> graph = new ArrayList<>();
+            List<GraphCouplesAmount> graph = new ArrayList<>();
             // Looping through all the days since last week
             Calendar today = Calendar.getInstance();
             for (int i = 0; i < 7; i++) {
@@ -232,7 +234,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 System.out.println(beginRange);
                 System.out.println(endRange);
 
-                graph.add(new GraphCouples(todayDate, transactionRepository.countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(TransactionStatus.CONFIRMED, TransactionType.PAYMENT, endRange, beginRange, merchant)));
+                graph.add(new GraphCouplesAmount(todayDate, transactionRepository.sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(TransactionStatus.CONFIRMED, TransactionType.PAYMENT, endRange, beginRange, merchant)));
                 today.add(Calendar.DATE, -1);
         }   
 

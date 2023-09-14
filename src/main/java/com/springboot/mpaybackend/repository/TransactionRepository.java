@@ -167,26 +167,45 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "AND t.status = :status " +
             "AND t.type = :type " +
             "AND t.deleted = false ")
-    Long countByStatusAndTypeAndDeletedFalseForBank(TransactionStatus status, TransactionType type, Bank bank);
+        Long countByStatusAndTypeAndDeletedFalseForBank(TransactionStatus status, TransactionType type, Bank bank);
 
 
-    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'PAYMENT' " +
-            "AND t.status = 'CONFIRMED' " +
-            "AND t.transactionDate >= :lastYear " +
-            "AND t.merchant.bank = :bank")
-    double calculateYearlyTurnOverForBank(@Param("lastYear") Date prevYearTime, Bank bank);
+        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'PAYMENT' " +
+                "AND t.status = 'CONFIRMED' " +
+                "AND t.transactionDate >= :lastYear " +
+                "AND t.merchant.bank = :bank")
+        double calculateYearlyTurnOverForBank(@Param("lastYear") Date prevYearTime, Bank bank);
 
-    long countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchantBank(TransactionStatus transactionStatus, TransactionType transactionType, Date endRange, Date beginRange, Bank bank);
+        long countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchantBank(TransactionStatus transactionStatus, TransactionType transactionType, Date endRange, Date beginRange, Bank bank);
 
-    long countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndClient(
-            TransactionStatus confirmed, TransactionType payment, Date endRange, Date beginRange, Client client);
+        long countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndClient(
+                TransactionStatus confirmed, TransactionType payment, Date endRange, Date beginRange, Client client);
 
-    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'PAYMENT' AND t.status = 'CONFIRMED' AND t.transactionDate >= :lastWeek AND t.merchant.username.username = :username")
-    double calculateWeeklyTurnOverAndMerchant(Date lastWeek, String username);
+        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'PAYMENT' AND t.status = 'CONFIRMED' AND t.transactionDate >= :lastWeek AND t.merchant.username.username = :username")
+        double calculateWeeklyTurnOverAndMerchant(Date lastWeek, String username);
 
-    long countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(
-            TransactionStatus confirmed, TransactionType payment, Date endRange, Date beginRange, Merchant merchant);
+        long countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(
+                TransactionStatus confirmed, TransactionType payment, Date endRange, Date beginRange, Merchant merchant);
 
-List<Transaction> findAllByOrderId(String orderId);
+        List<Transaction> findAllByOrderId(String orderId);
+
+        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE " +
+                "t.client = :client AND "+
+                "t.status = :status AND "+
+                "t.type = :type AND " +
+                "t.transactionDate >= :beginRange AND "+
+                "t.transactionDate <= :endRange")
+        double sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndClient(
+                TransactionStatus status, TransactionType type, Date endRange, Date beginRange, Client client);
+
+        @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE " +
+        "t.merchant = :merchant AND "+
+        "t.status = :status AND "+
+        "t.type = :type AND " +
+        "t.transactionDate >= :beginRange AND "+
+        "t.transactionDate <= :endRange")
+        double sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(
+                        TransactionStatus confirmed, TransactionType payment, Date endRange, Date beginRange,
+                        Merchant merchant);
 
 }
