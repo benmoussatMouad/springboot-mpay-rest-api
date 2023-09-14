@@ -181,7 +181,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     long countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndClient(
             TransactionStatus confirmed, TransactionType payment, Date endRange, Date beginRange, Client client);
 
-    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'PAYMENT' AND t.status = 'CONFIRMED' AND t.transactionDate >= :lastWeek AND t.merchant.username = :username")
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = 'PAYMENT' AND t.status = 'CONFIRMED' AND t.transactionDate >= :lastWeek AND t.merchant.username.username = :username")
     double calculateWeeklyTurnOverAndMerchant(Date lastWeek, String username);
 
     long countByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(
