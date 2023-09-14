@@ -317,7 +317,8 @@ public class TransactionServiceImpl implements TransactionService {
         newTransaction.setClient(transaction.getClient());
         newTransaction.setOrderId(transaction.getOrderId());
         newTransaction.setSatimId(transaction.getSatimId());
-        newTransaction.setAmountRefund(refundAmount);
+        newTransaction.setPan(transaction.getPan());
+        newTransaction.setAmount(refundAmount);
         newTransaction.setMerchant(merchant);
         newTransaction.setTransactionDate(new Date());
         newTransaction.setType(TransactionType.REFUND);
