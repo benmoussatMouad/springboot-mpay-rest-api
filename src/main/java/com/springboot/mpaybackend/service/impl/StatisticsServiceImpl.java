@@ -98,11 +98,11 @@ public class StatisticsServiceImpl implements StatisticsService {
         Bank bank = null;
         if (user.getUserType().equals(UserType.BANK_USER) || user.getUserType().equals(UserType.BANK_ADMIN)) {
             UserBank userBank = userBankRepository.findByUsernameUsername(username)
-                    .orElseThrow(() -> new ResourceNotFoundException("user", "username", username));
+                    .orElseThrow(() -> new ResourceNotFoundException("user bank", "username", username));
             bank = userBank.getBank();
         } else {
             UserAgency userAgency = userAgencyRepository.findByUsernameUsername(username)
-                    .orElseThrow(() -> new ResourceNotFoundException("user", "username", username));
+                    .orElseThrow(() -> new ResourceNotFoundException("user agency", "username", username));
 
             bank = userAgency.getAgency().getBank();
         }
@@ -201,7 +201,11 @@ public class StatisticsServiceImpl implements StatisticsService {
                 System.out.println(beginRange);
                 System.out.println(endRange);
 
-                graph.add(new GraphCouplesAmount(todayDate, transactionRepository.sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndClient(TransactionStatus.CONFIRMED, TransactionType.PAYMENT, endRange, beginRange, client)));
+                graph.add(new GraphCouplesAmount(todayDate, 
+                            transactionRepository.sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndClient(TransactionStatus.CONFIRMED, TransactionType.PAYMENT, endRange, beginRange, client)
+                             - transactionRepository.sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndClient(TransactionStatus.CONFIRMED, TransactionType.REFUND, endRange, beginRange, client)
+                             - transactionRepository.sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndClient(TransactionStatus.CONFIRMED, TransactionType.CANCELLATION, endRange, beginRange, client)
+                            ));
                 today.add(Calendar.DATE, -1);
         }   
 
@@ -234,7 +238,12 @@ public class StatisticsServiceImpl implements StatisticsService {
                 System.out.println(beginRange);
                 System.out.println(endRange);
 
-                graph.add(new GraphCouplesAmount(todayDate, transactionRepository.sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(TransactionStatus.CONFIRMED, TransactionType.PAYMENT, endRange, beginRange, merchant)));
+                graph.add(new GraphCouplesAmount(todayDate, 
+                transactionRepository.sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(TransactionStatus.CONFIRMED, TransactionType.PAYMENT, endRange, beginRange, merchant)
+                - transactionRepository.sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(TransactionStatus.CONFIRMED, TransactionType.CANCELLATION, endRange, beginRange, merchant)
+                - transactionRepository.sumAmountByStatusAndTypeAndDeletedFalseAndTransactionDateBeforeAndTransactionDateAfterAndMerchant(TransactionStatus.CONFIRMED, TransactionType.REFUND, endRange, beginRange, merchant)
+                 
+                ));
                 today.add(Calendar.DATE, -1);
         }   
 
