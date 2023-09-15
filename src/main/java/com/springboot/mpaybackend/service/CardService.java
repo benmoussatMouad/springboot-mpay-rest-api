@@ -5,6 +5,8 @@ import com.springboot.mpaybackend.payload.CardDto;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+
 public interface CardService {
 
     CardDto addCard(AddCardDto dto, String clientUsername);
@@ -12,6 +14,8 @@ public interface CardService {
     List<CardDto> getCardsByClientId(Long clientId);
 
     List<CardDto> getCardsByClientUsername(String username);
+
+    void deleteCard(Long id, String name);
 
 
 }

@@ -2,6 +2,7 @@ package com.springboot.mpaybackend.service.impl;
 
 import com.springboot.mpaybackend.entity.Client;
 import com.springboot.mpaybackend.entity.ClientCard;
+import com.springboot.mpaybackend.exception.MPayAPIException;
 import com.springboot.mpaybackend.exception.ResourceNotFoundException;
 import com.springboot.mpaybackend.payload.AddCardDto;
 import com.springboot.mpaybackend.payload.CardDto;
@@ -9,6 +10,7 @@ import com.springboot.mpaybackend.repository.CardRepository;
 import com.springboot.mpaybackend.repository.ClientRepository;
 import com.springboot.mpaybackend.service.CardService;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -57,4 +59,22 @@ public class CardServiceImpl implements CardService {
 
         return clientCards.stream().map(card -> modelMapper.map(card, CardDto.class)).collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteCard(Long id, String name) {
+        List<ClientCard> clientCards = cardRepository.findByClientUserUsernameAndDeletedFalse(name);
+
+        if (!clientCards.stream().anyMatch(card -> card.getId().equals(id))) {
+            throw new MPayAPIException(HttpStatus.FORBIDDEN, "Card does not belong to client");
+        }
+        
+        ClientCard card = cardRepository.findByIdAndDeletedFalse(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Client card", "id", id));
+
+        card.setDeleted(true);
+
+        cardRepository.save(card);
+    }
+
+    
 }
