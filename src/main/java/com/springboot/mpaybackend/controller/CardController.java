@@ -4,9 +4,13 @@ import com.springboot.mpaybackend.payload.AddCardDto;
 import com.springboot.mpaybackend.payload.CardDto;
 import com.springboot.mpaybackend.service.CardService;
 import io.swagger.v3.oas.annotations.Parameter;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import org.springframework.security.core.Authentication;
+
 
 import java.util.List;
 
@@ -43,4 +47,13 @@ public class CardController {
                 throw new IllegalStateException( "Unexpected value: " + filter );
         }
     }
+
+    @DeleteMapping("{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'CLIENT')")
+    public ResponseEntity<String> deleteCard(@PathVariable Long id, Authentication authentication) {
+        
+        cardService.deleteCard(id, authentication.getName());
+        return  ResponseEntity.ok("Card deleted");
+    }
+
 }
