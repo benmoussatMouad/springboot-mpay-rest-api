@@ -730,6 +730,8 @@ public class MerchantServiceImpl implements MerchantService {
         bm.setDebutInfoBm(dto.getBmContent().split("\n")[1]);
         bm.setFinBm(dto.getBmContent().split("\n")[2]);
 
+        bm.setDeleted(false);
+
         bmRepository.save(bm);
 
         // Create a TM entity
@@ -779,6 +781,8 @@ public class MerchantServiceImpl implements MerchantService {
         tm.setEnteteTm(dto.getTmContent().split("\n")[0]);
         tm.setDebutInfoTm(dto.getTmContent().split("\n")[1]);
         tm.setFinTm(dto.getTmContent().split("\n")[2]);
+
+        tm.setDeleted(false);
 
         tmRepository.save(tm);
 
