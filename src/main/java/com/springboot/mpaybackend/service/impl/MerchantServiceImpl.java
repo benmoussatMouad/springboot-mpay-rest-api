@@ -783,7 +783,7 @@ public class MerchantServiceImpl implements MerchantService {
         tmRepository.save(tm);
 
         // Set status to ACCEPTED
-        merchant.setStatus(MerchantStatus.ACCEPTED);
+        merchant.setStatus(MerchantStatus.VALIDATED);
 
         Merchant savedMerchant =  merchantRepository.save(merchant);
 
@@ -795,7 +795,7 @@ public class MerchantServiceImpl implements MerchantService {
         trace.setBank( account.getBank() );
         trace.setUser( merchant.getUsername() );
         trace.setCreatedAt( new Date() );
-        trace.setStatus( MerchantStatus.ACCEPTED );
+        trace.setStatus( MerchantStatus.VALIDATED );
         merchantStatusTraceRepository.save( trace );
 
         return modelMapper.map(savedMerchant, MerchantDto.class);
