@@ -440,7 +440,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionPage getTransactions(Integer page, Integer size, Long id, String orderId, String terminalId, String phone, String status, String startDate, String endDate, String type, String pan, String last4) {
         Page<Transaction> transactionPage = transactionRepository.findByFilter(
                 PageRequest.of(page, size),
-                id, orderId, terminalId, phone, (status!=null? TransactionStatus.valueOf(status): null), startDate, endDate,
+                id, orderId, terminalId, phone, (status!=null? TransactionStatus.valueOf(status): null), startDate, endDate + " 23:59:59",
                 (type!=null? TransactionType.valueOf(type) : null), pan, last4
         );
 

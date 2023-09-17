@@ -69,7 +69,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
         "AND (:type is null OR t.type = :type) " + // Added space after t.type
         "AND (:pan is null OR CONCAT('%', t.pan, '%') LIKE CONCAT('%', :pan, '%')) " +
         "AND (:last4 is null OR t.pan LIKE CONCAT('%', :last4)) " +
-        "AND (:startDate is null OR :endDate is null OR (t.transactionDate >= TO_TIMESTAMP(:startDate, 'DD-MM-YYYY') AND t.transactionDate <= TO_TIMESTAMP(:endDate, 'DD-MM-YYYY'))) " +
+        "AND (:startDate is null OR :endDate is null OR (t.transactionDate >= TO_TIMESTAMP(:startDate, 'DD-MM-YYYY') AND t.transactionDate <= TO_TIMESTAMP(:endDate, 'DD-MM-YYYY HH:MI:SS') )) " +
         "AND (t.deleted = FALSE)")
     Page<Transaction> findByFilter(Pageable pageable, Long id, String orderId, String terminalId, String phone, TransactionStatus status, String startDate, String endDate, TransactionType type, String pan, String last4);
 
