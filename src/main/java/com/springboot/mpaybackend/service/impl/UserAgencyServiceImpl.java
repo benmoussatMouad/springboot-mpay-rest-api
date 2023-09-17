@@ -79,10 +79,11 @@ public class UserAgencyServiceImpl implements UserAgencyService {
 
         User user = new User();
         user.setUsername( dto.getUsername() );
+        
         user.setPassword( passwordEncoder.encode( dto.getPassword() ) );
         user.setPhone( dto.getPhone() );
         user.setFirstConnexion( true );
-        user.setUserType( UserType.AGENCY_USER );
+        user.setUserType( UserType.valueOf(dto.getUserType()) );
         System.out.println(dto.getUsername());
         userRepository.save( user );
 
