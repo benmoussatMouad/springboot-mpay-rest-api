@@ -570,7 +570,7 @@ public class MerchantServiceImpl implements MerchantService {
                 .orElseThrow(() -> new ResourceNotFoundException("Merchant", "id", id));
 
         // Check if merchant is ACCEPTED
-        if (!merchant.getStatus().equals(MerchantStatus.ACCEPTED)) {
+        if (!merchant.getStatus().equals(MerchantStatus.VALIDATED)) {
             throw new MPayAPIException(HttpStatus.FORBIDDEN, "Merchant status should be ACCEPTED");
         }
 
