@@ -647,7 +647,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<TransactionTraceDto> getTransactionTimelineById(Long id) {
-        List<TransactionTrace> list = transactionTraceRepository.findByIdOrderByUpdatedAt(id);
+        List<TransactionTrace> list = transactionTraceRepository.findByTransactionIdOrderByUpdatedAt(id);
         
         return list.stream().map(trace -> modelMapper.map(trace, TransactionTraceDto.class)).toList();
     }

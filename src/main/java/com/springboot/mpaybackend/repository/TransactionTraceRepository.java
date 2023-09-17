@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TransactionTraceRepository extends JpaRepository<TransactionTrace, Long> {
 
-    List<TransactionTrace> findByIdOrderByUpdatedAt(Long id);
+    List<TransactionTrace> findByTransactionIdOrderByUpdatedAt(Long id);
 }
